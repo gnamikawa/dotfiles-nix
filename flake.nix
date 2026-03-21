@@ -33,6 +33,7 @@
           # the path to your home.nix.
           modules = [
             ./home.nix
+            ./flatpak.nix
           ];
           extraSpecialArgs = {
             inherit pkgs2511;
