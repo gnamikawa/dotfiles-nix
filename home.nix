@@ -57,6 +57,7 @@ in
         libreoffice-qt6-fresh
         home-manager
         waybar
+        fastfetch
       ];
 
       programs = {
