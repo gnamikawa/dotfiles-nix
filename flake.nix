@@ -21,28 +21,33 @@
       system = "x86_64-linux";
       pkgs = nixpkgs.legacyPackages.${system};
       pkgs2511 = (import nixpkgs2511) { inherit system; };
+      constants = import ./constants;
     in
     {
-      homeConfigurations = {
-        home-manager.useGlobalPkgs = true;
-        home-manager.useUserPackages = true;
-        "genzo" = home-manager.lib.homeManagerConfiguration {
-          inherit pkgs;
-
-          # Specify your home configuration modules here, for example,
-          # the path to your home.nix.
-          modules = [
-            ./home.nix
-            ./flatpak.nix
-          ];
-          extraSpecialArgs = {
+      nixosModules.default =
+        { ... }:
+        {
+          home-manager.users."genzo" = import ./home.nix;
+          home-manager.extraSpecialArgs = {
+            inherit constants;
             inherit pkgs2511;
           };
-
-          # Optionally use extraSpecialArgs
-          # to pass through arguments to home.nix
         };
+
+      homeConfigurations."genzo" = home-manager.lib.homeManagerConfiguration {
+        inherit pkgs;
+
+        # Specify your home configuration modules here, for example,
+        # the path to your home.nix.
+        modules = [
+          ./home.nix
+        ];
+        extraSpecialArgs = {
+          inherit pkgs2511;
+        };
+
+        # Optionally use extraSpecialArgs
+        # to pass through arguments to home.nix
       };
-      homeModules."genzo" = import ./home.nix;
     };
 }
