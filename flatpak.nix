@@ -1,70 +1,82 @@
-{ pkgs, lib, ... }:
-let
-  desiredFlatpaks = [
-    "com.discordapp.Discord"
-    "com.visualstudio.code"
-  ];
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}:
 
-  flatpakList = lib.concatStringsSep " " desiredFlatpaks;
+let
+  cfg = config.programs.flatpakManagement;
 in
 {
-  home.activation.flatpakManagement = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-    set +e
+  options.programs.flatpakManagement = {
+    enable = lib.mkOption {
+      type = lib.types.bool;
+      default = false;
+      description = "Enable automatic Flatpak management.";
+    };
 
-    # Check if this is a dry-run
-    dryrun=0
-    if [ "$HOME_MANAGER_DRY_RUN" = "1" ]; then
-      dryrun=1
-      echo "Running in dry-run mode; no changes will be applied."
-    fi
+    desiredFlatpaks = lib.mkOption {
+      type = lib.types.listOf lib.types.str;
+      default = [ ];
+      description = "List of Flatpak apps to ensure are installed.";
+    };
+  };
 
-    FLATPAK="${pkgs.flatpak}/bin/flatpak"
+  config = lib.mkIf cfg.enable {
+    home.activation.flatpakManagement = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+      set +e
 
-    # Add Flathub remote if needed
-    if [ $dryrun -eq 0 ]; then
-      run $FLATPAK remote-add --user --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
-    else
-      echo "[dry-run] Would add Flathub remote"
-    fi
+      # Default to "0" if unset
+      dryrun="''${HOME_MANAGER_DRY_RUN:-0}"
+      echo $dryrun
 
-    installedFlatpaks=$($FLATPAK list --app --columns=application)
+      if [ "$dryrun" = "1" ]; then
+        echo "Running in dry-run mode; no changes will be applied."
+      fi
 
-    # Uninstall apps not in desired list
-    for installed in $installedFlatpaks; do
-      found=0
-      for desired in ${flatpakList}; do
-        if [ "$installed" = "$desired" ]; then
-          found=1
-          break
+      if [ "$dryrun" = "0" ]; then
+        run ${pkgs.flatpak}/bin/flatpak remote-add --user --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+      else
+        echo "[dry-run] Would add Flathub remote"
+      fi
+
+      installedFlatpaks=$(${pkgs.flatpak}/bin/flatpak list --app --columns=application)
+
+      for installed in $installedFlatpaks; do
+        found=0
+        for desired in ${lib.concatStringsSep " " cfg.desiredFlatpaks}; do
+          if [ "$installed" = "$desired" ]; then
+            found=1
+            break
+          fi
+        done
+
+        if [ "$found" = "0" ]; then
+          if [ "$dryrun" = "0" ]; then
+            echo "Removing $installed"
+            run ${pkgs.flatpak}/bin/flatpak uninstall --user -y --noninteractive "$installed" || true
+          else
+            echo "[dry-run] Would remove $installed"
+          fi
         fi
       done
 
-      if [ "$found" -eq 0 ]; then
-        if [ $dryrun -eq 0 ]; then
-          echo "Removing $installed"
-          run $FLATPAK uninstall --user -y --noninteractive "$installed" || true
+      for app in ${lib.concatStringsSep " " cfg.desiredFlatpaks}; do
+        if [ "$dryrun" = "0" ]; then
+          echo "Ensuring $app is installed"
+          run ${pkgs.flatpak}/bin/flatpak install --user -y flathub "$app" || true
         else
-          echo "[dry-run] Would remove $installed"
+          echo "[dry-run] Would install $app"
         fi
-      fi
-    done
+      done
 
-    # Install missing desired apps
-    for app in ${flatpakList}; do
-      if [ $dryrun -eq 0 ]; then
-        echo "Ensuring $app is installed"
-        run $FLATPAK install --user -y flathub "$app" || true
+      if [ "$dryrun" = "0" ]; then
+        run ${pkgs.flatpak}/bin/flatpak uninstall --user --unused -y || true
+        run ${pkgs.flatpak}/bin/flatpak update -y || true
       else
-        echo "[dry-run] Would install $app"
+        echo "[dry-run] Would remove unused runtimes and update apps"
       fi
-    done
-
-    # Cleanup unused runtimes
-    if [ $dryrun -eq 0 ]; then
-      run $FLATPAK uninstall --user --unused -y || true
-      run $FLATPAK update -y || true
-    else
-      echo "[dry-run] Would remove unused runtimes and update apps"
-    fi
-  '';
+    '';
+  };
 }

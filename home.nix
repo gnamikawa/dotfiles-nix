@@ -28,6 +28,11 @@
     in
     { } // configMappings;
 
+  programs.flatpakManagement.enable = true;
+  programs.flatpakManagement.desiredFlatpaks = [
+    "com.discordapp.Discord"
+    "com.visualstudio.code"
+  ];
   home.packages = with pkgs; [
     nix-index
     stdenv.cc.cc.lib
