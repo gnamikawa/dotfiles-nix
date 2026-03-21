@@ -1,0 +1,43 @@
+{
+  "network": {
+    // "interface":
+    // "rfkill":
+    "interval": 10,
+    // "family":
+    "format": "󰤨",
+    "format-ethernet": "󰈀",
+    "format-wifi": "{icon}",
+    // "format-linked":
+    "format-disconnected": "󰤯",
+    "format-disabled": "󰤮",
+    // "format-alt":
+    "format-icons": [
+      "󰤟",
+      "󰤢",
+      "󰤥",
+      "󰤨"
+    ],
+    // "rotate":
+    "min-length": 2,
+    "max-length": 2,
+    // "align":
+    // "justify":
+    "on-click": "sh $HOME/.config/waybar/scripts/networktoggle.sh",
+    // "on-click-middle":
+    "on-click-right": "nm-connection-editor",
+    // "on-update":
+    // "on-scroll-up":
+    // "on-scroll-down":
+    // "smooth-scrolling-threshold":
+    // "tooltip":
+    "tooltip-format": "Gateway: {gwaddr}",
+    "tooltip-format-ethernet": "Interface: {ifname}",
+    "tooltip-format-wifi": "Network: {essid}\nIP Addr: {ipaddr}/{cidr}\nStrength: {signalStrength}%\nFrequency: {frequency} GHz",
+    "tooltip-format-disconnected": "Wi-Fi Disconnected",
+    "tooltip-format-disabled": "Wi-Fi Disabled"
+    // "menu":
+    // "menu-file":
+    // "menu-actions":
+    // "expand":
+  }
+}

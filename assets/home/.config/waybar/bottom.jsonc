@@ -1,0 +1,24 @@
+{
+  "include": [
+    "~/.config/waybar/modules/custom/dividers.jsonc",
+    "~/.config/waybar/modules/extras/tray.jsonc",
+    "~/.config/waybar/modules/cpu.jsonc",
+    "~/.config/waybar/modules/memory.jsonc",
+    "~/.config/waybar/modules/idle_inhibitor.jsonc",
+    "~/.config/waybar/modules/custom/power_menu.jsonc"
+  ],
+  "layer": "top",
+  "position": "bottom",
+  "output": [
+    "DP-3"
+  ],
+  "spacing": 0,
+  "modules-right": [
+    "custom/left_div#1",
+    "tray",
+    "cpu",
+    "memory",
+    "idle_inhibitor",
+    "custom/power_menu"
+  ]
+}

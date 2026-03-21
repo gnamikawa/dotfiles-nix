@@ -1,0 +1,58 @@
+/*----------------
+    media info
+----------------*/
+
+#mpris {
+	padding: 0 12px;
+}
+
+/*------------
+    volume
+------------*/
+
+#pulseaudio,
+#wireplumber {
+	background-color: @main-bg;
+}
+
+/*----------------
+    brightness
+----------------*/
+
+#backlight {
+	background-color: @backlight;
+}
+
+/*-------------
+    battery
+-------------*/
+
+#battery {
+	background-color: @battery;
+}
+
+
+/*----------------
+    power menu
+----------------*/
+
+#custom-power_menu {
+	padding: 0 19px 0 16px;
+	color: @accent;
+	background-color: @main-bg;
+}
+#custom-power_menu:hover {
+	background-color: @hover-bg;
+}
+
+#tray {
+	padding: 4px 8px;
+	background-color: @main-bg;
+}
+#tray menu {
+	background-color: @main-bg;
+	border-radius: 10px;
+  border-color: @main-br;
+  border-width: 1px;
+  padding: 4px 8px;
+}

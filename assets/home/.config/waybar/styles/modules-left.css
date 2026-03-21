@@ -1,0 +1,28 @@
+/*--------------
+    username
+--------------*/
+
+#custom-user {
+	padding-right: 12px;
+}
+
+/*----------------
+    workspaces
+----------------*/
+
+#workspaces {
+	padding: 0 1px;
+	background-color: @main-bg;
+}
+#workspaces button.active label,
+#workspaces button.focused label {
+	color: @accent
+}
+
+/*------------------
+    window title
+------------------*/
+
+#window {
+	margin-left: 12px;
+}

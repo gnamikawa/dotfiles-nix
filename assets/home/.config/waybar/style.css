@@ -1,0 +1,13 @@
+/* ignore GTK theme */
+* {
+	all: initial;
+}
+
+@import "theme.css";
+@import "styles/fonts.css";
+@import "styles/global.css";
+@import "styles/modules-center.css";
+@import "styles/modules-left.css";
+@import "styles/modules-right.css";
+@import "styles/modules-dividers.css";
+@import "styles/states.css";
