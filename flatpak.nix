@@ -1,42 +1,70 @@
-{ pkgs, ... }:
+{ pkgs, lib, ... }:
 let
-  # We point directly to 'gnugrep' instead of 'grep'
-  grep = pkgs.gnugrep;
-  # 1. Declare the Flatpaks you *want* on your system
   desiredFlatpaks = [
-    # "com.discordapp.Discord"
+    "com.discordapp.Discord"
+    "com.visualstudio.code"
   ];
+
+  flatpakList = lib.concatStringsSep " " desiredFlatpaks;
 in
 {
-  xdg.portal.enable = true;
-  home.activation.flatpakManagement = {
-    text = ''
-      # # 2. Ensure the Flathub repo is added
-      # ${pkgs.flatpak}/bin/flatpak remote-add --if-not-exists flathub \
-      #   https://flathub.org/repo/flathub.flatpakrepo
+  home.activation.flatpakManagement = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    set +e
 
-      # 3. Get currently installed Flatpaks
-      installedFlatpaks=$(${pkgs.flatpak}/bin/flatpak list --app --columns=application)
+    # Check if this is a dry-run
+    dryrun=0
+    if [ "$HOME_MANAGER_DRY_RUN" = "1" ]; then
+      dryrun=1
+      echo "Running in dry-run mode; no changes will be applied."
+    fi
 
-      # 4. Remove any Flatpaks that are NOT in the desired list
-      for installed in $installedFlatpaks; do
-        if ! echo ${toString desiredFlatpaks} | ${grep}/bin/grep -q $installed; then
-          echo "Removing $installed because it's not in the desiredFlatpaks list."
-          ${pkgs.flatpak}/bin/flatpak uninstall -y --noninteractive $installed
+    FLATPAK="${pkgs.flatpak}/bin/flatpak"
+
+    # Add Flathub remote if needed
+    if [ $dryrun -eq 0 ]; then
+      run $FLATPAK remote-add --user --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+    else
+      echo "[dry-run] Would add Flathub remote"
+    fi
+
+    installedFlatpaks=$($FLATPAK list --app --columns=application)
+
+    # Uninstall apps not in desired list
+    for installed in $installedFlatpaks; do
+      found=0
+      for desired in ${flatpakList}; do
+        if [ "$installed" = "$desired" ]; then
+          found=1
+          break
         fi
       done
 
-      # 5. Install or re-install the Flatpaks you DO want
-      for app in ${toString desiredFlatpaks}; do
-        echo "Ensuring $app is installed."
-        ${pkgs.flatpak}/bin/flatpak install -y flathub $app
-      done
+      if [ "$found" -eq 0 ]; then
+        if [ $dryrun -eq 0 ]; then
+          echo "Removing $installed"
+          run $FLATPAK uninstall --user -y --noninteractive "$installed" || true
+        else
+          echo "[dry-run] Would remove $installed"
+        fi
+      fi
+    done
 
-      # 6. Remove unused Flatpaks
-      ${pkgs.flatpak}/bin/flatpak uninstall --unused -y
+    # Install missing desired apps
+    for app in ${flatpakList}; do
+      if [ $dryrun -eq 0 ]; then
+        echo "Ensuring $app is installed"
+        run $FLATPAK install --user -y flathub "$app" || true
+      else
+        echo "[dry-run] Would install $app"
+      fi
+    done
 
-      # 7. Update all installed Flatpaks
-      ${pkgs.flatpak}/bin/flatpak update -y
-    '';
-  };
+    # Cleanup unused runtimes
+    if [ $dryrun -eq 0 ]; then
+      run $FLATPAK uninstall --user --unused -y || true
+      run $FLATPAK update -y || true
+    else
+      echo "[dry-run] Would remove unused runtimes and update apps"
+    fi
+  '';
 }

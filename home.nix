@@ -8,6 +8,7 @@
     ./programs/kitty.nix
     ./programs/neovim.nix
     ./programs/yazi.nix
+    ./flatpak.nix
   ];
 
   home.username = "genzo";
@@ -50,6 +51,7 @@
     home-manager
     waybar
     fastfetch
+    flatpak
   ];
 
   xdg = {
