@@ -41,12 +41,6 @@
       color13  ${constants.theme.terminal.bright.special}
       color14  ${constants.theme.terminal.bright.secondaryInfo}
       color15  ${constants.theme.terminal.bright.text}
-
-      # Optional tab colors
-      active_tab_background   ${constants.theme.blue} 
-      active_tab_foreground   ${constants.theme.lightgray}
-      inactive_tab_background ${constants.theme.lightblack}
-      inactive_tab_foreground #6c6c6c
     '';
   };
 }
