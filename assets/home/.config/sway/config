@@ -58,7 +58,7 @@ bindsym $mod+r exec ranger
 bindsym $mod+F4 kill
 bindsym $win+f floating toggle
 
-bindsym $mod+Shift+e exec "swaymsg exit"
+bindsym $mod+Shift+e exec "uwsm stop"
 bindsym $mod+Shift+r exec "swaymsg reload"
 
 bindsym $mod+F3 exec "dmenu_run -m 0"
