@@ -5,12 +5,12 @@ let
   );
 in
 rec {
-  backgrounds = {
+  background = {
     default = palette.background."100";
     secondary = palette.background."200";
   };
 
-  componentBackgrounds = {
+  componentBackground = {
     default = colorVariantGenerator "100";
     hover = colorVariantGenerator "200";
     active = colorVariantGenerator "300";
@@ -34,13 +34,13 @@ rec {
 
   terminal = {
     selection = {
-      background = componentBackgrounds.active.amber;
+      background = componentBackground.active.amber;
       text = text.secondary.amber;
     };
 
     normal = {
       text = text.primary.gray;
-      background = backgrounds.default;
+      background = background.default;
 
       error = text.secondary.red;
       warning = text.secondary.amber;
@@ -54,7 +54,7 @@ rec {
 
     bright = {
       text = text.primary.gray;
-      background = backgrounds.default;
+      background = background.default;
 
       error = text.primary.red;
       warning = text.primary.amber;
