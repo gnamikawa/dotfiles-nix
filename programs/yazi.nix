@@ -55,54 +55,58 @@
     theme = {
       app = {
         overall = {
-          bg = constants.theme.blackout;
-          fg = "#cccccc";
+          bg = constants.theme.componentBackground.default.gray;
+          fg = constants.theme.text.primary.gray;
         };
       };
 
       mgr = {
         cwd = {
-          fg = "#569cd6";
+          fg = constants.theme.text.secondary.gray;
         };
         find_keyword = {
-          fg = "#dcdcaa";
+          fg = constants.theme.text.secondary.amber;
+          bg = constants.theme.componentBackground.active.amber;
           bold = true;
         };
         find_position = {
-          fg = constants.theme.teal;
-          bg = "#264f78";
+          fg = constants.theme.text.secondary.amber;
+          bg = constants.theme.componentBackground.active.amber;
           bold = true;
         };
         symlink_target = {
-          fg = constants.theme.purple;
+          fg = constants.theme.text.secondary.gray;
         };
 
         marker_copied = {
-          fg = constants.theme.teal;
+          fg = constants.theme.text.secondary.teal;
         };
         marker_cut = {
-          fg = "#f44747";
+          fg = constants.theme.text.secondary.red;
         };
         marker_selected = {
-          fg = "#dcdcaa";
+          fg = constants.theme.text.secondary.amber;
         };
 
         border_symbol = "│";
         border_style = {
-          fg = constants.theme.lightblack;
+          fg = constants.theme.border.default.gray;
         };
       };
 
       indicator = {
         parent = {
-          fg = "#569cd6";
+          fg = constants.theme.text.secondary.gray;
+          bg = constants.theme.componentBackground.hover.blue;
         };
         current = {
-          fg = "#569cd6";
+          fg = constants.theme.text.secondary.blue;
+          bg = constants.theme.componentBackground.hover.blue;
           bold = true;
         };
         preview = {
-          fg = constants.theme.lightgray;
+          fg = constants.theme.text.secondary.gray;
+          bg = constants.theme.componentBackground.hover.blue;
         };
         padding = {
           open = " ";
@@ -112,12 +116,12 @@
 
       tabs = {
         active = {
-          fg = constants.theme.blackout;
-          bg = constants.theme.blue;
+          fg = constants.theme.text.primary.gray;
+          bg = constants.theme.background.default;
         };
         inactive = {
-          fg = constants.theme.lightgray;
-          bg = constants.theme.lightblack;
+          fg = constants.theme.text.secondary.gray;
+          bg = constants.theme.background.default;
         };
         sep_inner = {
           open = " ";
@@ -131,38 +135,38 @@
 
       mode = {
         normal_main = {
-          fg = constants.theme.blackout;
-          bg = "#569cd6";
+          fg = constants.theme.text.primary.gray;
+          bg = constants.theme.highContrastBackground.default.blue;
           bold = true;
         };
         normal_alt = {
-          fg = constants.theme.blackout;
-          bg = constants.theme.blue;
+          fg = constants.theme.text.primary.gray;
+          bg = constants.theme.highContrastBackground.default.purple;
         };
         select_main = {
-          fg = constants.theme.blackout;
-          bg = constants.theme.teal;
+          fg = constants.theme.text.primary.gray;
+          bg = constants.theme.highContrastBackground.default.teal;
           bold = true;
         };
         select_alt = {
-          fg = constants.theme.blackout;
-          bg = "#f9f1a5";
+          fg = constants.theme.text.primary.gray;
+          bg = constants.theme.highContrastBackground.default.amber;
         };
         unset_main = {
-          fg = constants.theme.blackout;
-          bg = "#f44747";
+          fg = constants.theme.text.primary.gray;
+          bg = constants.theme.highContrastBackground.default.red;
           bold = true;
         };
         unset_alt = {
-          fg = constants.theme.blackout;
-          bg = "#ff6161";
+          fg = constants.theme.text.primary.gray;
+          bg = constants.theme.highContrastBackground.default.pink;
         };
       };
 
       status = {
         overall = {
-          fg = constants.theme.lightgray;
-          bg = constants.theme.blackout;
+          fg = constants.theme.text.primary.gray;
+          bg = constants.theme.componentBackground.default.gray;
         };
         sep_left = {
           open = "";
@@ -174,32 +178,32 @@
         };
 
         perm_type = {
-          fg = "#569cd6";
+          fg = constants.theme.text.secondary.gray;
         };
         perm_read = {
-          fg = constants.theme.teal;
+          fg = constants.theme.text.secondary.green;
         };
         perm_write = {
-          fg = "#dcdcaa";
+          fg = constants.theme.text.secondary.blue;
         };
         perm_exec = {
-          fg = "#ce9178";
+          fg = constants.theme.text.secondary.amber;
         };
         perm_sep = {
-          fg = "#6a9955";
+          fg = constants.theme.text.secondary.gray;
         };
 
         progress_label = {
-          fg = constants.theme.lightgray;
+          fg = constants.theme.text.primary.gray;
           bold = true;
         };
         progress_normal = {
-          fg = "#569cd6";
-          bg = constants.theme.lightblack;
+          fg = constants.theme.text.primary.blue;
+          bg = constants.theme.highContrastBackground.default.gray;
         };
         progress_error = {
-          fg = "#f44747";
-          bg = constants.theme.lightblack;
+          fg = constants.theme.text.primary.red;
+          bg = constants.theme.highContrastBackground.default.gray;
         };
       };
 
@@ -207,71 +211,72 @@
         rules = [
           {
             mime = "inode/directory";
-            fg = "#5599d2";
+            fg = constants.theme.text.secondary.blue;
           }
         ];
       };
 
       input = {
         border = {
-          fg = constants.theme.blue;
+          fg = constants.theme.border.default.blue;
         };
         title = {
-          fg = constants.theme.blue;
+          fg = constants.theme.text.secondary.blue;
           bold = true;
         };
         value = {
-          fg = constants.theme.lightgray;
+          fg = constants.theme.text.primary.gray;
         };
         selected = {
-          fg = constants.theme.blackout;
-          bg = constants.theme.teal;
+          fg = constants.theme.text.secondary.amber;
+          bg = constants.theme.componentBackground.active.amber;
         };
       };
 
       cmp = {
         border = {
-          fg = constants.theme.blue;
+          fg = constants.theme.border.default.blue;
         };
         active = {
-          fg = constants.theme.blackout;
-          bg = constants.theme.blue;
+          fg = constants.theme.text.primary.gray;
+          bg = constants.theme.componentBackground.active.gray;
           bold = true;
         };
         inactive = {
-          fg = constants.theme.lightgray;
+          fg = constants.theme.text.secondary.gray;
+          bg = constants.theme.componentBackground.default.gray;
         };
       };
 
       tasks = {
         border = {
-          fg = constants.theme.blue;
+          fg = constants.theme.border.default.blue;
         };
         title = {
-          fg = constants.theme.blue;
+          fg = constants.theme.text.secondary.blue;
           bold = true;
         };
         hovered = {
-          fg = constants.theme.blackout;
-          bg = constants.theme.blue;
+          fg = constants.theme.text.primary.gray;
+          bg = constants.theme.componentBackground.active.gray;
         };
       };
 
       help = {
         on = {
-          fg = constants.theme.teal;
+          fg = constants.theme.text.secondary.amber;
         };
         run = {
-          fg = "#569cd6";
+          fg = constants.theme.text.primary.gray;
         };
         desc = {
-          fg = constants.theme.lightgray;
+          fg = constants.theme.text.secondary.gray;
         };
         hovered = {
-          bg = constants.theme.lightblack;
+          bg = constants.theme.componentBackground.active.gray;
         };
         footer = {
-          fg = "#6a9955";
+          fg = constants.theme.text.secondary.green;
         };
       };
     };
