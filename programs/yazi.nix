@@ -41,11 +41,6 @@ in
             desc = "Open the current working directory in a new window";
           }
           {
-            on = "<S-k>";
-            run = "spot";
-            desc = "Show information about selected item";
-          }
-          {
             on = "q";
             run = "noop";
           }
