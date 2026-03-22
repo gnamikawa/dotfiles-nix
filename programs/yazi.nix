@@ -1,9 +1,31 @@
-{ constants, ... }:
+{ constants, pkgs, ... }:
+let
+  yaziPluginRepoDir = pkgs.fetchFromGitHub {
+    owner = "yazi-rs";
+    repo = "plugins";
+    rev = "196281844b8cbcac658a59013e4805300c2d6126";
+    sha256 = "sha256-pAkBlodci4Yf+CTjhGuNtgLOTMNquty7xP0/HSeoLzE=";
+  };
+in
 {
   programs.yazi = {
     shellWrapperName = "y";
     enable = true;
     enableBashIntegration = true;
+    initLua = ''
+      require("git"):setup({
+        order = 1500
+      })
+      require("full-border"):setup {
+      	-- Available values: ui.Border.PLAIN, ui.Border.ROUNDED
+      	type = ui.Border.ROUNDED,
+      }
+    '';
+    plugins = {
+      git = "${yaziPluginRepoDir}/git.yazi";
+      full-border = "${yaziPluginRepoDir}/full-border.yazi";
+      mount = "${yaziPluginRepoDir}/mount.yazi";
+    };
 
     keymap = {
       mgr = {
@@ -27,6 +49,11 @@
             on = "q";
             run = "noop";
           }
+          {
+            on = "M";
+            run = "plugin mount";
+            desc = "Open the mount manager";
+          }
         ];
       };
     };
@@ -47,6 +74,19 @@
           {
             mime = "image/*";
             run = "image";
+          }
+        ];
+
+        prepend_fetchers = [
+          {
+            id = "git";
+            url = "*";
+            run = "git";
+          }
+          {
+            id = "git";
+            url = "*/";
+            run = "git";
           }
         ];
       };
