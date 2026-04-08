@@ -120,6 +120,7 @@
       background-color = constants.theme.componentBackground.active.gray;
       border-color = constants.theme.border.active.gray;
       text-color = constants.theme.text.primary.gray;
+      progress-color = constants.theme.text.primary.gray;
       font = "JetBrainsMono Nerd Font,JetBrainsMono NF 10";
 
       max-icon-size = 64;

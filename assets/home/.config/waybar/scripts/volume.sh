@@ -13,6 +13,7 @@
 VALUE=1
 MIN=0
 MAX=100
+ID_FILE="${XDG_RUNTIME_DIR:-/tmp}/volume-notify-id"
 
 print-usage() {
 	local script=${0##*/}
@@ -81,7 +82,10 @@ get-icon() {
 
 toggle-mute() {
 	pactl "set-$dev_mute" "$dev" toggle
-	notify-send "$title: $(check-muted)" -i "$(get-icon)" -r 2425
+
+  local prev_id=0
+  [ -f "$ID_FILE" ] && prev_id=$(cat "$ID_FILE")
+	notify-send --print-id "$title: $(check-muted)" -i "$(get-icon)" -r "$prev_id" > "$ID_FILE"
 }
 
 set-volume() {
@@ -105,7 +109,9 @@ set-volume() {
 	local icon
 	icon=$(get-icon "$new_vol")
 
-	notify-send "$title: ${new_vol}%" -h int:value:$new_vol -i "$icon" -r 2425
+  local prev_id=0
+  [ -f "$ID_FILE" ] && prev_id=$(cat "$ID_FILE")
+  notify-send --print-id "$title: ${new_vol}%" -h int:value:"$new_vol" -i "$icon" -r "$prev_id" > "$ID_FILE"
 }
 
 main() {
