@@ -23,6 +23,7 @@
       lua5_1
       sqlite
       lazygit
+      tree-sitter
     ];
   };
 }
