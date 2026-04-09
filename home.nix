@@ -1,4 +1,9 @@
-{ pkgs, constants, ... }:
+{
+  pkgs,
+  constants,
+  config,
+  ...
+}:
 {
   imports = [
     ./programs/bash.nix
@@ -21,7 +26,7 @@
         builtins.map (name: {
           name = ".config/${name}";
           value = {
-            source = ./assets/home/.config/${name};
+            source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/repositories/dotfiles-nix/assets/home/.config/${name}";
           };
         }) configNames
       );
