@@ -9,36 +9,29 @@
 # Author: Jesse Mirabel <sejjymvm@gmail.com>
 # Created: September 07, 2025
 # License: MIT
-
 VALUE=1
 MIN=0
 MAX=100
 ID_FILE="${XDG_RUNTIME_DIR:-/tmp}/volume-notify-id"
+LOCK_FILE="${XDG_RUNTIME_DIR:-/tmp}/volume-notify.lock"
 
 print-usage() {
 	local script=${0##*/}
 	cat <<- EOF
 		USAGE: $script [OPTIONS]
-
 		Adjust default device volume and send a notification with the current level
-
 		OPTIONS:
 		    input            Set device as '@DEFAULT_SOURCE@'
 		    output           Set device as '@DEFAULT_SINK@'
-
 		    mute             Toggle device mute
-
 		    raise <value>    Raise volume by <value>
 		    lower <value>    Lower volume by <value>
 		                         Default value: $VALUE
-
 		EXAMPLES:
 		    Toggle microphone mute:
 		        $ $script input mute
-
 		    Raise speaker volume:
 		        $ $script output raise
-
 		    Lower speaker volume by 5:
 		        $ $script output lower 5
 	EOF
@@ -53,7 +46,6 @@ check-muted() {
 		'yes') state='Muted' ;;
 		'no') state='Unmuted' ;;
 	esac
-
 	echo "$state"
 }
 
@@ -64,7 +56,6 @@ get-volume() {
 get-icon() {
 	local icon
 	local new_vol=${1:-$(get-volume)}
-
 	if [[ $(check-muted) == 'Muted' ]]; then
 		icon="$dev_icon-muted"
 	else
@@ -76,15 +67,13 @@ get-icon() {
 			icon="$dev_icon-high"
 		fi
 	fi
-
 	echo "$icon"
 }
 
 toggle-mute() {
 	pactl "set-$dev_mute" "$dev" toggle
-
-  local prev_id=0
-  [ -f "$ID_FILE" ] && prev_id=$(cat "$ID_FILE")
+	local prev_id=0
+	[ -f "$ID_FILE" ] && [ -s "$ID_FILE" ] && prev_id=$(cat "$ID_FILE")
 	notify-send --print-id "$title: $(check-muted)" -i "$(get-icon)" -r "$prev_id" > "$ID_FILE"
 }
 
@@ -92,7 +81,6 @@ set-volume() {
 	local vol
 	vol=$(get-volume)
 	local new_vol
-
 	case $action in
 		'raise')
 			new_vol=$((vol + value))
@@ -103,22 +91,18 @@ set-volume() {
 			((new_vol < MIN)) && new_vol=$MIN
 			;;
 	esac
-
 	pactl "set-$dev_vol" "$dev" "${new_vol}%"
-
 	local icon
 	icon=$(get-icon "$new_vol")
-
-  local prev_id=0
-  [ -f "$ID_FILE" ] && prev_id=$(cat "$ID_FILE")
-  notify-send --print-id "$title: ${new_vol}%" -h int:value:"$new_vol" -i "$icon" -r "$prev_id" > "$ID_FILE"
+	local prev_id=0
+	[ -f "$ID_FILE" ] && [ -s "$ID_FILE" ] && prev_id=$(cat "$ID_FILE")
+	notify-send --print-id "$title: ${new_vol}%" -h int:value:"$new_vol" -i "$icon" -r "$prev_id" > "$ID_FILE"
 }
 
 main() {
 	device=$1
 	action=$2
 	value=${3:-$VALUE}
-
 	! ((value > 0)) && print-usage
 
 	case $device in
@@ -139,11 +123,14 @@ main() {
 		*) print-usage ;;
 	esac
 
-	case $action in
-		'mute') toggle-mute ;;
-		'raise' | 'lower') set-volume ;;
-		*) print-usage ;;
-	esac
+	(
+		flock --nonblock 9 || exit 0
+		case $action in
+			'mute') toggle-mute ;;
+			'raise' | 'lower') set-volume ;;
+			*) print-usage ;;
+		esac
+	) 9>"$LOCK_FILE"
 }
 
 main "$@"
