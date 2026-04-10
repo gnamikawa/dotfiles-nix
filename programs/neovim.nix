@@ -2,6 +2,9 @@
 {
   programs.neovim = {
     enable = true;
+    withPython3 = true;
+    withRuby = true;
+    withNodeJs = true;
     defaultEditor = true;
     extraPackages = with pkgs; [
       go
