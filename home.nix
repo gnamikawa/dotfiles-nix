@@ -1,5 +1,6 @@
 {
   pkgs,
+  pkgs2511,
   constants,
   config,
   ...
@@ -39,29 +40,113 @@
     "com.visualstudio.code"
   ];
   home.packages = with pkgs; [
-    nix-index
+    # ── Core System & Hardware ────────────────────────────────────────────────
     stdenv.cc.cc.lib
-    playerctl
-    python313Packages.ueberzug
+    busybox
+    pciutils
+    hwinfo
+    libwacom
+    xf86_input_wacom
+    evtest
     udiskie
-    # cudaPackages.cudnn
+    libimobiledevice
+    ifuse
+
+    # ── GPU & Performance ─────────────────────────────────────────────────────
     cudatoolkit
-    bottom
     nvtopPackages.full
     gperftools
+
+    # ── Display & Wayland ─────────────────────────────────────────────────────
+    wlr-randr
+    wdisplays
+    grim
+    slurp
+    wl-clipboard
+
+    # ── Window Manager & Desktop ──────────────────────────────────────────────
+    i3
+    i3blocks
+    i3status
+    waybar
+    dmenu # Dynamic menu / launcher
+    mako # Wayland notification daemon
+
+    # ── Audio & PipeWire ──────────────────────────────────────────────────────
+    pavucontrol # PulseAudio / PipeWire volume control
+    qpwgraph # PipeWire patchbay / graph GUI
+    pa_applet # System tray audio applet
+    crosspipe
+
+    # ── Bluetooth & Networking ────────────────────────────────────────────────
+    blueman # Bluetooth manager
+    networkmanagerapplet
+
+    # ── File Management ───────────────────────────────────────────────────────
     pcmanfm
+    file-roller
+    yazi
+    atool
+    unrar
+    unzip
+    p7zip
+    stow
+
+    # ── Terminal & CLI Tools ──────────────────────────────────────────────────
+    htop
+    bottom
+    nix-index
+    wget
+    fzf
+    ripgrep
+    xclip
+    bat
+    fastfetch
+    inotify-tools
+    feh
+
+    # ── Development ───────────────────────────────────────────────────────────
+    clang
+    cargo
+    rust-analyzer
+    # python314
+    pkgs2511.python310
+    # python313
+    python313Packages.ueberzug
+
+    # ── Creative & Media ──────────────────────────────────────────────────────
     krita
     blender
     mpv
-    file-roller
-    feh
-    zathura
-    keepassxc
+    playerctl
+    v4l-utils
+    zbar
+
+    # ── Document & Office ─────────────────────────────────────────────────────
     libreoffice-qt6-fresh
+    zathura
+    poppler-utils
+    odt2txt
+
+    # ── Preview & Thumbnails ──────────────────────────────────────────────────
+    ueberzug
+    libcaca
+    exiftool
+
+    # ── Security & Passwords ──────────────────────────────────────────────────
+    keepassxc
+
+    # ── Notifications ─────────────────────────────────────────────────────────
+    libnotify
+
+    # ── Browser & Internet ────────────────────────────────────────────────────
+    chromium
+
+    # ── Compatibility ─────────────────────────────────────────────────────────
+    wineWow64Packages.stable # 32+64-bit Wine
+
+    # ── System Management ─────────────────────────────────────────────────────
     home-manager
-    waybar
-    fastfetch
-    flatpak
   ];
 
   xdg = {

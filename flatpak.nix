@@ -24,6 +24,7 @@ in
   };
 
   config = lib.mkIf cfg.enable {
+    home.packages = with pkgs; [ flatpak ];
     home.activation.flatpakManagement = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
       set +e
 
