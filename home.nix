@@ -85,7 +85,6 @@
     # ── File Management ───────────────────────────────────────────────────────
     pcmanfm
     file-roller
-    yazi
     atool
     unrar
     unzip

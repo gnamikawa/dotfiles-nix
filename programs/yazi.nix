@@ -6,25 +6,91 @@ let
     rev = "196281844b8cbcac658a59013e4805300c2d6126";
     sha256 = "sha256-pAkBlodci4Yf+CTjhGuNtgLOTMNquty7xP0/HSeoLzE=";
   };
+  bookmarksRepoDir = pkgs.fetchFromGitHub {
+    owner = "dedukun";
+    repo = "bookmarks.yazi";
+    rev = "9ef1254d8afe88aba21cd56a186f4485dd532ab8";
+    sha256 = "sha256-GQFBRB2aQqmmuKZ0BpcCAC4r0JFKqIANZNhUC98SlwY=";
+  };
+  restoreRepoDir = pkgs.fetchFromGitHub {
+    owner = "boydaihungst";
+    repo = "restore.yazi";
+    rev = "0e0870460b9b74c5ae98b7f96c7c26a9a274ce6d";
+    sha256 = "sha256-rDsyMF5IEBHx+fJ0oYTCCQAlTSquUcOkFLC4Lmbuz6k=";
+  };
+  clipboardRepoDir = pkgs.fetchFromGitHub {
+    owner = "XYenon";
+    repo = "clipboard.yazi";
+    rev = "3b9681091b783d6bc5d07172afd6159060a7db63";
+    sha256 = "sha256-8p2RC8F8JH1K36HebJM58stHX+lFLD+KYQxfdJm06y0=";
+  };
 in
 {
   programs.yazi = {
     shellWrapperName = "y";
     enable = true;
     enableBashIntegration = true;
+    extraPackages = with pkgs; [
+      ueberzugpp
+      ffmpeg
+      poppler-utils
+      imagemagick
+      fzf
+      fd
+      ripgrep
+      chafa
+      zoxide
+      _7zz
+      resvg
+      jq
+    ];
     initLua = ''
       require("git"):setup({
         order = 1500
       })
-      require("full-border"):setup {
+
+      require("full-border"):setup({
       	-- Available values: ui.Border.PLAIN, ui.Border.ROUNDED
       	type = ui.Border.ROUNDED,
-      }
+      })
+
+      require("restore"):setup({
+        position = { "center", w = 70, h = 40 },
+        show_confirm = true,
+        suppress_success_notification = true,
+        theme = {
+          title = "blue",
+          header = "green",
+          header_warning = "yellow",
+          list_item = { odd = "blue", even = "blue" },
+        }
+      })
+
+      require("bookmarks"):setup({
+        last_directory = { enable = false, persist = false, mode = "dir" },
+        persist = "none",
+        desc_format = "full",
+        file_pick_mode = "hover",
+        custom_desc_input = false,
+        show_keys = false,
+        notify = {
+          enable = false,
+          timeout = 1,
+          message = {
+            new = "New bookmark '<key>' -> '<folder>'",
+            delete = "Deleted bookmark in '<key>'",
+            delete_all = "Deleted all bookmarks",
+          }
+        }
+      })
     '';
     plugins = {
       git = "${yaziPluginRepoDir}/git.yazi";
       full-border = "${yaziPluginRepoDir}/full-border.yazi";
       mount = "${yaziPluginRepoDir}/mount.yazi";
+      clipboard = clipboardRepoDir;
+      restore = restoreRepoDir;
+      bookmarks = bookmarksRepoDir;
     };
 
     keymap = {
@@ -48,6 +114,70 @@ in
             on = "M";
             run = "plugin mount";
             desc = "Open the mount manager";
+          }
+
+          # Restore plugin
+          {
+            on = "u";
+            run = "plugin restore";
+            desc = "Restore last deleted files/folders";
+          }
+          {
+            on = [
+              "d"
+              "u"
+            ];
+            run = "plugin restore";
+            desc = "Restore last deleted files/folders";
+          }
+          {
+            on = [
+              "d"
+              "U"
+            ];
+            run = "plugin restore -- --interactive";
+            desc = "Restore deleted files/folders (Interactive)";
+          }
+
+          # Clipboard plugin
+          {
+            on = "y";
+            run = [
+              "yank"
+              "plugin clipboard -- --action=copy"
+            ];
+          }
+          {
+            on = "<C-p>";
+            run = "plugin clipboard -- --action=paste";
+          }
+
+          # Bookmarks plugin
+          {
+            on = "m";
+            run = "plugin bookmarks save";
+            desc = "Save current position as a bookmark";
+          }
+          {
+            on = "'";
+            run = "plugin bookmarks jump";
+            desc = "Jump to a bookmark";
+          }
+          {
+            on = [
+              "b"
+              "d"
+            ];
+            run = "plugin bookmarks delete";
+            desc = "Delete a bookmark";
+          }
+          {
+            on = [
+              "b"
+              "D"
+            ];
+            run = "plugin bookmarks delete_all";
+            desc = "Delete all bookmarks";
           }
         ];
       };
