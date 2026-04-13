@@ -15,9 +15,27 @@
     ./programs/kitty.nix
     ./programs/neovim.nix
     ./programs/yazi.nix
+    ./modules/sway-common.nix
+    ./modules/sway-desktop.nix
+    ./modules/sway-laptop.nix
+    ./modules/waybar
     ./flatpak.nix
   ];
 
+  programs.waybar.custom =
+    if osConfig.networking.hostName == "GEN-LPC" then
+      {
+        primaryOutput = "eDP-1";
+        secondaryOutputs = [ ];
+      }
+    else
+      {
+        primaryOutput = "DP-3";
+        secondaryOutputs = [
+          "DP-2"
+          "HDMI-A-1"
+        ];
+      };
   home.username = "genzo";
   home.homeDirectory = "/home/genzo";
   home.stateVersion = "25.11";
@@ -40,113 +58,115 @@
     "com.discordapp.Discord"
     "com.visualstudio.code"
   ];
-  home.packages = with pkgs; [
-    # ── Core System & Hardware ────────────────────────────────────────────────
-    stdenv.cc.cc.lib
-    busybox
-    pciutils
-    hwinfo
-    libwacom
-    xf86_input_wacom
-    evtest
-    udiskie
-    libimobiledevice
-    ifuse
+  home.packages =
+    with pkgs;
+    [
+      # ── Core System & Hardware ────────────────────────────────────────────────
+      stdenv.cc.cc.lib
+      busybox
+      pciutils
+      hwinfo
+      libwacom
+      xf86_input_wacom
+      evtest
+      udiskie
+      libimobiledevice
+      ifuse
 
-    # ── Display & Wayland ─────────────────────────────────────────────────────
-    wlr-randr
-    wdisplays
-    grim
-    slurp
-    wl-clipboard
+      # ── Display & Wayland ─────────────────────────────────────────────────────
+      wlr-randr
+      wdisplays
+      grim
+      slurp
+      wl-clipboard
 
-    # ── Window Manager & Desktop ──────────────────────────────────────────────
-    i3
-    i3blocks
-    i3status
-    waybar
-    dmenu # Dynamic menu / launcher
-    mako # Wayland notification daemon
+      # ── Window Manager & Desktop ──────────────────────────────────────────────
+      i3
+      i3blocks
+      i3status
+      dmenu # Dynamic menu / launcher
+      mako # Wayland notification daemon
 
-    # ── Audio & PipeWire ──────────────────────────────────────────────────────
-    pavucontrol # PulseAudio / PipeWire volume control
-    qpwgraph # PipeWire patchbay / graph GUI
-    pa_applet # System tray audio applet
-    crosspipe
+      # ── Audio & PipeWire ──────────────────────────────────────────────────────
+      pavucontrol # PulseAudio / PipeWire volume control
+      qpwgraph # PipeWire patchbay / graph GUI
+      pa_applet # System tray audio applet
+      crosspipe
 
-    # ── Bluetooth & Networking ────────────────────────────────────────────────
-    blueman # Bluetooth manager
-    networkmanagerapplet
+      # ── Bluetooth & Networking ────────────────────────────────────────────────
+      blueman # Bluetooth manager
+      networkmanagerapplet
 
-    # ── File Management ───────────────────────────────────────────────────────
-    pcmanfm
-    file-roller
-    atool
-    unrar
-    unzip
-    p7zip
-    stow
+      # ── File Management ───────────────────────────────────────────────────────
+      pcmanfm
+      file-roller
+      atool
+      unrar
+      unzip
+      p7zip
+      stow
 
-    # ── Terminal & CLI Tools ──────────────────────────────────────────────────
-    htop
-    bottom
-    nix-index
-    wget
-    fzf
-    ripgrep
-    xclip
-    bat
-    fastfetch
-    inotify-tools
-    feh
+      # ── Terminal & CLI Tools ──────────────────────────────────────────────────
+      htop
+      bottom
+      nix-index
+      wget
+      fzf
+      ripgrep
+      xclip
+      bat
+      fastfetch
+      inotify-tools
+      feh
 
-    # ── Development ───────────────────────────────────────────────────────────
-    clang
-    cargo
-    rust-analyzer
-    # python314
-    pkgs2511.python310
-    # python313
-    python313Packages.ueberzug
+      # ── Development ───────────────────────────────────────────────────────────
+      clang
+      cargo
+      rust-analyzer
+      # python314
+      pkgs2511.python310
+      # python313
+      python313Packages.ueberzug
 
-    # ── Creative & Media ──────────────────────────────────────────────────────
-    krita
-    blender
-    mpv
-    playerctl
-    v4l-utils
-    zbar
+      # ── Creative & Media ──────────────────────────────────────────────────────
+      krita
+      blender
+      mpv
+      playerctl
+      v4l-utils
+      zbar
 
-    # ── Document & Office ─────────────────────────────────────────────────────
-    libreoffice-qt6-fresh
-    zathura
-    poppler-utils
-    odt2txt
+      # ── Document & Office ─────────────────────────────────────────────────────
+      libreoffice-qt6-fresh
+      zathura
+      poppler-utils
+      odt2txt
 
-    # ── Preview & Thumbnails ──────────────────────────────────────────────────
-    ueberzug
-    libcaca
-    exiftool
+      # ── Preview & Thumbnails ──────────────────────────────────────────────────
+      ueberzug
+      libcaca
+      exiftool
 
-    # ── Security & Passwords ──────────────────────────────────────────────────
-    keepassxc
+      # ── Security & Passwords ──────────────────────────────────────────────────
+      keepassxc
 
-    # ── Notifications ─────────────────────────────────────────────────────────
-    libnotify
+      # ── Notifications ─────────────────────────────────────────────────────────
+      libnotify
 
-    # ── Browser & Internet ────────────────────────────────────────────────────
-    chromium
+      # ── Browser & Internet ────────────────────────────────────────────────────
+      chromium
 
-    # ── Compatibility ─────────────────────────────────────────────────────────
-    wineWow64Packages.stable # 32+64-bit Wine
+      # ── Compatibility ─────────────────────────────────────────────────────────
+      wineWow64Packages.stable # 32+64-bit Wine
 
-    # ── System Management ─────────────────────────────────────────────────────
-    home-manager
-  ] ++ (lib.optionals osConfig.hardware.nvidia.enabled [
-    cudatoolkit
-    nvtopPackages.full
-    gperftools
-  ]);
+      # ── System Management ─────────────────────────────────────────────────────
+      home-manager
+    ]
+    ++ (lib.optionals osConfig.hardware.nvidia.enabled [
+      cudatoolkit
+      nvtopPackages.full
+      gperftools
+    ]);
 
   xdg = {
     autostart.enable = true;
@@ -242,7 +262,7 @@
   };
 
   systemd.user.services = {
-    top-waybar = {
+    waybar = {
       Unit = {
         Description = "top waybar";
         After = [ "graphical-session.target" ];
@@ -250,35 +270,7 @@
       };
       Service = {
         Type = "simple";
-        ExecStart = "${pkgs.waybar}/bin/waybar -c %h/.config/waybar/top.jsonc -s %h/.config/waybar/style.css";
-        Restart = "on-failure";
-      };
-      Install.WantedBy = [ "graphical-session.target" ];
-    };
-
-    bottom-waybar = {
-      Unit = {
-        Description = "bottom waybar";
-        After = [ "graphical-session.target" ];
-        PartOf = [ "graphical-session.target" ];
-      };
-      Service = {
-        Type = "simple";
-        ExecStart = "${pkgs.waybar}/bin/waybar -c %h/.config/waybar/bottom.jsonc -s %h/.config/waybar/style.css";
-        Restart = "on-failure";
-      };
-      Install.WantedBy = [ "graphical-session.target" ];
-    };
-
-    etc-waybar = {
-      Unit = {
-        Description = "waybar displayed on all sub-monitors";
-        After = [ "graphical-session.target" ];
-        PartOf = [ "graphical-session.target" ];
-      };
-      Service = {
-        Type = "simple";
-        ExecStart = "${pkgs.waybar}/bin/waybar -c %h/.config/waybar/etc.jsonc -s %h/.config/waybar/style.css";
+        ExecStart = "${pkgs.waybar}/bin/waybar -c %h/.config/waybar/config -s %h/.config/waybar/style.css";
         Restart = "on-failure";
       };
       Install.WantedBy = [ "graphical-session.target" ];
