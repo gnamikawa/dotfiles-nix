@@ -3,6 +3,7 @@
   pkgs2511,
   constants,
   config,
+  osConfig,
   ...
 }:
 {
@@ -51,11 +52,6 @@
     udiskie
     libimobiledevice
     ifuse
-
-    # ── GPU & Performance ─────────────────────────────────────────────────────
-    cudatoolkit
-    nvtopPackages.full
-    gperftools
 
     # ── Display & Wayland ─────────────────────────────────────────────────────
     wlr-randr
@@ -146,7 +142,11 @@
 
     # ── System Management ─────────────────────────────────────────────────────
     home-manager
-  ];
+  ] ++ (lib.optionals osConfig.hardware.nvidia.enabled [
+    cudatoolkit
+    nvtopPackages.full
+    gperftools
+  ]);
 
   xdg = {
     autostart.enable = true;
