@@ -8,11 +8,16 @@
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    nur = {
+      url = "github:nix-community/NUR";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
     {
       nixpkgs,
+      nur,
       nixpkgs2511,
       home-manager,
       ...
@@ -27,10 +32,12 @@
       nixosModules.default =
         { ... }:
         {
+          nixpkgs.overlays = [ nur.overlays.default ];
           home-manager.users."genzo" = import ./home.nix;
           home-manager.extraSpecialArgs = {
             inherit constants;
             inherit pkgs2511;
+            inherit nur;
           };
         };
 
@@ -39,9 +46,16 @@
 
         modules = [
           ./home.nix
+          (
+            { ... }:
+            {
+              nixpkgs.overlays = [ nur.overlays.default ];
+            }
+          )
         ];
         extraSpecialArgs = {
           inherit pkgs2511;
+          inherit nur;
         };
       };
     };
