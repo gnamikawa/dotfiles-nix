@@ -19,6 +19,7 @@
     ./modules/sway-desktop.nix
     ./modules/sway-laptop.nix
     ./modules/waybar
+    ./modules/theme
     ./flatpak.nix
   ];
 
@@ -170,14 +171,6 @@
 
   xdg = {
     autostart.enable = true;
-    mimeApps = {
-      enable = true;
-      defaultApplications = {
-        "inode/directory" = "pcmanfm.desktop";
-        "application/pdf" = "org.pwmt.zathura-pdf-mupdf.desktop";
-        "image/*" = "feh.desktop";
-      };
-    };
   };
 
   i18n = {
