@@ -24,6 +24,12 @@ let
     rev = "3b9681091b783d6bc5d07172afd6159060a7db63";
     sha256 = "sha256-8p2RC8F8JH1K36HebJM58stHX+lFLD+KYQxfdJm06y0=";
   };
+  compressRepoDir = pkgs.fetchFromGitHub {
+    owner = "KKV9";
+    repo = "compress.yazi";
+    rev = "46a6b9f02ff2f8aced466a1f01a3fe241f1cd45f";
+    sha256 = "sha256-Mby185FCJY6nqHcHDQu+D5SLk+wGcyeUHK8yAvrd4TM=";
+  };
 in
 {
   programs.yazi = {
@@ -91,6 +97,7 @@ in
       clipboard = clipboardRepoDir;
       restore = restoreRepoDir;
       bookmarks = bookmarksRepoDir;
+      compress = compressRepoDir;
     };
 
     keymap = {
@@ -178,6 +185,53 @@ in
             ];
             run = "plugin bookmarks delete_all";
             desc = "Delete all bookmarks";
+          }
+
+          # Compress plugin
+          {
+            on = [
+              "c"
+              "a"
+              "a"
+            ];
+            run = "plugin compress";
+            desc = "Archive selected files";
+          }
+          {
+            on = [
+              "c"
+              "a"
+              "p"
+            ];
+            run = "plugin compress -p";
+            desc = "Archive selected files (password)";
+          }
+          {
+            on = [
+              "c"
+              "a"
+              "h"
+            ];
+            run = "plugin compress -ph";
+            desc = "Archive selected files (password+header)";
+          }
+          {
+            on = [
+              "c"
+              "a"
+              "l"
+            ];
+            run = "plugin compress -l";
+            desc = "Archive selected files (compression level)";
+          }
+          {
+            on = [
+              "c"
+              "a"
+              "u"
+            ];
+            run = "plugin compress -phl";
+            desc = "Archive selected files (password+header+level)";
           }
         ];
       };
