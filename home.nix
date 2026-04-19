@@ -261,19 +261,6 @@
       Install.WantedBy = [ "graphical-session.target" ];
     };
 
-    fcitx5-tray = {
-      Unit = {
-        Description = "Fcitx 5 Tray Applet";
-        After = [ "graphical-session.target" ];
-        PartOf = [ "graphical-session.target" ];
-      };
-      Service = {
-        Type = "simple";
-        ExecStart = "${pkgs.fcitx5}/bin/fcitx5";
-      };
-      Install.WantedBy = [ "graphical-session.target" ];
-    };
-
     # keepassxc = {
     #   Unit = {
     #     Description = "Password Manager";
