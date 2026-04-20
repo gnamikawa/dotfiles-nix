@@ -42,6 +42,13 @@ in
             };
             command = "floating enable, border pixel 1";
           }
+          {
+            criteria = {
+              app_id = "firefox";
+              title = "Picture-in-Picture";
+            };
+            command = "floating enable, border pixel 1, resize set 426 240, move position ${toString (1920 - 426 - 32)} 0, sticky enable";
+          }
         ];
       };
 
@@ -50,6 +57,7 @@ in
       # ── Focus behaviour ────────────────────────────────────────────────────
       focus = {
         wrapping = "no";
+        followMouse = false;
       };
 
       # ── Floating modifier ──────────────────────────────────────────────────
@@ -188,7 +196,6 @@ in
 
     extraConfig = ''
       default_orientation horizontal
-      for_window [urgent=latest] focus
     '';
   };
 }
