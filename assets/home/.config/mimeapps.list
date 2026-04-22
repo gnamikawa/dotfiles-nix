@@ -1,10 +1,7 @@
-[Added Associations]
-image/png=krita_png.desktop;feh.desktop;
-
 [Default Applications]
 application/pdf=org.pwmt.zathura-pdf-mupdf.desktop
-image/*=feh.desktop
 inode/directory=pcmanfm.desktop
 image/png=feh.desktop
+image/*=feh.desktop
 
 [Removed Associations]
