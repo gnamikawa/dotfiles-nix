@@ -49,6 +49,13 @@ in
             };
             command = "floating enable, border pixel 1, resize set 426 240, move position ${toString (1920 - 426 - 32)} 0, sticky enable";
           }
+          {
+            criteria = {
+              app_id = "Thunar";
+              title = "^rename.*";
+            };
+            command = "floating enable, border pixel 1";
+          }
         ];
       };
 
