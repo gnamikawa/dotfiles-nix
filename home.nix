@@ -15,6 +15,7 @@
     ./programs/kitty.nix
     ./programs/neovim.nix
     ./programs/yazi.nix
+    ./modules/hyprlock.nix
     ./modules/sway-common.nix
     ./modules/sway-desktop.nix
     ./modules/sway-laptop.nix
