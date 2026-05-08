@@ -1,6 +1,5 @@
 {
   pkgs,
-  pkgs2511,
   constants,
   config,
   osConfig,
@@ -126,10 +125,6 @@
       clang
       cargo
       rust-analyzer
-      # python314
-      pkgs2511.python310
-      # python313
-      python313Packages.ueberzug
 
       # ── Creative & Media ──────────────────────────────────────────────────────
       krita
