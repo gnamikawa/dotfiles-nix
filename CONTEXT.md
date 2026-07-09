@@ -30,8 +30,19 @@ enablement (wacom, v4l, iOS devices), Wayland utilities, and Nix glue. Known
 to be fuzzy; tolerated deliberately.
 
 ### User applications
-Desktop/GUI applications and development tools chosen by the user, as opposed
-to packages a system needs to function.
+Desktop/GUI applications chosen by the user. Anything useful without a
+display belongs in CLI tools instead.
+
+### CLI tools
+Terminal-only tools and development toolchains — everything in this bundle
+must be useful on a headless box.
+
+### Profile
+A composition of modules that standalone home-manager can activate. Two
+exist: **graphical** (the full configuration, GUI packages wrapped for
+foreign-distro GL) and **terminal** (the headless subset the graphical
+profile builds upon). Under NixOS the graphical profile plus a host
+directory is always used.
 
 ### Host
 A named machine this configuration serves. Currently `GEN-DPC` (desktop,

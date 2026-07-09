@@ -24,4 +24,10 @@ Deliberate deviations (dotfiles-nix only):
 - `modules/sway/` — a module directory rather than a file, because it
   carries its waybar/theme asset tree.
 - No `tests/` — system-nix's VM tests exercise the real host configurations
-  including this flake (its ADR 0001), so guarantees are proven there.
+  including this flake (its ADR 0001), so NixOS-mode guarantees are proven
+  there. Standalone mode is invisible to system-nix, so it is covered by
+  this repo's own flake checks, which build both standalone profiles
+  (ADR 0003).
+- Layered aggregators — `modules/terminal.nix` under `modules/default.nix`
+  expresses the terminal/graphical profile split (ADR 0003); system-nix has
+  a single aggregator.
