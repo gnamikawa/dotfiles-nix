@@ -16,11 +16,11 @@
     ./programs/yazi.nix
     ./modules/direnv.nix
     ./modules/hyprlock.nix
-    ./modules/sway-common.nix
-    ./modules/sway-desktop.nix
-    ./modules/sway-laptop.nix
-    ./modules/waybar
-    ./modules/theme
+    ./modules/sway/sway-common.nix
+    ./modules/sway/sway-desktop.nix
+    ./modules/sway/sway-laptop.nix
+    ./modules/sway/waybar
+    ./modules/sway/theme
     ./flatpak.nix
   ];
 
