@@ -1,11 +1,13 @@
 {
   pkgs,
   lib,
-  osConfig,
+  # Absent under standalone home-manager (no NixOS underneath): default to
+  # no NVIDIA rather than failing evaluation.
+  osConfig ? { },
   ...
 }:
 {
-  home.packages = lib.optionals osConfig.hardware.nvidia.enabled (
+  home.packages = lib.optionals (lib.attrByPath [ "hardware" "nvidia" "enabled" ] false osConfig) (
     with pkgs;
     [
       cudatoolkit
