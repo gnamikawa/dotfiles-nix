@@ -3,5 +3,13 @@ application/pdf=org.pwmt.zathura-pdf-mupdf.desktop
 inode/directory=pcmanfm.desktop
 image/png=feh.desktop
 image/*=feh.desktop
+x-scheme-handler/claude-cli=claude-code-url-handler.desktop
+application/x-zerosize=code.desktop
 
 [Removed Associations]
+
+[Added Associations]
+application/x-tiled-tsx=com.visualstudio.code.desktop;
+application/x-compressed-tar=org.gnome.FileRoller.desktop;
+application/pdf=chromium-browser.desktop;firefox.desktop;
+application/x-zerosize=code.desktop;
