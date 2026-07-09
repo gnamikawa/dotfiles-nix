@@ -69,7 +69,6 @@
     zbar
     atool
     unrar
-    unzip
     p7zip
     stow
     poppler-utils
@@ -77,6 +76,5 @@
     ueberzug
     libcaca
     exiftool
-    wget
   ];
 }
