@@ -1,4 +1,4 @@
-{ ... }:
+{ pkgs, config, ... }:
 {
   services.hypridle = {
     enable = true;
@@ -12,6 +12,7 @@
   };
 
   programs.hyprlock = {
+    package = config.lib.nixGL.wrap pkgs.hyprlock;
     enable = true;
     settings = {
       general = {

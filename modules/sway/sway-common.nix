@@ -1,6 +1,12 @@
 # sway-common.nix — shared sway configuration for all hosts
 
-{ lib, constants, ... }:
+{
+  lib,
+  pkgs,
+  config,
+  constants,
+  ...
+}:
 
 let
   mod = "Mod1"; # Alt   — primary modifier
@@ -14,6 +20,7 @@ in
 
   wayland.windowManager.sway = {
     enable = true;
+    package = config.lib.nixGL.wrap pkgs.sway;
 
     config = {
 

@@ -77,7 +77,7 @@ in
       };
       Service = {
         Type = "simple";
-        ExecStart = "${pkgs.waybar}/bin/waybar -c %h/.config/waybar/config -s %h/.config/waybar/style.css";
+        ExecStart = "${config.programs.waybar.package}/bin/waybar -c %h/.config/waybar/config -s %h/.config/waybar/style.css";
         Restart = "on-failure";
       };
       Install.WantedBy = [ "graphical-session.target" ];
@@ -86,6 +86,7 @@ in
 
     programs.waybar = {
       enable = true;
+      package = config.lib.nixGL.wrap pkgs.waybar;
       settings = bars;
 
       # CSS is assembled by concatenating all source files in the same order

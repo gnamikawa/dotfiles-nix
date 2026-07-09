@@ -1,6 +1,6 @@
-{ pkgs, ... }:
+{ pkgs, config, ... }:
 {
-  home.packages = with pkgs; [
-    obsidian
+  home.packages = [
+    (config.lib.nixGL.wrap pkgs.obsidian)
   ];
 }
