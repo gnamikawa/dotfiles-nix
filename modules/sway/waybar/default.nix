@@ -46,7 +46,8 @@ in
 
     primaryOutput = lib.mkOption {
       type = lib.types.str;
-      default = "DP-1";
+      # A machine without host-specific config is most likely a laptop.
+      default = "eDP-1";
       description = "Output name for the primary display (hosts the top and bottom bars).";
       example = "eDP-1";
     };
