@@ -20,8 +20,6 @@
     ./modules/mako.nix
     ./modules/assets.nix
     ./modules/sway/sway-common.nix
-    ./modules/sway/sway-desktop.nix
-    ./modules/sway/sway-laptop.nix
     ./modules/sway/waybar
     ./modules/sway/theme
     # ./modules/flatpak.nix
@@ -33,20 +31,6 @@
 
   ];
 
-  programs.waybar.custom =
-    if osConfig.networking.hostName == "GEN-LPC" then
-      {
-        primaryOutput = "eDP-1";
-        secondaryOutputs = [ ];
-      }
-    else
-      {
-        primaryOutput = "DP-3";
-        secondaryOutputs = [
-          "DP-2"
-          "HDMI-A-1"
-        ];
-      };
   home.username = "genzo";
   home.homeDirectory = "/home/genzo";
   home.stateVersion = "25.11";

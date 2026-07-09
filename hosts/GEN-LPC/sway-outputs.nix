@@ -1,4 +1,4 @@
-# sway-laptop.nix — GEN-LPC specific sway configuration
+# GEN-LPC sway outputs — built-in display and touchpad
 
 { ... }:
 

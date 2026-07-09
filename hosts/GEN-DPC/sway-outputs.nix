@@ -1,4 +1,4 @@
-# sway-desktop.nix — GEN-DPC specific sway configuration
+# GEN-DPC sway outputs — monitors and wacom input mapping
 
 { ... }:
 

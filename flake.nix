@@ -29,10 +29,17 @@
     in
     {
       nixosModules.default =
-        { ... }:
+        { config, ... }:
         {
           nixpkgs.overlays = [ nur.overlays.default ];
-          home-manager.users."genzo" = import ./home.nix;
+          home-manager.users."genzo" = {
+            imports = [
+              ./home.nix
+              # Host-specific configuration; a host without a directory here
+              # fails at evaluation on purpose.
+              (./hosts + "/${config.networking.hostName}")
+            ];
+          };
           home-manager.extraSpecialArgs = {
             inherit constants;
             inherit nur;
