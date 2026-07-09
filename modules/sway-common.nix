@@ -7,6 +7,11 @@ let
   win = "Mod4"; # Super — secondary modifier
 in
 {
+  # Prevents wlroots 0.19 from using the DRM atomic commit path that triggers the syncobj assertion
+  home.sessionVariables = {
+    WLR_DRM_NO_ATOMIC = "1";
+  };
+
   wayland.windowManager.sway = {
     enable = true;
 
