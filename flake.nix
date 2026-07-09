@@ -34,7 +34,7 @@
           nixpkgs.overlays = [ nur.overlays.default ];
           home-manager.users."genzo" = {
             imports = [
-              ./home.nix
+              ./modules
               # Host-specific configuration; a host without a directory here
               # fails at evaluation on purpose.
               (./hosts + "/${config.networking.hostName}")
@@ -50,7 +50,7 @@
         inherit pkgs;
 
         modules = [
-          ./home.nix
+          ./modules
           (
             { ... }:
             {
