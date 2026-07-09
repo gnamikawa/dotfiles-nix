@@ -1,79 +1,56 @@
 { pkgs, ... }:
 {
+  # GUI applications only.
   home.packages = with pkgs; [
 
-    # ── Window Manager & Desktop ──────────────────────────────────────────────
+    # ── Window Manager & Desktop ──────────────────────────────────────────
     dmenu # Dynamic menu / launcher
     mako # Wayland notification daemon
 
-    # ── Display Management ────────────────────────────────────────────────────
+    # ── Display Management ────────────────────────────────────────────────
     wlr-randr
     wdisplays
 
-    # ── Audio & PipeWire ──────────────────────────────────────────────────────
+    # ── Audio & PipeWire ──────────────────────────────────────────────────
     pavucontrol # PulseAudio / PipeWire volume control GUI
     qpwgraph # PipeWire patchbay / graph GUI
 
-    # ── Bluetooth & Networking ────────────────────────────────────────────────
+    # ── Bluetooth & Networking ────────────────────────────────────────────
     blueman # Bluetooth manager
     networkmanagerapplet
 
-    # ── File Management ───────────────────────────────────────────────────────
+    # ── File Management ───────────────────────────────────────────────────
     pcmanfm
     file-roller
 
-    # ── Creative & Media ──────────────────────────────────────────────────────
+    # ── Creative & Media ──────────────────────────────────────────────────
     krita
     blender
     mpv
-    yt-dlp
     audacity
 
-    # ── Document & Office ─────────────────────────────────────────────────────
+    # ── Document & Office ─────────────────────────────────────────────────
     libreoffice-qt6-fresh
     zathura
 
-    # ── Security & Passwords ──────────────────────────────────────────────────
+    # ── Security & Passwords ──────────────────────────────────────────────
     keepassxc
 
-    # ── Browser & Internet ────────────────────────────────────────────────────
+    # ── Browser & Internet ────────────────────────────────────────────────
     chromium
 
-    # ── Compatibility ─────────────────────────────────────────────────────────
+    # ── Compatibility ─────────────────────────────────────────────────────
     wineWow64Packages.stable # 32+64-bit Wine
 
-    # ── System Monitors ───────────────────────────────────────────────────────
-    htop
-    bottom
-
-    # ── Tray ──────────────────────────────────────────────────────────────────
+    # ── Tray ──────────────────────────────────────────────────────────────
     pa_applet
     crosspipe
     udiskie
     libnotify
-    # ── Development ───────────────────────────────────────────────────────────
-    clang
-    cargo
-    rust-analyzer
-    nix-index
 
-    # ── Etc ───────────────────────────────────────────────────────────────────
-    fzf
-    ripgrep
-    xclip
-    bat
-    fastfetch
+    # ── Etc ────────────────────────────────────────────────────────────────
     feh
     playerctl
     zbar
-    atool
-    unrar
-    p7zip
-    stow
-    poppler-utils
-    odt2txt
-    ueberzug
-    libcaca
-    exiftool
   ];
 }

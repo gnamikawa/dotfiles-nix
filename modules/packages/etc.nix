@@ -16,7 +16,6 @@
     wl-clipboard
     inotify-tools
     v4l-utils
-    home-manager
 
   ];
 }

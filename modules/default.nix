@@ -26,6 +26,7 @@
     ./packages/nvidia.nix
     ./packages/base-linux.nix
     ./packages/user-applications.nix
+    ./packages/cli-tools.nix
     ./obsidian.nix
     ./packages/etc.nix
 
