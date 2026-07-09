@@ -4,7 +4,6 @@
 
     # ── System ────────────────────────────────────────────────────────────────
     stdenv.cc.cc.lib
-    busybox
     pciutils
     hwinfo
     libwacom

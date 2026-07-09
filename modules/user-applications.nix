@@ -3,9 +3,6 @@
   home.packages = with pkgs; [
 
     # ── Window Manager & Desktop ──────────────────────────────────────────────
-    i3
-    i3blocks
-    i3status
     dmenu # Dynamic menu / launcher
     mako # Wayland notification daemon
 
