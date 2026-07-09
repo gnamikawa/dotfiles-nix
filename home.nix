@@ -24,7 +24,7 @@
     ./modules/sway/sway-laptop.nix
     ./modules/sway/waybar
     ./modules/sway/theme
-    # ./flatpak.nix
+    # ./modules/flatpak.nix
     ./modules/packages/nvidia.nix
     ./modules/packages/base-linux.nix
     ./modules/packages/user-applications.nix
@@ -50,12 +50,6 @@
   home.username = "genzo";
   home.homeDirectory = "/home/genzo";
   home.stateVersion = "25.11";
-  # programs.flatpakManagement.enable = true;
-  # programs.flatpakManagement.desiredFlatpaks = [
-  #   "com.discordapp.Discord"
-  #   "com.visualstudio.code"
-  # ];
-
   xdg = {
     autostart.enable = true;
   };

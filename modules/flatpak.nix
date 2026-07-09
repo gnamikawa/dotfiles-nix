@@ -80,4 +80,14 @@ in
       fi
     '';
   };
+
+  # Disabled pending a lighter update mechanism — see
+  # docs/adr/0001-disable-flatpak-management.md. Re-enable by uncommenting
+  # the import in home.nix and this block:
+  #
+  # programs.flatpakManagement.enable = true;
+  # programs.flatpakManagement.desiredFlatpaks = [
+  #   "com.discordapp.Discord"
+  #   "com.visualstudio.code"
+  # ];
 }
