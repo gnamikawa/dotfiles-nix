@@ -1,23 +1,50 @@
-# dotfiles-nix
+# Context
 
-Home-manager configuration for Genzo's machines (desktop and laptop), organised
-as importable modules plus raw config assets symlinked into `~/.config`.
+Glossary of terms as used in this repository. Definitions here are canonical;
+if code or conversation disagrees with this file, one of them is wrong.
 
-## Language
+This repository maintains structure parity with system-nix — see
+`docs/adr/0002-structure-parity-with-system-nix.md`.
 
-### Package modules
+## Terms
 
-**Base Linux packages** (`modules/base-linux.nix`):
+### Module
+One concern, one file, directly under `modules/`. A module is shared by every
+host; anything host-specific does not belong in one. `modules/default.nix` is
+the aggregator that imports all of them. A module may be a directory instead
+of a file only when it carries its own asset tree (currently only `sway/`).
+
+### Package bundle
+An install-only module under `modules/packages/` — it adds packages and
+configures nothing. Current bundles: base-linux, user-applications, etc,
+nvidia.
+
+### Base Linux packages
 The standard Linux userland that mainstream distributions (e.g. Debian) ship
-preinstalled but NixOS deliberately leaves to the user — coreutils, grep, curl,
-vim, and kin.
-_Avoid_: core packages, essentials
+preinstalled but NixOS deliberately leaves to the user — coreutils, grep,
+curl, vim, and kin.
 
-**Etc packages** (`modules/etc.nix`):
+### Etc packages
 The grab-bag of system-adjacent packages with no better home yet: hardware
 enablement (wacom, v4l, iOS devices), Wayland utilities, and Nix glue. Known
 to be fuzzy; tolerated deliberately.
 
-**User applications** (`modules/user-applications.nix`):
+### User applications
 Desktop/GUI applications and development tools chosen by the user, as opposed
 to packages a system needs to function.
+
+### Host
+A named machine this configuration serves. Currently `GEN-DPC` (desktop,
+NVIDIA GPU) and `GEN-LPC` (laptop). Everything that differs between machines
+lives in `hosts/<NAME>/`; a machine whose hostname has no directory there
+fails at evaluation on purpose. The term is shared with system-nix.
+
+### Asset
+A raw (non-Nix) config file under `assets/`, symlinked into the home
+directory out-of-store so the application can read — and write — it live,
+without a rebuild. Assets are the escape hatch for programs that rewrite
+their own config.
+
+### Constants
+The palette/theme attrset under `constants/`, injected into every module via
+`extraSpecialArgs`. It is data, not a module.
