@@ -1,6 +1,7 @@
 {
   config,
   lib,
+  pkgs,
   ...
 }:
 
@@ -67,6 +68,20 @@ in
   };
 
   config = {
+    systemd.user.services.waybar = {
+      Unit = {
+        Description = "top waybar";
+        After = [ "graphical-session.target" ];
+        PartOf = [ "graphical-session.target" ];
+      };
+      Service = {
+        Type = "simple";
+        ExecStart = "${pkgs.waybar}/bin/waybar -c %h/.config/waybar/config -s %h/.config/waybar/style.css";
+        Restart = "on-failure";
+      };
+      Install.WantedBy = [ "graphical-session.target" ];
+    };
+
 
     programs.waybar = {
       enable = true;
@@ -138,4 +153,5 @@ in
       };
     };
   };
+
 }
