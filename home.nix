@@ -22,6 +22,9 @@
     ./modules/sway/waybar
     ./modules/sway/theme
     ./flatpak.nix
+    ./modules/nvidia.nix
+    ./modules/user-applications.nix
+    ./modules/etc.nix
   ];
 
   programs.waybar.custom =
@@ -60,111 +63,6 @@
     "com.discordapp.Discord"
     "com.visualstudio.code"
   ];
-  home.packages =
-    with pkgs;
-    [
-      # ── Core System & Hardware ────────────────────────────────────────────────
-      stdenv.cc.cc.lib
-      busybox
-      pciutils
-      hwinfo
-      libwacom
-      xf86_input_wacom
-      evtest
-      udiskie
-      libimobiledevice
-      ifuse
-
-      # ── Display & Wayland ─────────────────────────────────────────────────────
-      wlr-randr
-      wdisplays
-      grim
-      slurp
-      wl-clipboard
-
-      # ── Window Manager & Desktop ──────────────────────────────────────────────
-      i3
-      i3blocks
-      i3status
-      dmenu # Dynamic menu / launcher
-      mako # Wayland notification daemon
-
-      # ── Audio & PipeWire ──────────────────────────────────────────────────────
-      pavucontrol # PulseAudio / PipeWire volume control
-      qpwgraph # PipeWire patchbay / graph GUI
-      pa_applet # System tray audio applet
-      crosspipe
-
-      # ── Bluetooth & Networking ────────────────────────────────────────────────
-      blueman # Bluetooth manager
-      networkmanagerapplet
-
-      # ── File Management ───────────────────────────────────────────────────────
-      pcmanfm
-      file-roller
-      atool
-      unrar
-      unzip
-      p7zip
-      stow
-
-      # ── Terminal & CLI Tools ──────────────────────────────────────────────────
-      htop
-      bottom
-      nix-index
-      wget
-      fzf
-      ripgrep
-      xclip
-      bat
-      fastfetch
-      inotify-tools
-      feh
-
-      # ── Development ───────────────────────────────────────────────────────────
-      clang
-      cargo
-      rust-analyzer
-
-      # ── Creative & Media ──────────────────────────────────────────────────────
-      krita
-      blender
-      mpv
-      playerctl
-      v4l-utils
-      zbar
-
-      # ── Document & Office ─────────────────────────────────────────────────────
-      libreoffice-qt6-fresh
-      zathura
-      poppler-utils
-      odt2txt
-
-      # ── Preview & Thumbnails ──────────────────────────────────────────────────
-      ueberzug
-      libcaca
-      exiftool
-
-      # ── Security & Passwords ──────────────────────────────────────────────────
-      keepassxc
-
-      # ── Notifications ─────────────────────────────────────────────────────────
-      libnotify
-
-      # ── Browser & Internet ────────────────────────────────────────────────────
-      chromium
-
-      # ── Compatibility ─────────────────────────────────────────────────────────
-      wineWow64Packages.stable # 32+64-bit Wine
-
-      # ── System Management ─────────────────────────────────────────────────────
-      home-manager
-    ]
-    ++ (lib.optionals osConfig.hardware.nvidia.enabled [
-      cudatoolkit
-      nvtopPackages.full
-      gperftools
-    ]);
 
   xdg = {
     autostart.enable = true;
