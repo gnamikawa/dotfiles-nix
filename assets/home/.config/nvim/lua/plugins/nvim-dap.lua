@@ -66,7 +66,6 @@ return {
             "process handle SIGWINCH -n true -p true -s false",
           }),
         })
-        print(vim.inspect(updated_config.initCommands))
         _run(updated_config, opts)
       end
     end,
