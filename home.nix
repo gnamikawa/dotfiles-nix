@@ -18,6 +18,7 @@
     ./modules/hyprlock.nix
     ./modules/fcitx5.nix
     ./modules/mako.nix
+    ./modules/assets.nix
     ./modules/sway/sway-common.nix
     ./modules/sway/sway-desktop.nix
     ./modules/sway/sway-laptop.nix
@@ -49,20 +50,6 @@
   home.username = "genzo";
   home.homeDirectory = "/home/genzo";
   home.stateVersion = "25.11";
-  home.file =
-    let
-      configNames = builtins.attrNames (builtins.readDir ./assets/home/.config);
-      configMappings = builtins.listToAttrs (
-        builtins.map (name: {
-          name = ".config/${name}";
-          value = {
-            source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/repositories/dotfiles-nix/assets/home/.config/${name}";
-          };
-        }) configNames
-      );
-    in
-    { } // configMappings;
-
   # programs.flatpakManagement.enable = true;
   # programs.flatpakManagement.desiredFlatpaks = [
   #   "com.discordapp.Discord"
