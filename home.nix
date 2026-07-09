@@ -7,13 +7,13 @@
 }:
 {
   imports = [
-    ./programs/bash.nix
-    ./programs/firefox.nix
-    ./programs/git.nix
-    ./programs/keepassxc.nix
-    ./programs/kitty.nix
-    ./programs/neovim.nix
-    ./programs/yazi.nix
+    ./modules/bash.nix
+    ./modules/firefox.nix
+    ./modules/git.nix
+    ./modules/keepassxc.nix
+    ./modules/kitty.nix
+    ./modules/neovim.nix
+    ./modules/yazi.nix
     ./modules/direnv.nix
     ./modules/hyprlock.nix
     ./modules/sway/sway-common.nix
