@@ -11,21 +11,49 @@
       url = "github:nix-community/NUR";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    nixgl = {
+      url = "github:nix-community/nixGL";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
     {
+      self,
       nixpkgs,
       nur,
       home-manager,
+      nixgl,
       ...
     }:
     let
       system = "x86_64-linux";
       pkgs = import nixpkgs {
         inherit system;
+        # NixOS mode inherits this from the system; standalone must allow
+        # unfree packages (vscode, obsidian, unrar, ...) itself.
+        config.allowUnfree = true;
       };
       constants = import ./constants;
+
+      # Shared settings for the standalone (non-NixOS) profiles.
+      standaloneModule =
+        { ... }:
+        {
+          nixpkgs.overlays = [ nur.overlays.default ];
+          targets.genericLinux.enable = true;
+        };
+
+      standalone =
+        modules:
+        home-manager.lib.homeManagerConfiguration {
+          inherit pkgs;
+          modules = modules ++ [ standaloneModule ];
+          extraSpecialArgs = {
+            inherit constants;
+            inherit nur;
+          };
+        };
     in
     {
       nixosModules.default =
@@ -46,21 +74,29 @@
           };
         };
 
-      homeConfigurations."genzo" = home-manager.lib.homeManagerConfiguration {
-        inherit pkgs;
-
-        modules = [
+      # Standalone profiles for non-NixOS distributions (e.g. Debian).
+      homeConfigurations = {
+        "genzo-graphical" = standalone [
           ./modules
           (
             { ... }:
             {
-              nixpkgs.overlays = [ nur.overlays.default ];
+              # Wrap GUI packages so they can use the host's GL drivers.
+              nixGL.packages = nixgl.packages;
+              nixGL.defaultWrapper = "mesa";
             }
           )
         ];
-        extraSpecialArgs = {
-          inherit nur;
-        };
+
+        "genzo-terminal" = standalone [ ./modules/terminal.nix ];
+      };
+
+      # Keep the standalone profiles from rotting: `nix flake check` builds
+      # both activation packages. NixOS-module mode is covered by system-nix's
+      # VM tests instead (docs/adr/0002).
+      checks.${system} = {
+        home-graphical = self.homeConfigurations."genzo-graphical".activationPackage;
+        home-terminal = self.homeConfigurations."genzo-terminal".activationPackage;
       };
     };
 }
