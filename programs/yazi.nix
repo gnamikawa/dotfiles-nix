@@ -261,11 +261,13 @@ in
             id = "git";
             url = "*";
             run = "git";
+            group = "git";
           }
           {
             id = "git";
             url = "*/";
             run = "git";
+            group = "git";
           }
         ];
       };
