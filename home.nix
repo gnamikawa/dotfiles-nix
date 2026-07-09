@@ -22,11 +22,11 @@
     ./modules/sway/waybar
     ./modules/sway/theme
     # ./flatpak.nix
-    ./modules/nvidia.nix
-    ./modules/base-linux.nix
-    ./modules/user-applications.nix
+    ./modules/packages/nvidia.nix
+    ./modules/packages/base-linux.nix
+    ./modules/packages/user-applications.nix
     ./modules/obsidian.nix
-    ./modules/etc.nix
+    ./modules/packages/etc.nix
 
   ];
 
