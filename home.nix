@@ -25,7 +25,9 @@
     ./modules/nvidia.nix
     ./modules/base-linux.nix
     ./modules/user-applications.nix
+    ./modules/obsidian.nix
     ./modules/etc.nix
+
   ];
 
   programs.waybar.custom =

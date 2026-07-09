@@ -26,6 +26,8 @@
     krita
     blender
     mpv
+    yt-dlp
+    audacity
 
     # ── Document & Office ─────────────────────────────────────────────────────
     libreoffice-qt6-fresh
