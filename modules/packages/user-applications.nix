@@ -6,7 +6,6 @@
 
     # ── Window Manager & Desktop ──────────────────────────────────────────
     dmenu # Dynamic menu / launcher
-    mako # Wayland notification daemon
 
     # ── Display Management ────────────────────────────────────────────────
     wlr-randr
@@ -33,9 +32,6 @@
     # ── Document & Office ─────────────────────────────────────────────────
     libreoffice-qt6-fresh
     zathura
-
-    # ── Security & Passwords ──────────────────────────────────────────────
-    keepassxc
 
     # ── Browser & Internet ────────────────────────────────────────────────
     chromium

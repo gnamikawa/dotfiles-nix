@@ -1,7 +1,13 @@
-{ constants, ... }:
+{
+  pkgs,
+  config,
+  constants,
+  ...
+}:
 {
   services.mako = {
     enable = true;
+    package = config.lib.nixGL.wrap pkgs.mako;
 
     settings = {
       sort = "-time";

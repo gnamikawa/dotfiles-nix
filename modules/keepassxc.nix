@@ -1,6 +1,7 @@
-{ ... }:
+{ pkgs, config, ... }:
 {
   programs.keepassxc = {
+    package = config.lib.nixGL.wrap pkgs.keepassxc;
     enable = true;
     # autostart = true;
     settings = {
