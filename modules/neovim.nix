@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs, config, ... }:
 {
   home.sessionVariables = {
     EDITOR = "nvim";
@@ -21,9 +21,9 @@
     mermaid-cli
     tectonic
     tetex
-    kitty
-    wezterm
-    ghostty
+    (config.lib.nixGL.wrap kitty)
+    (config.lib.nixGL.wrap wezterm)
+    (config.lib.nixGL.wrap ghostty)
     fd
     lua5_1
     sqlite
