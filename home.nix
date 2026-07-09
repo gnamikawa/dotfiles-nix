@@ -21,7 +21,7 @@
     ./modules/sway/sway-laptop.nix
     ./modules/sway/waybar
     ./modules/sway/theme
-    ./flatpak.nix
+    # ./flatpak.nix
     ./modules/nvidia.nix
     ./modules/base-linux.nix
     ./modules/user-applications.nix
@@ -59,11 +59,11 @@
     in
     { } // configMappings;
 
-  programs.flatpakManagement.enable = true;
-  programs.flatpakManagement.desiredFlatpaks = [
-    "com.discordapp.Discord"
-    "com.visualstudio.code"
-  ];
+  # programs.flatpakManagement.enable = true;
+  # programs.flatpakManagement.desiredFlatpaks = [
+  #   "com.discordapp.Discord"
+  #   "com.visualstudio.code"
+  # ];
 
   xdg = {
     autostart.enable = true;
