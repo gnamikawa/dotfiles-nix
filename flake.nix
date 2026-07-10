@@ -15,6 +15,10 @@
       url = "github:nix-community/nixGL";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    claude-desktop-nix = {
+      url = "path:/home/genzo/repositories/claude-desktop-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
@@ -24,6 +28,7 @@
       nur,
       home-manager,
       nixgl,
+      claude-desktop-nix,
       ...
     }:
     let
@@ -35,6 +40,9 @@
         config.allowUnfree = true;
       };
       constants = import ./constants;
+
+      # Claude Desktop (official .deb, Cowork-enabled) from its own flake.
+      claude-desktop = claude-desktop-nix.packages.${system}.default;
 
       # Shared settings for the standalone (non-NixOS) profiles.
       standaloneModule =
@@ -52,6 +60,7 @@
           extraSpecialArgs = {
             inherit constants;
             inherit nur;
+            inherit claude-desktop;
           };
         };
     in
@@ -71,6 +80,7 @@
           home-manager.extraSpecialArgs = {
             inherit constants;
             inherit nur;
+            inherit claude-desktop;
           };
         };
 

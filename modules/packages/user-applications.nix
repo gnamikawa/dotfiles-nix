@@ -1,8 +1,12 @@
-{ pkgs, config, ... }:
+{ pkgs, config, claude-desktop, ... }:
 {
   # GUI applications only, routed through the nixGL wrapper so they can run
   # on non-NixOS distributions (identity under NixOS / when nixGL is unset).
-  home.packages = map config.lib.nixGL.wrap (with pkgs; [
+  home.packages = map config.lib.nixGL.wrap ([
+
+    # Claude Desktop, from claude-desktop-nix (official .deb, Cowork-enabled).
+    claude-desktop
+  ] ++ (with pkgs; [
 
     # ── Window Manager & Desktop ──────────────────────────────────────────
     dmenu # Dynamic menu / launcher
@@ -49,5 +53,5 @@
     feh
     playerctl
     zbar
-  ]);
+  ]));
 }

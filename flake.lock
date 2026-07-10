@@ -1,5 +1,22 @@
 {
   "nodes": {
+    "claude-desktop-nix": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1783684603,
+        "narHash": "sha256-C5c9zTeinvHwbNo2uAtrJfePg/JRruPwyKaatJvRYvw=",
+        "path": "/home/genzo/repositories/claude-desktop-nix",
+        "type": "path"
+      },
+      "original": {
+        "path": "/home/genzo/repositories/claude-desktop-nix",
+        "type": "path"
+      }
+    },
     "flake-parts": {
       "inputs": {
         "nixpkgs-lib": [
@@ -119,6 +136,7 @@
     },
     "root": {
       "inputs": {
+        "claude-desktop-nix": "claude-desktop-nix",
         "home-manager": "home-manager",
         "nixgl": "nixgl",
         "nixpkgs": "nixpkgs",
