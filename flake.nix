@@ -101,6 +101,38 @@
         "genzo-terminal" = standalone [ ./modules/terminal.nix ];
       };
 
+      # Development environments (see CONTEXT.md): self-sufficient devShells
+      # layered over the ambient layer by direnv. Each file under devshells/
+      # exports mkShell arguments; combos that must compile against each
+      # other's libraries are pre-merged here via inputsFrom — casual combos
+      # stack as `use flake dotfiles#<env>` lines in a project .envrc instead.
+      devShells.${system} =
+        let
+          shellArgs = name: import (./devshells + "/${name}.nix") pkgs;
+          mkNamed = name: pkgs.mkShell ({ name = "dotfiles-${name}"; } // shellArgs name);
+          catalog = nixpkgs.lib.genAttrs [
+            "default"
+            "cpp"
+            "rust"
+            "go"
+            "node"
+            "python"
+            "java"
+            "cuda"
+          ] mkNamed;
+        in
+        catalog
+        // {
+          # cuda listed first so its pinned gcc wins PATH order over cpp's.
+          cpp-cuda = pkgs.mkShell {
+            name = "dotfiles-cpp-cuda";
+            inputsFrom = [
+              catalog.cuda
+              catalog.cpp
+            ];
+          };
+        };
+
       # Keep the standalone profiles from rotting: `nix flake check` builds
       # both activation packages. NixOS-module mode is covered by system-nix's
       # VM tests instead (docs/adr/0002).

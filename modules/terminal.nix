@@ -10,6 +10,7 @@
     ./neovim.nix
     ./yazi.nix
     ./direnv.nix
+    ./default-env.nix
     ./assets.nix
     ./packages/base-linux.nix
     ./packages/cli-tools.nix

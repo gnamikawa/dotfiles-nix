@@ -31,3 +31,6 @@ Deliberate deviations (dotfiles-nix only):
 - Layered aggregators — `modules/terminal.nix` under `modules/default.nix`
   expresses the terminal/graphical profile split (ADR 0003); system-nix has
   a single aggregator.
+- `devshells/` — the development-environment catalog (ADR 0004). It lives
+  only here because environments are user-level and must be portable;
+  system-nix deliberately has no analogue.

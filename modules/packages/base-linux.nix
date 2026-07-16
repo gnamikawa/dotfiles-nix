@@ -20,7 +20,6 @@
     procps
     psmisc
     util-linux
-    kmod
     sysstat
 
     # ── Networking ────────────────────────────────────────────────────────────
@@ -62,8 +61,13 @@
     bc
     time
     man-db
-    shadow
-    cron
+
+    # ── Guide compatibility (CONTEXT.md) ──────────────────────────────────────
+    # Kept because external documentation assumes them, not for habitual use.
+    perl
+    dash
+    diffstat
+    patchutils
 
   ];
 }

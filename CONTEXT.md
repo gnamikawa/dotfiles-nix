@@ -34,8 +34,41 @@ Desktop/GUI applications chosen by the user. Anything useful without a
 display belongs in CLI tools instead.
 
 ### CLI tools
-Terminal-only tools and development toolchains — everything in this bundle
-must be useful on a headless box.
+Terminal-only tools — everything in this bundle must be useful on a
+headless box. Never toolchains: compilers, runtimes, and library headers
+belong to development environments, not the ambient layer.
+
+### Ambient layer
+The set of tools present in every interactive shell on every host without
+any activation step. It is deliberately **lean**: the interactive CLI
+toolkit only. Compilers, language runtimes, build toolchains, and library
+headers are never ambient — they belong to development environments. This
+repository owns the user-level part (portable to non-NixOS machines);
+system-nix owns the system-level part (its base system). The term is shared
+with system-nix.
+
+### Development environment
+A named, activatable set of toolchain packages layered on top of the
+ambient layer, defined in this repository's devshell catalog. The
+**default development environment** is active in **every interactive shell
+at any working directory** and contains only cross-language glue, never
+full language toolchains. Its automatic activation does not make it
+ambient: unlike the ambient layer it remains a **removable layer** —
+identifiable, shadowable, and strippable per project — whereas ambient
+tools are never removable. A **project environment** stacks on top of it,
+shadows any of its tools, or removes it entirely (first-class: a project
+declares removal with one line, never hand-rolled PATH surgery).
+**Language environments** (`cpp`, `rust`, `go`, `node`, …) are
+self-sufficient — each carries its complete toolchain rather than a delta —
+and stack on top of whatever is already active. Combinations that must
+compile against each other's libraries are pre-merged; anything else
+composes at activation time. The term is shared with system-nix.
+
+### Guide-compatibility tool
+A tool kept in the ambient layer not because it is habitually used but
+because external documentation (guides, tutorials, answers) assumes its
+presence. Keeping one is a deliberate decision with this stated rationale.
+The term is shared with system-nix.
 
 ### Profile
 A composition of modules that standalone home-manager can activate. Two

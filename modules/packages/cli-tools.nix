@@ -1,6 +1,8 @@
 { pkgs, ... }:
 {
   # Terminal-only tools — everything here must be useful on a headless box.
+  # Ambient layer (CONTEXT.md): no compilers, runtimes, or toolchains — those
+  # live in the devshells/ catalog as development environments.
   home.packages = with pkgs; [
 
     # ── System Monitors ───────────────────────────────────────────────────────
@@ -8,10 +10,12 @@
     bottom
 
     # ── Development ───────────────────────────────────────────────────────────
-    clang
-    cargo
-    rust-analyzer
     nix-index
+    gh # GitHub CLI
+    shellcheck
+    shfmt
+    strace
+    ltrace
 
     # ── Search & Files ────────────────────────────────────────────────────────
     fzf
@@ -21,6 +25,12 @@
     unrar
     p7zip
     stow
+    moreutils
+    rsync
+
+    # ── Text & Data ───────────────────────────────────────────────────────────
+    jq # JSON processor
+    yq # YAML/TOML processor
 
     # ── Documents & Previews ──────────────────────────────────────────────────
     poppler-utils
@@ -28,6 +38,12 @@
     ueberzug
     libcaca
     exiftool
+
+    # ── Terminal Multiplexer ──────────────────────────────────────────────────
+    tmux
+
+    # ── Secrets ───────────────────────────────────────────────────────────────
+    gnupg
 
     # ── Etc ───────────────────────────────────────────────────────────────────
     xclip
