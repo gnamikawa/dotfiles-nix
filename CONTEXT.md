@@ -98,6 +98,47 @@ rationale for Nix management admits only the slice that needs it, never
 the whole config: ten host-varying lines earn generation; the static
 body around them stays an asset.
 
+### Keyboard-first
+The system is operated entirely from the keyboard; the mouse is a last
+resort and, where possible, never required. Every interactive surface
+must be fully reachable and operable without a pointer — a flow that
+demands the mouse is a defect. Inherently pointer-driven work (drawing
+on the Cintiq) is the sole exemption.
+
+### Action hub
+The single-keybind, keyboard-driven menu hosting infrequent quick
+actions (status checks, device switching, summoning parked windows,
+power actions). It exists to cap keybind pollution: a new quick action
+lands in the hub by default and earns a dedicated keybind only through
+high frequency of use.
+
+### Etc space
+The hidden holding area for windows that deserve no screen real estate —
+the window-level sibling of Etc packages. Contents are summonable over
+the current view on demand and banished back out of sight; the space
+occupies no output. A grab-bag by design, tolerated deliberately.
+
+### Satellite window
+A small window that belongs near the user's attention but never in the
+tiling layout (video pop-outs, live-chat pop-outs). Satellites come in
+two tiers: an **attention satellite** occupies a tiny dedicated corner
+of the primary output, always visible, glanced at often; an **ambient
+satellite** occupies the media output wholesale, watched passively.
+When the media output is absent, an ambient satellite parks out of
+sight and is summonable on demand rather than vanishing. A satellite
+reappears at its last-used location whenever that location is visible.
+
+### Companion sliver
+A narrow window docked beside an ambient satellite on the media output
+(e.g., a live-chat pop-out beside the video it belongs to). The media
+output is a large-plus-sliver composition, not a single window.
+
+### Media output
+The output a host designates for ambient satellites — passive media
+real estate beside the primary output. On GEN-DPC it is the TV
+(the I-O Data display); GEN-LPC designates none. May be absent; its
+absence changes ambient satellites' behavior, never their existence.
+
 ### Geist
 The design system (Vercel's Geist) that governs all OS theming. It is
 the canonical standard every themed surface — window chrome, bars,
