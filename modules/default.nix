@@ -13,8 +13,8 @@
     ./fcitx5.nix
     ./mako.nix
     ./sway/sway-common.nix
-    ./sway/waybar
     ./sway/theme
+    ./waybar.nix
     # ./flatpak.nix
     ./packages/nvidia.nix
     ./packages/user-applications.nix

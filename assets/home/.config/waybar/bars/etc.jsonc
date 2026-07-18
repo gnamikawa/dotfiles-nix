@@ -1,0 +1,12 @@
+// Etc bar body (raw asset) — workspaces on secondary outputs. Only hosts
+// with secondary outputs include it in their generated entry config.
+{
+    "layer": "top",
+    "position": "top",
+    "spacing": "0",
+
+    "modules-left": [
+        "hyprland/workspaces",
+        "custom/right_div#1"
+    ]
+}
