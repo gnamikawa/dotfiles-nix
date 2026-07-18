@@ -32,7 +32,7 @@ fi
 
 if nixos-version 1>/dev/null 2>/dev/null; then
 	nixosRepo="$HOME/repositories/system-nix/"
-	alias rebuildos='nix flake update --flake $nixosRepo && sudo nixos-rebuild switch --flake $nixosRepo'
+  alias rebuildos='nix flake update --flake $nixosRepo dotfiles-nix && sudo nixos-rebuild switch --flake $nixosRepo'
 fi
 
 function mkrepo {
