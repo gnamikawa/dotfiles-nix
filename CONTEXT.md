@@ -85,9 +85,18 @@ fails at evaluation on purpose. The term is shared with system-nix.
 
 ### Asset
 A raw (non-Nix) config file under `assets/`, symlinked into the home
-directory out-of-store so the application can read — and write — it live,
-without a rebuild. Assets are the escape hatch for programs that rewrite
-their own config.
+directory out-of-store so it can be read — and edited — live, without a
+rebuild. Assets are the **default** home for all configuration. A config
+is Nix-managed only where it needs a power raw files lack: injected
+values (constants), store-path references, or host/profile branching —
+and then only as a computed slice, never wholesale.
+
+### Computed slice
+The minimal Nix-generated portion of an otherwise raw configuration,
+joined to its asset via the application's own include mechanism. A
+rationale for Nix management admits only the slice that needs it, never
+the whole config: ten host-varying lines earn generation; the static
+body around them stays an asset.
 
 ### Constants
 The palette/theme attrset under `constants/`, injected into every module via
