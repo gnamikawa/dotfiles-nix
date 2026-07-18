@@ -11,8 +11,9 @@ This repository maintains structure parity with system-nix — see
 ### Module
 One concern, one file, directly under `modules/`. A module is shared by every
 host; anything host-specific does not belong in one. `modules/default.nix` is
-the aggregator that imports all of them. A module may be a directory instead
-of a file only when it carries its own asset tree (currently only `sway/`).
+the aggregator that imports all of them. A module may become a directory only
+when one file no longer holds its responsibilities cleanly (see
+`docs/maintenance.md`); none currently does.
 
 ### Package bundle
 An install-only module under `modules/packages/` — it adds packages and

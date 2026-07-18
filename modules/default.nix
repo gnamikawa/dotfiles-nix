@@ -12,7 +12,6 @@
     ./hyprlock.nix
     ./fcitx5.nix
     ./mako.nix
-    ./sway/sway-common.nix
     ./theme.nix
     ./waybar.nix
     # ./flatpak.nix
