@@ -98,6 +98,14 @@ rationale for Nix management admits only the slice that needs it, never
 the whole config: ten host-varying lines earn generation; the static
 body around them stays an asset.
 
+### Geist
+The design system (Vercel's Geist) that governs all OS theming. It is
+the canonical standard every themed surface — window chrome, bars,
+GTK/Qt applications, terminals, notifications, lock screens, input
+methods — is measured against. Adherence is expected by default: a
+surface that diverges from Geist is a defect, not a stylistic choice.
+The palette in Constants encodes Geist's color scales.
+
 ### Constants
 The palette/theme attrset under `constants/`, injected into every module via
 `extraSpecialArgs`. It is data, not a module.
