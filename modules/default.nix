@@ -8,6 +8,7 @@
     ./firefox.nix
     ./keepassxc.nix
     ./kitty.nix
+    ./hyprland.nix
     ./hyprlock.nix
     ./fcitx5.nix
     ./mako.nix
