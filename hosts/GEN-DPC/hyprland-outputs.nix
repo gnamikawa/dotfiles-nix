@@ -25,21 +25,21 @@ in
   xdg.configFile."generated/hypr/monitors.conf".text = ''
     monitorv2 {
         output = desc:${ioDataDesc}
-        mode = 2560x1440@59.951
-        position = -2560x0
+        mode = 2560x1440@59.95
+        position = -2560x-360
         scale = 1
     }
 
     monitorv2 {
         output = desc:${cintiqDesc}
         mode = 3840x2160@120
-        position = 0x1080
+        position = -1920x1080
         scale = 1
     }
 
     monitorv2 {
         output = desc:${viewteckDesc}
-        mode = 1920x1080@144.001
+        mode = 1920x1080@144.00
         position = 0x0
         scale = 1
     }
