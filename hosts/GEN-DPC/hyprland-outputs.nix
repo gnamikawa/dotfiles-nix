@@ -34,8 +34,10 @@ in
         scale = 1
     }
 
-    workspace = 8, monitor:desc:${cintiqDesc}
-    workspace = 9, monitor:desc:${ioDataDesc}
+    # default:true is required for the binding to hold at startup — without
+    # it Hyprland hands each monitor the lowest unused workspace instead.
+    workspace = 8, monitor:desc:${cintiqDesc}, default:true
+    workspace = 9, monitor:desc:${ioDataDesc}, default:true
 
     # Pen and touch both land on the Cintiq. Device names to be confirmed
     # against `hyprctl devices` during cutover verification.
