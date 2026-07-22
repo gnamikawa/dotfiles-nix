@@ -44,10 +44,11 @@ in
         scale = 1
     }
 
-    # default:true is required for the binding to hold at startup — without
-    # it Hyprland hands each monitor the lowest unused workspace instead.
-    workspace = 8, monitor:desc:${cintiqDesc}, default:true
-    workspace = 9, monitor:desc:${ioDataDesc}, default:true
+    # persistent:true instantiates the workspace at startup so the monitor
+    # binding actually holds; default:true alone never creates it, so each
+    # monitor would otherwise grab the lowest unused workspace.
+    workspace = 8, monitor:desc:${cintiqDesc}, default:true, persistent:true
+    workspace = 9, monitor:desc:${ioDataDesc}, default:true, persistent:true
 
     # Pen and touch both land on the Cintiq. Cutover-verified against
     # hyprctl devices (wacom-cintiq-pro-22-pen / -finger): the tablet
