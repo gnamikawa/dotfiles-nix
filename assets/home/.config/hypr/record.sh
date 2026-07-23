@@ -29,6 +29,15 @@ mon="$(slurp -o -f '%o')" || exit 0
 mkdir -p "$HOME/Videos"
 out="$HOME/Videos/recording-$(date +%Y-%m-%d-%H%M%S).mp4"
 
+# Capture desktop audio from EVERY output device's monitor, merged into one
+# track (gpu-screen-recorder joins sources with '|'), so audio is recorded no
+# matter which sink it is playing on -- falls back to default_output if none
+# enumerate. A Bluetooth sink's monitor may still be silent, but any wired/HDMI
+# sink carrying the audio is captured.
+audio="$(gpu-screen-recorder --list-audio-devices | awk -F'|' '$1 ~ /\.monitor$/ {print $1}' | paste -sd '|' -)"
+
 notify-send -t 1500 "Recording" "Started"
-gpu-screen-recorder -w "$mon" -f 60 -a default_output -q very_high -k h264 -o "$out"
+# -ac aac: AAC is the universally-playable mp4 audio codec (gpu-screen-recorder
+# would otherwise default to Opus, which many players won't decode inside mp4).
+gpu-screen-recorder -w "$mon" -f 60 -a "${audio:-default_output}" -ac aac -q very_high -k h264 -o "$out"
 [ -f "$out" ] && notify-send -t 2500 "Recording" "Saved → $out"
