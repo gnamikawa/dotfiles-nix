@@ -11,3 +11,5 @@ git:
 quitOnTopLevelReturn: true
 os:
   editPreset: "nvim"
+services:
+  "github.com": "github:github.com"
