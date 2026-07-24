@@ -1,0 +1,309 @@
+// Module definitions (raw asset) — included by the generated entry config
+// alongside each bar body (waybar forbids nested includes, so bodies cannot
+// include this file themselves). Unused definitions are harmless; bars pick
+// what they list in modules-left/right.
+//
+// Not ported from the retired Nix tree: battery (dead code, #10), mpris
+// (imported by no bar), sway/windowcount (sway-specific, displayed by no bar).
+{
+    "hyprland/workspaces": {
+        "format": "{icon}",
+        "format-icons": {
+            "1": "1",
+            "2": "2",
+            "3": "3",
+            "4": "4",
+            "5": "5",
+            "6": "6",
+            "7": "7",
+            "8": "8",
+            "9": "9"
+        },
+        "sort-by-number": true,
+        "on-scroll-up": "hyprctl dispatch workspace e-1",
+        "on-scroll-down": "hyprctl dispatch workspace e+1",
+        "on-click": "activate",
+        "cursor": true
+    },
+
+    "clock#time": {
+        "interval": 1,
+        "format": "{:%I:%M:%S %p}",
+        "min-length": 11,
+        "max-length": 11,
+        "tooltip-format": "Military Time: {:%H:%M:%S %p}"
+    },
+
+    "clock#date": {
+        "timezone": "Asia/Tokyo",
+        "format": "󰸗 {:%m/%d}",
+        "min-length": 8,
+        "max-length": 8,
+        "tooltip-format": "{calendar}",
+        "calendar": {
+            "mode": "month",
+            "mode-mon-col": 6,
+            "format": {
+                "months": "<span alpha='100%'><b>{}</b></span>",
+                "days": "<span alpha='90%'>{}</span>",
+                "weekdays": "<span alpha='80%'><i>{}</i></span>",
+                "today": "<span alpha='100%'><b><u>{}</u></b></span>"
+            }
+        },
+        "actions": {
+            "on-click": "mode"
+        }
+    },
+
+    "cpu": {
+        "interval": 10,
+        "format": "󰍛 {usage}%",
+        "format-warning": "󰀨 {usage}%",
+        "format-critical": "󰀨 {usage}%",
+        "states": {
+            "warning": 75,
+            "critical": 90
+        },
+        "min-length": 7,
+        "max-length": 7,
+        "tooltip": false
+    },
+
+    "memory": {
+        "interval": 10,
+        "format": "󰘚 {percentage}%",
+        "format-warning": "󰀧 {percentage}%",
+        "format-critical": "󰀧 {percentage}%",
+        "states": {
+            "warning": 75,
+            "critical": 90
+        },
+        "min-length": 7,
+        "max-length": 7,
+        "tooltip-format": "Memory Used: {used:0.1f} GB / {total:0.1f} GB"
+    },
+
+    "idle_inhibitor": {
+        "format": "{icon}",
+        "format-icons": {
+            "activated": "󰈈",
+            "deactivated": "󰈉"
+        },
+        "min-length": 3,
+        "max-length": 3,
+        "tooltip-format-activated": "Keep Screen On: <span text_transform='capitalize'>{status}</span>",
+        "tooltip-format-deactivated": "Keep Screen On: <span text_transform='capitalize'>{status}</span>",
+        "start-activated": false
+    },
+
+    "tray": {
+        "icon-size": 16,
+        "spacing": 24,
+        "cursor": true
+    },
+
+    "network": {
+        "interval": 10,
+        "format": "󰤨",
+        "format-ethernet": "󰈀",
+        "format-wifi": "{icon}",
+        "format-disconnected": "󰤯",
+        "format-disabled": "󰤮",
+        "format-icons": [
+            "󰤟",
+            "󰤢",
+            "󰤥",
+            "󰤨"
+        ],
+        "min-length": 2,
+        "max-length": 2,
+        "on-click": "sh ~/.config/waybar/scripts/networktoggle.sh",
+        "on-click-right": "nm-connection-editor",
+        "tooltip-format": "Gateway: {gwaddr}",
+        "tooltip-format-ethernet": "Interface: {ifname}",
+        "tooltip-format-wifi": "Network: {essid}\nIP Addr: {ipaddr}/{cidr}\nStrength: {signalStrength}%\nFrequency: {frequency} GHz",
+        "tooltip-format-disconnected": "Wi-Fi Disconnected",
+        "tooltip-format-disabled": "Wi-Fi Disabled"
+    },
+
+    "bluetooth": {
+        "format": "󰂯",
+        "format-disabled": "󰂲",
+        "format-off": "󰂲",
+        "format-on": "󰂰",
+        "format-connected": "󰂱",
+        "min-length": 2,
+        "max-length": 2,
+        "on-click": "sh ~/.config/waybar/scripts/bluetoothtoggle.sh",
+        "on-click-right": "blueman-manager",
+        "tooltip-format": "Device Addr: {device_address}",
+        "tooltip-format-disabled": "Bluetooth Disabled",
+        "tooltip-format-off": "Bluetooth Off",
+        "tooltip-format-on": "Bluetooth Disconnected",
+        "tooltip-format-connected": "Device: {device_alias}",
+        "tooltip-format-enumerate-connected": "Device: {device_alias}",
+        "tooltip-format-connected-battery": "Device: {device_alias}\nBattery: {device_battery_percentage}%",
+        "tooltip-format-enumerate-connected-battery": "Device: {device_alias}\nBattery: {device_battery_percentage}%"
+    },
+
+    "backlight": {
+        "format": "{icon} {percent}%",
+        "format-icons": [
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+        ],
+        "min-length": 7,
+        "max-length": 7,
+        "on-scroll-up": "~/.config/waybar/scripts/backlight.sh up",
+        "on-scroll-down": "~/.config/waybar/scripts/backlight.sh down",
+        "tooltip": false
+    },
+
+    "group/pulseaudio": {
+        "orientation": "horizontal",
+        "modules": [
+            "pulseaudio#output",
+            "pulseaudio#input"
+        ],
+        "drawer": {
+            "transition-left-to-right": false
+        }
+    },
+
+    "pulseaudio#output": {
+        "format": "{icon} {volume}%",
+        "format-muted": "{icon} {volume}%",
+        "format-icons": {
+            "default": [
+                "󰕿",
+                "󰖀",
+                "󰕾"
+            ],
+            "default-muted": "󰝟",
+            "headphone": "󰋋",
+            "headphone-muted": "󰟎",
+            "headset": "󰋎",
+            "headset-muted": "󰋐"
+        },
+        "min-length": 7,
+        "max-length": 7,
+        "on-click": "~/.config/waybar/scripts/volume.sh output mute",
+        "on-click-right": "pavucontrol --tab=1",
+        "on-scroll-up": "~/.config/waybar/scripts/volume.sh output raise",
+        "on-scroll-down": "~/.config/waybar/scripts/volume.sh output lower",
+        "tooltip-format": "Output Device: {desc}"
+    },
+
+    "pulseaudio#input": {
+        "format": "{format_source}",
+        "format-source": "󰍬 {volume}%",
+        "format-source-muted": "󰍭 {volume}%",
+        "min-length": 7,
+        "max-length": 7,
+        "on-click": "~/.config/waybar/scripts/volume.sh input mute",
+        "on-click-right": "pavucontrol --tab=2",
+        "on-scroll-up": "~/.config/waybar/scripts/volume.sh input raise",
+        "on-scroll-down": "~/.config/waybar/scripts/volume.sh input lower",
+        "tooltip-format": "Input Device: {desc}"
+    },
+
+    "group/wireplumber": {
+        "orientation": "horizontal",
+        "modules": [
+            "wireplumber#output",
+            "wireplumber#input"
+        ],
+        "drawer": {
+            "transition-left-to-right": false
+        }
+    },
+
+    "wireplumber#output": {
+        "format": "{icon} {volume}%",
+        "format-muted": "󰝟 {volume}%",
+        "format-icons": [
+            "󰕿",
+            "󰖀",
+            "󰕾"
+        ],
+        "min-length": 7,
+        "max-length": 7,
+        "on-click": "~/.config/waybar/scripts/volume.sh output mute",
+        "on-scroll-up": "~/.config/waybar/scripts/volume.sh output raise",
+        "on-scroll-down": "~/.config/waybar/scripts/volume.sh output lower",
+        "tooltip-format": "Device: {node_name}",
+        "node-type": "Audio/Sink"
+    },
+
+    "wireplumber#input": {
+        "format": "󰍬 {volume}%",
+        "format-muted": "󰍭 {volume}%",
+        "min-length": 7,
+        "max-length": 7,
+        "on-click": "~/.config/waybar/scripts/volume.sh input mute",
+        "on-scroll-up": "~/.config/waybar/scripts/volume.sh input raise",
+        "on-scroll-down": "~/.config/waybar/scripts/volume.sh input lower",
+        "tooltip-format": "Device: {node_name}",
+        "node-type": "Audio/Source"
+    },
+
+    "group/user": {
+        "orientation": "horizontal",
+        "modules": [
+            "custom/trigger",
+            "custom/user"
+        ],
+        "drawer": {}
+    },
+
+    "custom/trigger": {
+        "format": "󰍜",
+        "min-length": 4,
+        "max-length": 4,
+        "tooltip": false
+    },
+
+    "custom/user": {
+        "exec": "id -un",
+        "format": "{}",
+        "tooltip": false
+    },
+
+    "wlr/taskbar": {
+        "on-click": "activate",
+        "ignore-list": [
+            "terminator"
+        ],
+        "cursor": true
+    },
+
+    "custom/power_menu": {
+        "format": "󰤄",
+        "on-click": "kitty -e ~/.config/waybar/scripts/power-menu.sh",
+        "tooltip-format": "Power Menu"
+    },
+
+    "custom/left_div#1": { "format": "", "tooltip": false },
+    "custom/left_div#2": { "format": "", "tooltip": false },
+    "custom/left_div#3": { "format": "", "tooltip": false },
+    "custom/left_div#4": { "format": "", "tooltip": false },
+    "custom/left_div#5": { "format": "", "tooltip": false },
+    "custom/left_div#6": { "format": "", "tooltip": false },
+    "custom/left_div#7": { "format": "", "tooltip": false },
+    "custom/left_div#8": { "format": "", "tooltip": false },
+    "custom/left_inv#1": { "format": "", "tooltip": false },
+    "custom/left_inv#2": { "format": "", "tooltip": false },
+    "custom/right_div#1": { "format": "", "tooltip": false },
+    "custom/right_div#2": { "format": "", "tooltip": false },
+    "custom/right_div#3": { "format": "", "tooltip": false },
+    "custom/right_div#4": { "format": "", "tooltip": false },
+    "custom/right_div#5": { "format": "", "tooltip": false },
+    "custom/right_inv#1": { "format": "", "tooltip": false }
+}

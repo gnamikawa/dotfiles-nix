@@ -1,0 +1,26 @@
+// Top bar body (raw asset). Output pinning lives in the generated entry
+// config (~/.config/generated/waybar/config.jsonc), which includes this
+// file together with modules.jsonc.
+{
+    "layer": "top",
+    "height": 0,
+    "width": 0,
+    "margin": "0",
+    "spacing": "0",
+    "mode": "dock",
+    "reload_style_on_change": true,
+
+    "modules-left": [
+        "hyprland/workspaces",
+        "custom/right_div#1"
+    ],
+
+    "modules-right": [
+        "custom/left_div#1",
+        "group/pulseaudio",
+        "network",
+        "bluetooth",
+        "backlight",
+        "clock#time"
+    ]
+}

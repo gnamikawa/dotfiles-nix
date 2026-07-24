@@ -1,0 +1,15 @@
+// Bottom bar body (raw asset).
+{
+    "layer": "top",
+    "position": "bottom",
+    "spacing": "0",
+
+    "modules-right": [
+        "custom/left_div#1",
+        "tray",
+        "cpu",
+        "memory",
+        "idle_inhibitor",
+        "custom/power_menu"
+    ]
+}
