@@ -12,10 +12,10 @@ ZBAR_PID=$!
 
 notify-send "Scanning for QR code..."
 for ((i = 0; i < 10; i++)); do
-	for ((j = 0; j <= 250; j += 10)); do
-		v4l2-ctl --set-ctrl=focus_absolute=$j
-		sleep .01
-	done
+  for ((j = 0; j <= 250; j += 10)); do
+    v4l2-ctl --set-ctrl=focus_absolute=$j
+    sleep .01
+  done
 done
 
 # Read QR code result
@@ -23,11 +23,11 @@ URL=$(cat "$TMPFILE")
 rm "$TMPFILE"
 
 if [ -n "$URL" ]; then
-	notify-send "Opening URL in browser..." "$URL"
-	xdg-open "$URL"
+  notify-send "Opening URL in browser..." "$URL"
+  xdg-open "$URL"
 else
-	notify-send "Failed to scan QR code."
-	kill $ZBAR_PID
+  notify-send "Failed to scan QR code."
+  kill $ZBAR_PID
 fi
 
 # Restore autofocus
