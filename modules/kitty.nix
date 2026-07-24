@@ -1,7 +1,8 @@
-{ pkgs, constants, ... }:
+{ pkgs, config, constants, ... }:
 {
   programs.kitty = {
     enable = true;
+    package = config.lib.nixGL.wrap pkgs.kitty;
     enableGitIntegration = true;
     shellIntegration.enableBashIntegration = true;
     settings = {

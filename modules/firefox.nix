@@ -1,7 +1,8 @@
-{ pkgs, ... }:
+{ pkgs, config, ... }:
 {
   programs.firefox = {
     enable = true;
+    package = config.lib.nixGL.wrap pkgs.firefox;
     nativeMessagingHosts = [ pkgs.keepassxc ];
     profiles.minimal = {
       id = 0;
