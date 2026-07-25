@@ -16,7 +16,8 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     claude-desktop-nix = {
-      url = "path:/home/genzo/repositories/claude-desktop-nix";
+      url = "github:gnamikawa/claude-desktop-nix/master";
+      # url = "path:/home/genzo/repositories/claude-desktop-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };

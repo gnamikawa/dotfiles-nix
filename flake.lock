@@ -8,13 +8,17 @@
       },
       "locked": {
         "lastModified": 1783684603,
-        "narHash": "sha256-C5c9zTeinvHwbNo2uAtrJfePg/JRruPwyKaatJvRYvw=",
-        "path": "/home/genzo/repositories/claude-desktop-nix",
-        "type": "path"
+        "narHash": "sha256-LrIFOLrDkco/A0b6wEOHb1Jp9BORpv7z5PFIolZxwoU=",
+        "owner": "gnamikawa",
+        "repo": "claude-desktop-nix",
+        "rev": "19adb64aba10d0b21ec90b62b24ee0bca3c2c85b",
+        "type": "github"
       },
       "original": {
-        "path": "/home/genzo/repositories/claude-desktop-nix",
-        "type": "path"
+        "owner": "gnamikawa",
+        "ref": "master",
+        "repo": "claude-desktop-nix",
+        "type": "github"
       }
     },
     "flake-parts": {
