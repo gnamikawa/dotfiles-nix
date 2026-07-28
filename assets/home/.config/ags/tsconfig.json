@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "compilerOptions": {
+    "strict": true,
+    "module": "ES2022",
+    "target": "ES2020",
+    "lib": ["ES2023"],
+    "moduleResolution": "Bundler",
+    "jsx": "react-jsx",
+    "jsxImportSource": "ags/gtk4",
+
+    // Editor-only. `ags run` never reads this file: it bundles with esbuild,
+    // which aliases these same two names to the framework's store path
+    // (cli/lib/esbuild.go). These point instead at ~/.local/share/ags, a
+    // fixed path whose target modules/ags.nix keeps current — so the strings
+    // below survive every AGS update, and no node_modules is needed.
+    "paths": {
+      "ags": ["/home/genzo/.local/share/ags/lib"],
+      "ags/*": ["/home/genzo/.local/share/ags/lib/*"],
+      "gnim": ["/home/genzo/.local/share/ags/node_modules/gnim/dist"],
+      "gnim/*": ["/home/genzo/.local/share/ags/node_modules/gnim/dist/*"]
+    }
+  }
+}

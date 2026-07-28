@@ -15,6 +15,12 @@
       url = "github:nix-community/nixGL";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    # AGS v3, the desktop shell (ADR-0008). Upstream rather than nixpkgs,
+    # which carries v2.3.0 only and lost its maintainer on 2026-07-21.
+    ags = {
+      url = "github:aylur/ags";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     claude-desktop-nix = {
       url = "path:/home/genzo/repositories/claude-desktop-nix";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -29,6 +35,7 @@
       home-manager,
       nixgl,
       claude-desktop-nix,
+      ags,
       ...
     }:
     let
@@ -43,6 +50,11 @@
 
       # Claude Desktop (official .deb, Cowork-enabled) from its own flake.
       claude-desktop = claude-desktop-nix.packages.${system}.default;
+
+      # agsFull rather than the bare `ags`: it sets extraPackages at
+      # construction (every Astal library plus libadwaita), so no `.override`
+      # is applied after nixGL wrapping — the silent-drop failure of #37.
+      agsFull = ags.packages.${system}.agsFull;
 
       # Shared settings for the standalone (non-NixOS) profiles.
       standaloneModule =
@@ -61,6 +73,7 @@
             inherit constants;
             inherit nur;
             inherit claude-desktop;
+            inherit agsFull;
           };
         };
     in
@@ -81,6 +94,7 @@
             inherit constants;
             inherit nur;
             inherit claude-desktop;
+            inherit agsFull;
           };
         };
 
