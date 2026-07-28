@@ -14,6 +14,7 @@
     ./mako.nix
     ./theme.nix
     ./waybar.nix
+    ./ags.nix
     # ./flatpak.nix
     ./packages/nvidia.nix
     ./packages/user-applications.nix
