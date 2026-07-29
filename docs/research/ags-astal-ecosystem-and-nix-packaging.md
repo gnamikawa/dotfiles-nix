@@ -6,6 +6,12 @@ primary sources only: the Aylur/ags, Aylur/astal and Aylur/gnim repositories,
 their official docs, nixpkgs source, the home-manager source tree, GTK
 documentation, and the npm registry.
 
+**Amended 2026-07-30** ([#41](https://github.com/gnamikawa/dotfiles-nix/issues/41)):
+§4's hm-module/nixGL claim was falsified by measurement in
+[#37](https://github.com/gnamikawa/dotfiles-nix/issues/37) and has been
+rewritten; the TL;DR and §3 shape summary follow it. Everything else stands
+as investigated.
+
 ## TL;DR
 
 - **Target AGS v3, not v2.** AGS v3 (v3.0.0, 2025-10-22; latest v3.1.2,
@@ -24,8 +30,10 @@ documentation, and the npm registry.
 - **nixGL**: the shell is a GJS + GTK4 app, GPU-rendered by default, so the
   final derivation must go through `config.lib.nixGL.wrap` like every other
   GUI package (ADR 0003). Wrap the *bundled output derivation*; the upstream
-  home-manager module's own systemd unit cannot take a wrapped package, so
-  prefer bundling + a self-managed unit (or override `ExecStart`).
+  home-manager module *accepts* a wrapped package but then silently drops
+  its own `extraPackages` and ldflag overrides (see §4, corrected per
+  [#37](https://github.com/gnamikawa/dotfiles-nix/issues/37)), so prefer
+  bundling + a self-managed unit, wrapping last.
 
 ## 1. AGS v2 vs v3 vs "Astal directly"
 
@@ -213,9 +221,10 @@ The interaction is unusually Nix-friendly:
 
 Two viable shapes for this repo: (a) the home-manager module +
 `configDir`, which runs from source via `ags run` (dev-loop friendly,
-but its systemd unit resists nixGL — see below), or (b) a bundled
-derivation per the template, installed and unit-managed like any other
-package (hermetic, wrappable, survives an AGS CLI absence at runtime).
+but on a standalone profile its overrides are silently lost under nixGL —
+see §4), or (b) a bundled derivation per the template, installed and
+unit-managed like any other package (hermetic, wrappable, survives an AGS
+CLI absence at runtime).
 
 ## 4. nixGL for the standalone profiles
 
@@ -244,14 +253,32 @@ Requirements for the AGS shell specifically:
   binary. Nothing AGS-specific: the v3 bundle is a Bash script that execs
   gjs, and nixGL wraps by setting GL environment variables around the
   entrypoint, so the two compose.
-- **The upstream hm module's systemd unit cannot be wrapped cleanly**
-  (analysis of `nix/hm-module.nix`, not an upstream statement): the module
-  builds `finalPackage` by calling `.override` on `programs.ags.package`,
-  so a nixGL-wrapped package cannot be supplied there (wrapping loses
-  `.override`), `finalPackage` is read-only, and the unit's `ExecStart`
-  uses it unwrapped. If shape (a) is chosen on a standalone profile,
-  leave `systemd.enable = false` and write our own unit whose `ExecStart`
-  targets a wrapped launcher.
+- **The upstream hm module silently discards its own overrides when given
+  a nixGL-wrapped package.** This note originally claimed the module
+  *rejects* such a package — that `finalPackage`'s `.override` call cannot
+  be satisfied because wrapping loses `.override`, that `finalPackage`
+  being read-only is an obstacle, and that `ExecStart` ends up unwrapped.
+  [#37](https://github.com/gnamikawa/dotfiles-nix/issues/37) built the
+  thing and **falsified every clause** of that: home-manager's wrapper
+  deliberately re-adds `.override`
+  (`modules/targets/generic-linux/nixgl.nix:300-307`), the module evaluates
+  and builds clean, and `finalPackage` comes out still wrapped with
+  `ExecStart` pointing at the wrapped path.
+  The real constraint is worse because it is silent: nixGL's
+  `buildCommand` interpolates the store path captured **at wrap time**
+  (`cp -rs "${pkg.out}"`), so the module's later `.override` and
+  `overrideAttrs` change the derivation hash while changing nothing about
+  what is copied or exec'd. Two module behaviours are lost with no error —
+  `extraPackages`/`astal.*Package` never reach the gjs runtime (so every
+  service library this migration needs would be missing), and the
+  `-X main.agsJsPackage=$HOME/.local/share/ags` ldflag is inert. It
+  surfaces only at runtime, as a TSX `import` of an Astal service failing.
+  Scope: **standalone profiles only** — where `nixGL.packages` is unset
+  (NixOS: GEN-DPC, GEN-LPC) `wrap` is the identity, so `programs.ags` with
+  `systemd.enable = true` is usable there. Either way the safe shape is to
+  **wrap last, after every `.override`**, which shape (b) does by
+  construction. Measured evidence: [harness, commands and build
+  log](https://gist.github.com/gnamikawa/2a36043261f55592a439f58cbcbe7047).
 - No extra `LD_PRELOAD` handling is needed for gtk4-layer-shell in v3
   (v3.0.0 release notes) — one less thing to thread through the wrapper.
 
@@ -271,8 +298,12 @@ unavailable for v3 purposes until someone lands a v3 bump there.
 - Which GPU renderer GTK4 selects by default per version (ngl vs vulkan);
   the GTK running-docs confirm only that cairo is the fallback and the
   others are GL/Vulkan renderers.
-- The hm-module/systemd/nixGL incompatibility above is my reading of the
-  module source, not a documented upstream limitation.
+- ~~The hm-module/systemd/nixGL incompatibility above is my reading of the
+  module source, not a documented upstream limitation.~~ **Since verified
+  and falsified as stated** by
+  [#37](https://github.com/gnamikawa/dotfiles-nix/issues/37) — the module
+  accepts a wrapped package and keeps the wrap; the true defect is
+  override-loss-through-wrapping, and §4 now records it.
 - Long-term maintenance intent of the Aylur ecosystem is inferred from
   release/commit cadence and the docs' first-person history, not from any
   stated roadmap.
