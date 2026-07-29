@@ -6,6 +6,14 @@ if code or conversation disagrees with this file, one of them is wrong.
 This repository maintains structure parity with system-nix — see
 `docs/adr/0002-structure-parity-with-system-nix.md`.
 
+## Working style
+
+Answers are short and in plain language. A few sentences beats a structured
+write-up; length is earned only when the subject genuinely needs it, never
+spent on restating or on options that won't be pursued. This governs
+conversation, not the repository's prose — ADRs, research notes and the
+definitions below are reference material and stay as long as they must be.
+
 ## Terms
 
 ### Module
