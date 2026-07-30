@@ -98,13 +98,16 @@
 
       purple = {
         "100" = "#221527";
-        # Was "#432155", which is bit-exactly purple 300 and so wrong under
-        # every reading. Geist publishes two generations of colour tokens and
-        # they disagree here: the current one resolves through integer-HSL
-        # indirection to hsl(281, 38%, 16%) = #2E1938, while the older literal
-        # hexes and their oklch twin both say #341142. We take the current
-        # generation — it wins the sRGB cascade, and every other value in this
-        # ramp already matches it (#53).
+        # Was "#432155", which converts to hsl(279, 44%, 23%) — Geist's purple
+        # *300*, so this step held the next one's colour. That is not the hex
+        # on the line below: the two differ by one unit in two channels, which
+        # is finer than the integer HSL Geist publishes, so they are the same
+        # colour and the duplication went unseen. Geist's two generations of
+        # colour tokens disagree on the real 200: the current one resolves
+        # through integer-HSL indirection to hsl(281, 38%, 16%) = #2E1938,
+        # while the older literal hexes and their oklch twin both say #341142.
+        # We take the current generation — it wins the sRGB cascade, and every
+        # other value in this ramp already matches it (#53).
         "200" = "#2E1938";
         "300" = "#422154";
         "400" = "#4E2667";
