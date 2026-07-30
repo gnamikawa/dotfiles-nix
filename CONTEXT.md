@@ -171,5 +171,8 @@ surface that diverges from Geist is a defect, not a stylistic choice.
 The palette in Constants encodes Geist's color scales.
 
 ### Constants
-The palette/theme attrset under `constants/`, injected into every module via
-`extraSpecialArgs`. It is data, not a module.
+The design-token attrsets under `constants/`, injected into every module via
+`extraSpecialArgs`. It is data, not a module. Where a family's values differ
+between themes, the theme name sits near the front of the path
+(`constants.theme.dark.border.default.gray`) and every call site names the
+theme it wants — there is no default theme to fall back on.
