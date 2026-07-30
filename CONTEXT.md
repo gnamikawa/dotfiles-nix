@@ -14,6 +14,15 @@ spent on restating or on options that won't be pursued. This governs
 conversation, not the repository's prose — ADRs, research notes and the
 definitions below are reference material and stay as long as they must be.
 
+A sentence must stand on its own. Never let an issue number, a pull request
+number, a section marker or a file path do the work of an explanation: say the
+thing, then cite. "Issue #46 settled this" tells the reader nothing they can
+act on; "the audit found the role names are Geist's own" does, and the number
+can follow it in parentheses. Assume the reader has not read what is being
+cited and will not go and read it now. This applies to references backwards in
+the same conversation too — a decision made an hour ago still needs restating
+in a clause, not pointed at.
+
 ## Terms
 
 ### Module
