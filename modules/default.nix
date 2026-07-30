@@ -1,25 +1,14 @@
-# Graphical profile — the full home configuration: the terminal layer plus
-# the desktop session, GUI applications, and hardware bundles.
+# Desktop profile — the apps layer plus the desktop session itself.
 
 { ... }:
 {
   imports = [
-    ./terminal.nix
-    ./firefox.nix
-    ./keepassxc.nix
-    ./kitty.nix
+    ./apps.nix
     ./hyprland.nix
     ./hyprlock.nix
-    ./fcitx5.nix
     ./mako.nix
-    ./theme.nix
     ./waybar.nix
     ./ags.nix
-    # ./flatpak.nix
-    ./packages/nvidia.nix
-    ./packages/user-applications.nix
-    ./obsidian.nix
-    ./packages/etc.nix
   ];
 
   xdg = {
