@@ -64,6 +64,15 @@
           targets.genericLinux.enable = true;
         };
 
+      # Wrap GUI packages so they can use the host's GL drivers. Both
+      # graphical profiles need this; genzo-terminal ships no GUI package.
+      nixGLModule =
+        { ... }:
+        {
+          nixGL.packages = nixgl.packages;
+          nixGL.defaultWrapper = "mesa";
+        };
+
       standalone =
         modules:
         home-manager.lib.homeManagerConfiguration {
@@ -98,18 +107,24 @@
           };
         };
 
-      # Standalone profiles for non-NixOS distributions (e.g. Debian).
+      # Standalone profiles for non-NixOS distributions (e.g. Debian), named
+      # for what each one owns (issue #43).
       homeConfigurations = {
-        "genzo-graphical" = standalone [
+        # Applications only, for a distribution that owns its own desktop.
+        # Renamed from genzo-graphical, which imported ./modules wholesale and
+        # so shipped a competing session onto such a machine.
+        "genzo-apps" = standalone [
+          ./modules/apps.nix
+          nixGLModule
+        ];
+
+        # The full desktop, belonging to no host. Seeded with AGS rather than
+        # waybar: nothing depends on this profile yet, so there is no reason to
+        # start it on a surface being deleted.
+        "genzo-desktop" = standalone [
           ./modules
-          (
-            { ... }:
-            {
-              # Wrap GUI packages so they can use the host's GL drivers.
-              nixGL.packages = nixgl.packages;
-              nixGL.defaultWrapper = "mesa";
-            }
-          )
+          ./modules/ags.nix
+          nixGLModule
         ];
 
         "genzo-terminal" = standalone [ ./modules/terminal.nix ];
@@ -147,11 +162,12 @@
           };
         };
 
-      # Keep the standalone profiles from rotting: `nix flake check` builds
-      # both activation packages. NixOS-module mode is covered by system-nix's
+      # Keep the standalone profiles from rotting: `nix flake check` builds all
+      # three activation packages. NixOS-module mode is covered by system-nix's
       # VM tests instead (docs/adr/0002).
       checks.${system} = {
-        home-graphical = self.homeConfigurations."genzo-graphical".activationPackage;
+        home-apps = self.homeConfigurations."genzo-apps".activationPackage;
+        home-desktop = self.homeConfigurations."genzo-desktop".activationPackage;
         home-terminal = self.homeConfigurations."genzo-terminal".activationPackage;
       };
     };

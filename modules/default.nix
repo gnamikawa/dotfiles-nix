@@ -1,25 +1,19 @@
-# Graphical profile — the full home configuration: the terminal layer plus
-# the desktop session, GUI applications, and hardware bundles.
+# Desktop profile — the apps layer plus the desktop session itself.
+#
+# Shell surfaces (bar, notifications, and eventually the launcher) are *not*
+# here: they are staggered per host across the AGS migration, so each host
+# imports the surfaces that host runs (issue #43). A surface's module is
+# deleted once the last host drops it.
+#
+# Hyprland is deliberately not staggered, and so stays here rather than
+# becoming a host's choice.
 
 { ... }:
 {
   imports = [
-    ./terminal.nix
-    ./firefox.nix
-    ./keepassxc.nix
-    ./kitty.nix
+    ./apps.nix
     ./hyprland.nix
     ./hyprlock.nix
-    ./fcitx5.nix
-    ./mako.nix
-    ./theme.nix
-    ./waybar.nix
-    ./ags.nix
-    # ./flatpak.nix
-    ./packages/nvidia.nix
-    ./packages/user-applications.nix
-    ./obsidian.nix
-    ./packages/etc.nix
   ];
 
   xdg = {
