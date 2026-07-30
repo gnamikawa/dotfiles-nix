@@ -16,32 +16,32 @@
     };
 
     extraConfig = ''
-      background   ${constants.theme.terminal.normal.background}
-      foreground   ${constants.theme.terminal.normal.text}
-      cursor       ${constants.theme.terminal.normal.text}
+      background   ${constants.terminal.normal.background}
+      foreground   ${constants.terminal.normal.text}
+      cursor       ${constants.terminal.normal.text}
       cursor_text_color  ${constants.palette.debug}
-      selection_background ${constants.theme.terminal.selection.background}
-      selection_foreground ${constants.theme.terminal.selection.text}
+      selection_background ${constants.terminal.selection.background}
+      selection_foreground ${constants.terminal.selection.text}
 
       # Normal colors
-      color0  ${constants.theme.terminal.normal.background}
-      color1  ${constants.theme.terminal.normal.error}
-      color2  ${constants.theme.terminal.normal.success}
-      color3  ${constants.theme.terminal.normal.warning}
-      color4  ${constants.theme.terminal.normal.info}
-      color5  ${constants.theme.terminal.normal.special}
-      color6  ${constants.theme.terminal.normal.secondaryInfo}
-      color7  ${constants.theme.terminal.normal.text}
+      color0  ${constants.terminal.normal.background}
+      color1  ${constants.terminal.normal.error}
+      color2  ${constants.terminal.normal.success}
+      color3  ${constants.terminal.normal.warning}
+      color4  ${constants.terminal.normal.info}
+      color5  ${constants.terminal.normal.special}
+      color6  ${constants.terminal.normal.secondaryInfo}
+      color7  ${constants.terminal.normal.text}
 
       # Bright colors
-      color8  ${constants.theme.terminal.bright.background}
-      color9  ${constants.theme.terminal.bright.error}
-      color10  ${constants.theme.terminal.bright.success}
-      color11  ${constants.theme.terminal.bright.warning}
-      color12  ${constants.theme.terminal.bright.info}
-      color13  ${constants.theme.terminal.bright.special}
-      color14  ${constants.theme.terminal.bright.secondaryInfo}
-      color15  ${constants.theme.terminal.bright.text}
+      color8  ${constants.terminal.bright.background}
+      color9  ${constants.terminal.bright.error}
+      color10  ${constants.terminal.bright.success}
+      color11  ${constants.terminal.bright.warning}
+      color12  ${constants.terminal.bright.info}
+      color13  ${constants.terminal.bright.special}
+      color14  ${constants.terminal.bright.secondaryInfo}
+      color15  ${constants.terminal.bright.text}
     '';
   };
 }
