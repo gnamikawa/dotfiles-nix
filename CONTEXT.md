@@ -18,10 +18,11 @@ definitions below are reference material and stay as long as they must be.
 
 ### Module
 One concern, one file, directly under `modules/`. A module is shared by every
-host; anything host-specific does not belong in one. `modules/default.nix` is
-the aggregator that imports all of them. A module may become a directory only
-when one file no longer holds its responsibilities cleanly (see
-`docs/maintenance.md`); none currently does.
+host; anything host-specific does not belong in one. Modules are composed into
+profiles rather than all imported at once, so no single file imports them
+all — a host may import a module its profile leaves out. A module may become
+a directory only when one file no longer holds its responsibilities cleanly
+(see `docs/maintenance.md`); none currently does.
 
 ### Package bundle
 An install-only module under `modules/packages/` — it adds packages and
@@ -80,11 +81,15 @@ presence. Keeping one is a deliberate decision with this stated rationale.
 The term is shared with system-nix.
 
 ### Profile
-A composition of modules that standalone home-manager can activate. Two
-exist: **graphical** (the full configuration, GUI packages wrapped for
-foreign-distro GL) and **terminal** (the headless subset the graphical
-profile builds upon). Under NixOS the graphical profile plus a host
-directory is always used.
+A composition of modules that standalone home-manager can activate. Three
+exist, each layered on the one before: **terminal** (the headless subset),
+**apps** (terminal plus everything graphical that does not own the session,
+GUI packages wrapped for foreign-distro GL), and **desktop** (apps plus the
+session itself — compositor and lock screen). The boundary between apps and
+desktop is whether a thing owns the session, not whether it is graphical, so
+apps is the one safe to activate on a distribution that ships its own
+desktop. Under NixOS the desktop profile plus a host directory is always
+used; the host directory supplies the shell surfaces that host runs.
 
 ### Host
 A named machine this configuration serves. Currently `GEN-DPC` (desktop,
