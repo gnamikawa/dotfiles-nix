@@ -98,7 +98,14 @@
 
       purple = {
         "100" = "#221527";
-        "200" = "#432155";
+        # Was "#432155", which is bit-exactly purple 300 and so wrong under
+        # every reading. Geist publishes two generations of colour tokens and
+        # they disagree here: the current one resolves through integer-HSL
+        # indirection to hsl(281, 38%, 16%) = #2E1938, while the older literal
+        # hexes and their oklch twin both say #341142. We take the current
+        # generation — it wins the sRGB cascade, and every other value in this
+        # ramp already matches it (#53).
+        "200" = "#2E1938";
         "300" = "#422154";
         "400" = "#4E2667";
         "500" = "#5F2D84";
