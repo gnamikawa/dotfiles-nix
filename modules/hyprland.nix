@@ -19,8 +19,8 @@ in
   # Theme colors from constants — the palette variables the raw config
   # references (hyprland.conf: col.active_border = $borderActive, …).
   xdg.configFile."generated/hypr/theme.conf".text = ''
-    $borderActive = ${rgb constants.theme.border.active.gray}
-    $borderDefault = ${rgb constants.theme.border.default.gray}
+    $borderActive = ${rgb constants.theme.dark.border.active.gray}
+    $borderDefault = ${rgb constants.theme.dark.border.default.gray}
   '';
 
   # Host slices — hosts/<NAME>/hyprland-outputs.nix overrides both. The
