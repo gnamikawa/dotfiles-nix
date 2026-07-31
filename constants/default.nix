@@ -7,4 +7,5 @@
   type = import ./type.nix;
   radius = import ./radius.nix;
   shadow = import ./shadow.nix;
+  motion = import ./motion.nix;
 }
