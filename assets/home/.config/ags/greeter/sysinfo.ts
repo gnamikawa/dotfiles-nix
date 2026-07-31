@@ -19,9 +19,17 @@ export const kernel = read("/proc/sys/kernel/osrelease")
 export const nixosVersion = read("/run/current-system/nixos-version")
 
 export const generation = (() => {
-  const link = GLib.file_read_link("/nix/var/nix/profiles/system")
-  const m = link?.match(/system-(\d+)-link/)
-  return m ? m[1] : "?"
+  // try/catch and not `link?.`: GJS raises a GError as a JS exception rather
+  // than returning null, and this runs at module scope — an unreadable link
+  // took the whole module out and with it the screen, leaving greetd to
+  // respawn a greeter that died the same way every three seconds. A VM has no
+  // system profile at all, which is how that was found.
+  try {
+    const m = GLib.file_read_link("/nix/var/nix/profiles/system").match(/system-(\d+)-link/)
+    return m ? m[1] : "?"
+  } catch {
+    return "?"
+  }
 })()
 
 export function uptime(): string {
