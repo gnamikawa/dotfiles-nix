@@ -6,4 +6,5 @@
   space = import ./space.nix;
   type = import ./type.nix;
   radius = import ./radius.nix;
+  shadow = import ./shadow.nix;
 }
