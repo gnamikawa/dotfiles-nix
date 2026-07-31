@@ -46,6 +46,8 @@ let
 in
 {
   # Named one theme at a time rather than mapped over palette: palette's top
-  # level also holds `debug`, which is not a theme.
+  # level also holds `debug` and the theme-invariant black/white/contrast-fg,
+  # which are not themes.
   dark = roleVocabulary palette.dark;
+  light = roleVocabulary palette.light;
 }

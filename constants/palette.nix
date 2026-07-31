@@ -1,17 +1,38 @@
 # Uses vercel's geist design system as a base
 # https://vercel.com/geist/colors
 #
+# Transcribed from the token stylesheet, pinned by content hash so the diff can
+# be re-run against the same bytes:
+# https://vercel.com/vc-ap-b3331f/_next/static/immutable/chunks/02y9t7j2e779d.css
+#
 # The theme name sits near the front of the path — palette.dark.colors.gray."400"
 # — rather than at the leaf. theme.nix's colorVariantGenerator maps over
 # palette.colors assuming the leaf *is* the value, so a theme level underneath
 # it would break the generator (#53).
+#
+# Geist publishes the ramps as integer HSL triples, not hex. The dark hexes
+# below carry more precision than that: converted back to integer HSL they land
+# bit-exactly on Geist's triples 69 times in 82, and one unit out in a single
+# component the rest of the time — they are evidently the values Geist's triples
+# were rounded *from*. No such source exists for light, whose only other
+# representation in the stylesheet is a superseded generation with different
+# colours entirely, so the light hexes are converted from the triples. They are
+# what a browser paints for those hsl() values, and may sit 1/255 per channel
+# from whatever hex Geist rounded to get them (#56).
 {
   # Not a Geist colour and not theme-varying: a sentinel meaning "this surface
   # is unstyled". It screams equally loudly in either theme, so it carries no
   # theme level and there is no light counterpart to invent.
   debug = "#ff00ff";
 
-  dark = {
+  # Geist declares these once, outside either theme block, and never overrides
+  # them — so they carry no theme level either. contrast-fg is the text laid
+  # over a saturated fill (a blue-700 button), white against both themes.
+  black = "#000000";
+  white = "#FFFFFF";
+  contrast-fg = "#FFFFFF";
+
+  dark = rec {
     background = {
       "100" = "#0A0A0A";
       "200" = "#000000";
@@ -29,6 +50,23 @@
         "800" = "#7D7D7D";
         "900" = "#A0A0A0";
         "1000" = "#EDEDED";
+      };
+
+      # Transcribed, never derived. The published scale is not monotonic — 800
+      # is less opaque than 700, the same deliberate dip the gray ramp has —
+      # so a color-mix() derivation would smooth it and get those steps
+      # silently wrong (#53).
+      gray-alpha = {
+        "100" = "#FFFFFF0F";
+        "200" = "#FFFFFF17";
+        "300" = "#FFFFFF21";
+        "400" = "#FFFFFF24";
+        "500" = "#FFFFFF3D";
+        "600" = "#FFFFFF82";
+        "700" = "#FFFFFF8A";
+        "800" = "#FFFFFF78";
+        "900" = "#FFFFFF9C";
+        "1000" = "#FFFFFFEB";
       };
 
       blue = {
@@ -132,5 +170,149 @@
         "1000" = "#FEECF4";
       };
     };
+
+    # Default text. Geist writes the literal rather than aliasing white, so
+    # this is a transcription and not a reference.
+    foreground = "#FFFFFF";
+
+    # Geist aliases these into the ramps, which is the design decision worth
+    # keeping: selection is the top of the gray ramp, its text the bottom.
+    selection = colors.gray."1000";
+    selection-text-color = colors.gray."100";
+    link-color = colors.blue."900";
+  };
+
+  light = rec {
+    background = {
+      "100" = "#FFFFFF";
+      "200" = "#FAFAFA";
+    };
+
+    colors = {
+      gray = {
+        "100" = "#F2F2F2";
+        "200" = "#EBEBEB";
+        "300" = "#E6E6E6";
+        "400" = "#EBEBEB";
+        "500" = "#C9C9C9";
+        "600" = "#A8A8A8";
+        "700" = "#8F8F8F";
+        "800" = "#7D7D7D";
+        "900" = "#4D4D4D";
+        "1000" = "#171717";
+      };
+
+      # 200 and 400 are the same byte upstream, as 700/800 are in the gray ramp
+      # above. Transcribed as published.
+      gray-alpha = {
+        "100" = "#0000000D";
+        "200" = "#00000014";
+        "300" = "#0000001A";
+        "400" = "#00000014";
+        "500" = "#00000036";
+        "600" = "#00000057";
+        "700" = "#00000070";
+        "800" = "#00000082";
+        "900" = "#000000B3";
+        "1000" = "#000000E8";
+      };
+
+      blue = {
+        "100" = "#F0F7FF";
+        "200" = "#EBF5FF";
+        "300" = "#E0F0FF";
+        "400" = "#CCE6FF";
+        "500" = "#99CEFF";
+        "600" = "#52AEFF";
+        "700" = "#0072F5";
+        "800" = "#0062D1";
+        "900" = "#0068D6";
+        "1000" = "#00254D";
+      };
+
+      red = {
+        "100" = "#FFF0F0";
+        "200" = "#FFEBEB";
+        "300" = "#FFE5E5";
+        "400" = "#FDD8D8";
+        "500" = "#F8B9B9";
+        "600" = "#F87275";
+        "700" = "#E5484D";
+        "800" = "#DA2F35";
+        "900" = "#CB2A2F";
+        "1000" = "#391417";
+      };
+
+      amber = {
+        "100" = "#FFF6E5";
+        "200" = "#FFF4D6";
+        "300" = "#FEF0CD";
+        "400" = "#FFDD8F";
+        "500" = "#FFC96B";
+        "600" = "#F5B047";
+        "700" = "#FFB224";
+        "800" = "#FF990A";
+        "900" = "#A35200";
+        "1000" = "#4E2009";
+      };
+
+      green = {
+        "100" = "#EFFBEF";
+        "200" = "#EBFAEB";
+        "300" = "#DAF6DA";
+        "400" = "#C6F1C7";
+        "500" = "#99E59E";
+        "600" = "#6CDA75";
+        "700" = "#45A557";
+        "800" = "#398E4A";
+        "900" = "#297A3A";
+        "1000" = "#1B311E";
+      };
+
+      teal = {
+        "100" = "#EEFCF9";
+        "200" = "#E5FAF6";
+        "300" = "#D4F7F0";
+        "400" = "#BEF4EB";
+        "500" = "#86EAD9";
+        "600" = "#45DEC5";
+        "700" = "#12A594";
+        "800" = "#0D8C7D";
+        "900" = "#067A6E";
+        "1000" = "#073C34";
+      };
+
+      purple = {
+        "100" = "#F9F0FF";
+        "200" = "#F9F1FE";
+        "300" = "#F4E8FC";
+        "400" = "#EDDCF9";
+        "500" = "#D5B1F1";
+        "600" = "#BF89EC";
+        "700" = "#8E4EC6";
+        "800" = "#763DA9";
+        "900" = "#7820BC";
+        "1000" = "#2E004D";
+      };
+
+      pink = {
+        "100" = "#FFEBF5";
+        "200" = "#FEECF2";
+        "300" = "#FCE3EC";
+        "400" = "#F9D7E2";
+        "500" = "#F5B8CC";
+        "600" = "#EE87A7";
+        "700" = "#EA3E83";
+        "800" = "#DF2670";
+        "900" = "#BD2864";
+        "1000" = "#430A23";
+      };
+    };
+
+    foreground = "#000000";
+
+    selection = colors.gray."1000";
+    selection-text-color = colors.gray."100";
+    link-color = colors.blue."700";
   };
 }
