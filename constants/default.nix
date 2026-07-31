@@ -4,4 +4,5 @@
   terminal = import ./terminal.nix;
 
   space = import ./space.nix;
+  type = import ./type.nix;
 }
