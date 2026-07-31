@@ -113,7 +113,16 @@ export default function Greeter({ onAuthenticated }: { onAuthenticated: () => vo
     <entry
       $={(ref) => {
         entry = ref
-        ref.grab_focus()
+      }}
+      // On map, not in the ref callback above: that one runs while the widget
+      // is still loose, before it has been added to a parent, and grab_focus
+      // on an unrooted widget fails and returns false. Nothing then takes the
+      // focus back up — the surface stays focusless and swallows every
+      // keystroke, which looks exactly like a screen that ignores the
+      // keyboard. `map` is the first moment the entry is both rooted and on
+      // screen.
+      onMap={(self) => {
+        self.grab_focus()
       }}
       visibility={false}
       hexpand
