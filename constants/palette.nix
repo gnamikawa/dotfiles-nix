@@ -1,6 +1,16 @@
 # Uses vercel's geist design system as a base
 # https://vercel.com/geist/colors
 #
+# Transcribed from the token stylesheet, pinned by content hash so the diff can
+# be re-run against the same bytes:
+# https://vercel.com/vc-ap-b3331f/_next/static/immutable/chunks/02y9t7j2e779d.css
+#
+# Geist publishes the ramps as integer HSL triples, not hex. The hexes below
+# carry more precision than that: converted back to integer HSL they land
+# bit-exactly on Geist's triples 69 times in 82, and one unit out in a single
+# component the rest of the time — they are evidently the values Geist's triples
+# were rounded *from*.
+#
 # The theme name sits near the front of the path — palette.dark.colors.gray."400"
 # — rather than at the leaf. theme.nix's colorVariantGenerator maps over
 # palette.colors assuming the leaf *is* the value, so a theme level underneath
@@ -11,7 +21,14 @@
   # theme level and there is no light counterpart to invent.
   debug = "#ff00ff";
 
-  dark = {
+  # Geist declares these once, outside either theme block, and never overrides
+  # them — so they carry no theme level either. contrast-fg is the text laid
+  # over a saturated fill (a blue-700 button), white against both themes.
+  black = "#000000";
+  white = "#FFFFFF";
+  contrast-fg = "#FFFFFF";
+
+  dark = rec {
     background = {
       "100" = "#0A0A0A";
       "200" = "#000000";
@@ -29,6 +46,23 @@
         "800" = "#7D7D7D";
         "900" = "#A0A0A0";
         "1000" = "#EDEDED";
+      };
+
+      # Transcribed, never derived. The published scale is not monotonic — 800
+      # is less opaque than 700, the same deliberate dip the gray ramp has —
+      # so a color-mix() derivation would smooth it and get those steps
+      # silently wrong (#53).
+      gray-alpha = {
+        "100" = "#FFFFFF0F";
+        "200" = "#FFFFFF17";
+        "300" = "#FFFFFF21";
+        "400" = "#FFFFFF24";
+        "500" = "#FFFFFF3D";
+        "600" = "#FFFFFF82";
+        "700" = "#FFFFFF8A";
+        "800" = "#FFFFFF78";
+        "900" = "#FFFFFF9C";
+        "1000" = "#FFFFFFEB";
       };
 
       blue = {
@@ -132,5 +166,15 @@
         "1000" = "#FEECF4";
       };
     };
+
+    # Default text. Geist writes the literal rather than aliasing white, so
+    # this is a transcription and not a reference.
+    foreground = "#FFFFFF";
+
+    # Geist aliases these into the ramps, which is the design decision worth
+    # keeping: selection is the top of the gray ramp, its text the bottom.
+    selection = colors.gray."1000";
+    selection-text-color = colors.gray."100";
+    link-color = colors.blue."900";
   };
 }
