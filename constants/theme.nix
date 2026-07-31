@@ -49,4 +49,5 @@ in
   # level also holds `debug` and the theme-invariant black/white/contrast-fg,
   # which are not themes.
   dark = roleVocabulary palette.dark;
+  light = roleVocabulary palette.light;
 }
