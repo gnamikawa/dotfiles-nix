@@ -56,6 +56,13 @@
       # is applied after nixGL wrapping — the silent-drop failure of #37.
       agsFull = ags.packages.${system}.agsFull;
 
+      # The login screen, built rather than run from source. system-nix
+      # consumes this output and decides how it is launched (issue #38).
+      greeter = import ./packages/greeter.nix {
+        inherit pkgs;
+        agsPackages = ags.packages.${system};
+      };
+
       # Shared settings for the standalone (non-NixOS) profiles.
       standaloneModule =
         { ... }:
@@ -87,6 +94,12 @@
         };
     in
     {
+      # The repository's first package output. It exists because the greeter is
+      # the one surface outside the user session: it runs as its own system
+      # user, under greetd, from system-nix — which cannot import a
+      # home-manager module and must be handed a bin instead.
+      packages.${system}.greeter = greeter;
+
       nixosModules.default =
         { config, ... }:
         {
@@ -169,6 +182,10 @@
         home-apps = self.homeConfigurations."genzo-apps".activationPackage;
         home-desktop = self.homeConfigurations."genzo-desktop".activationPackage;
         home-terminal = self.homeConfigurations."genzo-terminal".activationPackage;
+        # Catches a greeter that will not bundle — a .tsx typo, a bad import —
+        # before it reaches a machine. Runtime throws are caught instead by
+        # system-nix's VM test, which boots the greeter and logs in through it.
+        inherit greeter;
       };
     };
 }
