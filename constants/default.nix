@@ -8,4 +8,5 @@
   radius = import ./radius.nix;
   shadow = import ./shadow.nix;
   motion = import ./motion.nix;
+  focus = import ./focus.nix;
 }
