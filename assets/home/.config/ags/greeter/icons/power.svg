@@ -1,0 +1,18 @@
+<!-- Lucide "power" (ISC) — https://github.com/lucide-icons/lucide, see LICENSE.
+     currentColor is replaced by the lit cream: resvg has no cascade to
+     inherit from, and the icon is dimmed by widget opacity rather than by
+     colour, so one baked colour is all it ever needs. -->
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  width="24"
+  height="24"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="#E8E2D6"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M12 2v10" />
+  <path d="M18.4 6.6a9 9 0 1 1-12.77.04" />
+</svg>

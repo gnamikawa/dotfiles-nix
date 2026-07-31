@@ -1,0 +1,269 @@
+/* The greeter's look, settled by prototype (issue #48).
+ *
+ * The colours here are NOT Geist's and NOT in constants/. The screen is
+ * deliberately tungsten-warm where Geist's dark theme is neutral, and that
+ * conflict with the "no colour literal outside constants/" rule is an open
+ * question of its own (issue #61) — where the warm palette lives is undecided,
+ * so it is spelled here for now and moves when that lands.
+ *
+ * Fonts are named bare: a missing font is answered at the package level in
+ * Nix, and a fallback chain would let a broken install land on something that
+ * looks almost right. Geist is installed system-wide by system-nix.
+ *
+ * Written against GTK 4.20.3 — no backdrop-filter, no prefers-reduced-motion. */
+
+* {
+  font-family: "Geist";
+}
+
+window {
+  background-color: #000000;
+  color: #e8e2d6;
+}
+
+/* The real entry: focusable and invisible. Everything the password looks like
+ * is the dot row; this only collects keystrokes. */
+entry {
+  min-height: 1px;
+  min-width: 1px;
+  padding: 0;
+  border: none;
+  box-shadow: none;
+  outline: none;
+  background: none;
+  background-color: transparent;
+  color: transparent;
+  caret-color: transparent;
+  opacity: 0;
+}
+
+/* ---------- the warm base ---------- */
+
+.warm {
+  background-image: radial-gradient(circle farthest-corner at 50% 45%, #1c1813 0%, #000000 72%);
+}
+
+.time {
+  font-size: 46px;
+  font-weight: 600;
+  letter-spacing: -1.84px;
+  color: #f2ede3;
+  /* The tungsten shape — a near-white core plus a wide amber falloff, amber
+   * turned well down. Warmer than a neutral halo, nowhere near a filament.
+   * There is deliberately no ambient pool behind it: spilling light onto the
+   * background read as a lamp sitting behind the screen rather than as a lit
+   * display. */
+  text-shadow:
+    0 0 12px rgba(255, 236, 208, 0.4),
+    0 0 30px rgba(226, 172, 100, 0.14);
+}
+
+.date {
+  font-size: 13px;
+  letter-spacing: 1.2px;
+  color: #9a9184;
+}
+
+/* padding so the glow has somewhere to bloom into */
+.core {
+  padding: 48px 96px;
+}
+
+/* ---------- the password, as eight dots ---------- */
+
+.dot {
+  min-width: 8px;
+  min-height: 8px;
+  border-radius: 4px;
+  background-color: #3a342c;
+}
+
+.dot.filled {
+  background-color: #e8e2d6;
+}
+.dot.bad {
+  background-color: #c4564b;
+}
+
+/* A headshake on the dot row: two full swings, each smaller than the last,
+ * landing back on centre. Short and damped — a refusal, not a tantrum.
+ *
+ * .no0 and .no1 are the same animation twice. Greeter.tsx alternates between
+ * them because a CSS animation only restarts when the class it hangs off
+ * changes: a second wrong password in a row would otherwise land on the class
+ * already applied and sit perfectly still. */
+
+@keyframes no {
+  0% {
+    margin-left: 0;
+    margin-right: 0;
+  }
+  16% {
+    margin-left: -14px;
+    margin-right: 14px;
+  }
+  33% {
+    margin-left: 12px;
+    margin-right: -12px;
+  }
+  50% {
+    margin-left: -8px;
+    margin-right: 8px;
+  }
+  67% {
+    margin-left: 5px;
+    margin-right: -5px;
+  }
+  84% {
+    margin-left: -2px;
+    margin-right: 2px;
+  }
+  100% {
+    margin-left: 0;
+    margin-right: 0;
+  }
+}
+
+.dots.no0,
+.dots.no1 {
+  animation: no 420ms cubic-bezier(0.36, 0.07, 0.19, 0.97);
+}
+
+/* Reserved space at all times, coloured transparent when hidden, so revealing
+ * the fault shifts nothing below it. */
+.fault {
+  font-size: 13px;
+  letter-spacing: 1px;
+  color: transparent;
+}
+
+.fault.shown {
+  color: #c4564b;
+}
+
+/* ---------- shape, shared by both bottom corners ---------- */
+
+.rail {
+  padding: 40px 48px;
+}
+
+.rail-key,
+.rail-val,
+.verb-label {
+  font-family: "Geist Mono";
+  font-size: 11px;
+}
+
+.verb {
+  /* the border is always here, just colourless — otherwise lighting it would
+   * shift the icon */
+  border: 1px solid transparent;
+  border-radius: 6px;
+  padding: 8px 10px;
+  /* zero-alpha twin of the lit pool: a gradient can only cross-fade into
+   * another gradient with the same stop count, so "none" would snap */
+  background-image: radial-gradient(circle closest-side, rgba(226, 170, 96, 0) 0%, rgba(0, 0, 0, 0) 100%);
+}
+
+/* ---------- ghost / lit, one language for the whole bottom band ----------
+ *
+ * Everything down here rests nearly invisible and lifts together when
+ * approached; only the pointer decides which. The rail lifts by changing
+ * colour and nothing else — light anchored to a glyph was tried at length and
+ * came out either invisible or a smear. */
+
+.ghost .rail-key {
+  color: #211e1a;
+}
+.ghost .rail-val {
+  color: #3a342c;
+}
+.lit .rail-key {
+  color: #8c8478;
+}
+.lit .rail-val {
+  color: #e8e2d6;
+}
+
+.verb-label {
+  color: #e8e2d6;
+  /* resting shadow, present but invisible — a shadow can only ease into
+   * another shadow, so an absent one would snap the way a gradient does */
+  text-shadow:
+    0 0 8px rgba(255, 236, 208, 0),
+    0 0 18px rgba(226, 172, 100, 0);
+}
+
+.verb.ghost image {
+  opacity: 0.3;
+}
+.verb.lit image {
+  opacity: 1;
+}
+
+.verb-label.slot.ghost {
+  opacity: 0;
+}
+.verb-label.slot.lit {
+  opacity: 1;
+}
+
+.verb-label.slot.lit {
+  text-shadow:
+    0 0 8px rgba(255, 236, 208, 0.28),
+    0 0 18px rgba(226, 172, 100, 0.14);
+}
+
+/* a PNG cannot cast light, so the icon's glow is painted behind it */
+.verb.lit {
+  background-image: radial-gradient(circle closest-side, rgba(226, 170, 96, 0.1) 0%, rgba(0, 0, 0, 0) 100%);
+}
+
+/* second level of hover: which one you would actually click, lit harder */
+.verb.lit:hover {
+  border-color: #2a251e;
+  background-image: radial-gradient(circle closest-side, rgba(226, 170, 96, 0.22) 0%, rgba(0, 0, 0, 0) 100%);
+}
+
+/* ---------- the lift is eased, not switched ----------
+ *
+ * A transition is read off the state being moved TO, so each rule below times
+ * the leg that ARRIVES at it: .lit times the light-up, .ghost times the
+ * fade-down. That is the whole mechanism by which the two directions are tuned
+ * independently.
+ *
+ *   IN   90ms    arriving is immediate
+ *   OUT  2400ms  leaving drops fast, then crawls the rest
+ *
+ * The out curve covers roughly two thirds of the distance in the first tenth
+ * of its duration and then flattens hard, so the fade departs promptly and
+ * trails off slowly. One transition, no knee to land on. 2400ms was chosen
+ * against 1100/1400/1800 from below and 3200/4200/5600 from above: shorter
+ * reads as a light switch, longer leaves the tail hanging around after
+ * attention has moved on. */
+
+.rail.lit .rail-key,
+.rail.lit .rail-val,
+.rail .verb.lit,
+.rail .verb.lit image,
+.rail .verb-label.lit {
+  transition:
+    background-image 90ms cubic-bezier(0.4, 0, 1, 1),
+    text-shadow 90ms cubic-bezier(0.4, 0, 1, 1),
+    border-color 90ms cubic-bezier(0.4, 0, 1, 1),
+    opacity 90ms cubic-bezier(0.4, 0, 1, 1),
+    color 90ms cubic-bezier(0.4, 0, 1, 1);
+}
+
+.rail.ghost .rail-key,
+.rail.ghost .rail-val,
+.rail .verb.ghost,
+.rail .verb.ghost image,
+.rail .verb-label.ghost {
+  transition:
+    background-image 2400ms cubic-bezier(0.02, 0.9, 0.2, 1),
+    text-shadow 2400ms cubic-bezier(0.02, 0.9, 0.2, 1),
+    border-color 2400ms cubic-bezier(0.02, 0.9, 0.2, 1),
+    opacity 2400ms cubic-bezier(0.02, 0.9, 0.2, 1),
+    color 2400ms cubic-bezier(0.02, 0.9, 0.2, 1);
+}
