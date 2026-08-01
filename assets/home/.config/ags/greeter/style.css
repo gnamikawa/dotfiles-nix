@@ -1,10 +1,27 @@
 /* The greeter's look, settled by prototype (issue #48).
  *
- * The colours here are NOT Geist's and NOT in constants/. The screen is
- * deliberately tungsten-warm where Geist's dark theme is neutral, and that
- * conflict with the "no colour literal outside constants/" rule is an open
- * question of its own (issue #61) — where the warm palette lives is undecided,
- * so it is spelled here for now and moves when that lands.
+ * Every colour here is Geist's, from the dark AMBER ramp (issue #61). The
+ * screen was first built on a warm palette of its own, on the assumption that
+ * Geist could not express a tungsten-lit display — that turned out to be
+ * wrong. Geist's amber 100 is #271700 and its amber 1000 is #fef3dd: its own
+ * warm near-black and its own cream. Judged side by side against the original,
+ * amber read better, so no warm family enters constants/ and the screen owns
+ * no colours of its own.
+ *
+ * Which step plays which part:
+ *
+ *   100   the wash                400   rail value at rest, resting dot
+ *   200   rail key at rest        600   rail key when lit
+ *   300   the hover border        700   the date
+ *   900   glow falloff, pools     1000  clock, lit text, filled dots, glow core
+ *
+ * The fault is red 700 and deliberately does not follow the hue: a wrong
+ * password has to read as a fault and not as the screen's accent.
+ *
+ * These are still literals, so the "no colour literal outside constants/" rule
+ * (issue #59) does not hold yet. They become var(--ds-amber-*) when the
+ * geistdesign package exists (issue #58) — a mechanical swap, since the values
+ * below are already that package's, spelled by hand.
  *
  * Fonts are named bare: a missing font is answered at the package level in
  * Nix, and a fallback chain would let a broken install land on something that
@@ -18,7 +35,7 @@
 
 window {
   background-color: #000000;
-  color: #e8e2d6;
+  color: #fef3dd;
 }
 
 /* The real entry: focusable and invisible. Everything the password looks like
@@ -40,28 +57,28 @@ entry {
 /* ---------- the warm base ---------- */
 
 .warm {
-  background-image: radial-gradient(circle farthest-corner at 50% 45%, #1c1813 0%, #000000 72%);
+  background-image: radial-gradient(circle farthest-corner at 50% 45%, #271700 0%, #000000 72%);
 }
 
 .time {
   font-size: 46px;
   font-weight: 600;
   letter-spacing: -1.84px;
-  color: #f2ede3;
-  /* The tungsten shape — a near-white core plus a wide amber falloff, amber
-   * turned well down. Warmer than a neutral halo, nowhere near a filament.
-   * There is deliberately no ambient pool behind it: spilling light onto the
-   * background read as a lamp sitting behind the screen rather than as a lit
-   * display. */
+  color: #fef3dd;
+  /* The tungsten shape — a cream core (amber 1000) plus a wide falloff of the
+   * vivid step (amber 900) turned well down. Warmer than a neutral halo,
+   * nowhere near a filament. There is deliberately no ambient pool behind it:
+   * spilling light onto the background read as a lamp sitting behind the
+   * screen rather than as a lit display. */
   text-shadow:
-    0 0 12px rgba(255, 236, 208, 0.4),
-    0 0 30px rgba(226, 172, 100, 0.14);
+    0 0 12px rgba(254, 243, 221, 0.4),
+    0 0 30px rgba(241, 161, 13, 0.14);
 }
 
 .date {
   font-size: 13px;
   letter-spacing: 1.2px;
-  color: #9a9184;
+  color: #ffb224;
 }
 
 /* padding so the glow has somewhere to bloom into */
@@ -75,14 +92,14 @@ entry {
   min-width: 8px;
   min-height: 8px;
   border-radius: 4px;
-  background-color: #3a342c;
+  background-color: #573300;
 }
 
 .dot.filled {
-  background-color: #e8e2d6;
+  background-color: #fef3dd;
 }
 .dot.bad {
-  background-color: #c4564b;
+  background-color: #e5484d;
 }
 
 /* A headshake on the dot row: two full swings, each smaller than the last,
@@ -138,7 +155,7 @@ entry {
 }
 
 .fault.shown {
-  color: #c4564b;
+  color: #e5484d;
 }
 
 /* ---------- shape, shared by both bottom corners ---------- */
@@ -162,7 +179,7 @@ entry {
   padding: 8px 10px;
   /* zero-alpha twin of the lit pool: a gradient can only cross-fade into
    * another gradient with the same stop count, so "none" would snap */
-  background-image: radial-gradient(circle closest-side, rgba(226, 170, 96, 0) 0%, rgba(0, 0, 0, 0) 100%);
+  background-image: radial-gradient(circle closest-side, rgba(241, 161, 13, 0) 0%, rgba(0, 0, 0, 0) 100%);
 }
 
 /* ---------- ghost / lit, one language for the whole bottom band ----------
@@ -173,25 +190,25 @@ entry {
  * came out either invisible or a smear. */
 
 .ghost .rail-key {
-  color: #211e1a;
+  color: #341c00;
 }
 .ghost .rail-val {
-  color: #3a342c;
+  color: #573300;
 }
 .lit .rail-key {
-  color: #8c8478;
+  color: #e79c13;
 }
 .lit .rail-val {
-  color: #e8e2d6;
+  color: #fef3dd;
 }
 
 .verb-label {
-  color: #e8e2d6;
+  color: #fef3dd;
   /* resting shadow, present but invisible — a shadow can only ease into
    * another shadow, so an absent one would snap the way a gradient does */
   text-shadow:
-    0 0 8px rgba(255, 236, 208, 0),
-    0 0 18px rgba(226, 172, 100, 0);
+    0 0 8px rgba(254, 243, 221, 0),
+    0 0 18px rgba(241, 161, 13, 0);
 }
 
 .verb.ghost image {
@@ -210,19 +227,19 @@ entry {
 
 .verb-label.slot.lit {
   text-shadow:
-    0 0 8px rgba(255, 236, 208, 0.28),
-    0 0 18px rgba(226, 172, 100, 0.14);
+    0 0 8px rgba(254, 243, 221, 0.28),
+    0 0 18px rgba(241, 161, 13, 0.14);
 }
 
 /* a PNG cannot cast light, so the icon's glow is painted behind it */
 .verb.lit {
-  background-image: radial-gradient(circle closest-side, rgba(226, 170, 96, 0.1) 0%, rgba(0, 0, 0, 0) 100%);
+  background-image: radial-gradient(circle closest-side, rgba(241, 161, 13, 0.1) 0%, rgba(0, 0, 0, 0) 100%);
 }
 
 /* second level of hover: which one you would actually click, lit harder */
 .verb.lit:hover {
-  border-color: #2a251e;
-  background-image: radial-gradient(circle closest-side, rgba(226, 170, 96, 0.22) 0%, rgba(0, 0, 0, 0) 100%);
+  border-color: #4a2900;
+  background-image: radial-gradient(circle closest-side, rgba(241, 161, 13, 0.22) 0%, rgba(0, 0, 0, 0) 100%);
 }
 
 /* ---------- the lift is eased, not switched ----------
