@@ -1,0 +1,3 @@
+/* The session stylesheet is intentionally hand-written. Tokens enter through
+ * CSS's own include mechanism; surface rules grow below this seam. */
+@import "/home/genzo/.local/share/geistdesign/geistdesign.css";

@@ -8,7 +8,13 @@
 // Restart after editing: systemctl --user restart ags
 
 import app from "ags/gtk4/app"
+import { space } from "geistdesign"
 
 app.start({
-  main() {},
+  css: `${SRC}/style.css`,
+  // Keeps the generated module live in this wiring proof and, with the flake
+  // check, proves the tsconfig alias resolves in AGS's esbuild invocation.
+  main() {
+    void space
+  },
 })

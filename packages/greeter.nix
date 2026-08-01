@@ -14,6 +14,7 @@
 {
   pkgs,
   agsPackages,
+  geistdesign,
 }:
 
 let
@@ -52,7 +53,10 @@ pkgs.stdenv.mkDerivation {
     pkgs.resvg
   ];
 
-  buildInputs = astalPackages ++ [ pkgs.gjs ];
+  buildInputs = astalPackages ++ [
+    pkgs.gjs
+    pkgs.geist-font
+  ];
 
   dontConfigure = true;
   dontBuild = true;
@@ -62,6 +66,7 @@ pkgs.stdenv.mkDerivation {
 
     mkdir -p $out/bin $out/share
     cp -r . $out/share
+    cp ${geistdesign}/geistdesign.css $out/share/geistdesign.css
 
     for icon in $out/share/greeter/icons/*.svg; do
       # 64px for a 16px slot, so the icon stays crisp on a scaled display.
