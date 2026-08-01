@@ -26,7 +26,6 @@ function Workspaces({ connector }: { connector: string }) {
             class={focused((current) =>
               current?.id === workspace.id ? "workspace active" : "workspace",
             )}
-            cursor="pointer"
             tooltipText={`Workspace ${workspace.name}`}
             onClicked={() => workspace.focus()}
           >
