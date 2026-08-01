@@ -9,7 +9,7 @@ let
   palette = import ./palette.nix;
 
   roleVocabulary =
-    p:
+    p: overlayBackdropColor:
     let
       colorVariantGenerator = (
         colorIndex: builtins.mapAttrs (key: _: p.colors.${key}.${colorIndex}) p.colors
@@ -42,12 +42,20 @@ let
         secondary = colorVariantGenerator "900";
         primary = colorVariantGenerator "1000";
       };
+
+      # Geist keeps the opacity separate so consumers can apply the backdrop
+      # colour and its strength through their native properties. The colour's
+      # alias changes with the theme; the scalar itself does not.
+      overlay.backdrop = {
+        color = overlayBackdropColor;
+        opacity = 0.8;
+      };
     };
 in
 {
   # Named one theme at a time rather than mapped over palette: palette's top
   # level also holds `debug` and the theme-invariant black/white/contrast-fg,
   # which are not themes.
-  dark = roleVocabulary palette.dark;
-  light = roleVocabulary palette.light;
+  dark = roleVocabulary palette.dark "var(--ds-background-200)";
+  light = roleVocabulary palette.light "var(--ds-gray-100)";
 }
