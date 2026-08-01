@@ -1,5 +1,5 @@
 # ags.nix — the AGS v3 desktop shell: package, launch unit, and the editor's
-# view of the framework types. The shell itself (app.ts and every surface) is
+# view of the framework types. The shell itself (app.tsx and every surface) is
 # a raw asset under assets/home/.config/ags/, symlinked out-of-store by
 # modules/assets.nix, so surfaces are edited live and picked up on restart
 # (ADR-0005, refined by issue #32 — AGS has no hot reload).

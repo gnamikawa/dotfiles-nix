@@ -1,3 +1,39 @@
 /* The session stylesheet is intentionally hand-written. Tokens enter through
  * CSS's own include mechanism; surface rules grow below this seam. */
 @import "/home/genzo/.local/share/geistdesign/geistdesign.css";
+
+window.bar {
+  background: transparent;
+  color: var(--ds-text-primary-gray);
+}
+
+.bar-content {
+  min-height: 32px;
+  padding: 4px 8px;
+  background-color: var(--ds-background-default);
+  border-bottom: 1px solid var(--ds-border-default-gray);
+}
+
+.workspace {
+  min-width: 28px;
+  min-height: 28px;
+  padding: 0;
+  color: var(--ds-text-secondary-gray);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--ds-radius-base);
+  box-shadow: none;
+  outline: none;
+}
+
+.workspace:hover {
+  color: var(--ds-text-primary-gray);
+  background-color: var(--ds-component-background-hover-gray);
+  border-color: var(--ds-border-hover-gray);
+}
+
+.workspace.active {
+  color: var(--ds-text-primary-blue);
+  background-color: var(--ds-component-background-active-blue);
+  border-color: var(--ds-border-active-blue);
+}

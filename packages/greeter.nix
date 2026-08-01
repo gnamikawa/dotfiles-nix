@@ -33,7 +33,7 @@ pkgs.stdenv.mkDerivation {
   version = "0.1.0";
 
   # The greeter half of the shared project tree, and nothing else. Narrowing it
-  # to these paths is what keeps an edit to the session's app.ts — which needs
+  # to these paths is what keeps an edit to the session's app.tsx — which needs
   # no rebuild at all — from changing this package's hash and with it the whole
   # system closure.
   src = lib.fileset.toSource {
