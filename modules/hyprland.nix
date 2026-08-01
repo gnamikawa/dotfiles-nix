@@ -21,6 +21,16 @@ in
   xdg.configFile."generated/hypr/theme.conf".text = ''
     $borderActive = ${rgb constants.theme.dark.border.active.gray}
     $borderDefault = ${rgb constants.theme.dark.border.default.gray}
+
+    $lockFont = ${rgb constants.theme.dark.text.primary.gray}
+    $lockInner = ${rgb constants.theme.dark.componentBackground.active.gray}
+    $lockOuter = ${rgb constants.theme.dark.background.default}
+
+    # Hyprland treats a single # as a comment marker, including inside exec
+    # arguments. The doubled spelling emits a literal # for slurp.
+    $slurpBackground = ##${lib.removePrefix "#" constants.palette.black}00
+    $slurpBorder = ##${lib.removePrefix "#" constants.palette.white}ff
+    $slurpSelection = ##${lib.removePrefix "#" constants.theme.dark.border.active.blue}55
   '';
 
   # Host slices — hosts/<NAME>/hyprland-outputs.nix overrides both. The

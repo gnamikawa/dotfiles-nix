@@ -176,3 +176,9 @@ The design-token attrsets under `constants/`, injected into every module via
 between themes, the theme name sits near the front of the path
 (`constants.theme.dark.border.default.gray`) and every call site names the
 theme it wants — there is no default theme to fall back on.
+
+Colour values have one source: no numeric colour literal may appear outside
+`constants/`. This includes pure black, pure white, alpha-bearing colours, and
+SVG attributes. Consumers refer to a token directly or receive a computed
+slice; generated build and Home Manager outputs may materialise the value. The
+CSS keyword `transparent` is allowed because it carries no hue of its own.

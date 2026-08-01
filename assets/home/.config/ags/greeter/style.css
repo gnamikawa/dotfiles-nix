@@ -5,10 +5,9 @@
  * Every colour here is Geist's, from the dark AMBER ramp (issue #61). The
  * screen was first built on a warm palette of its own, on the assumption that
  * Geist could not express a tungsten-lit display — that turned out to be
- * wrong. Geist's amber 100 is #271700 and its amber 1000 is #fef3dd: its own
- * warm near-black and its own cream. Judged side by side against the original,
- * amber read better, so no warm family enters constants/ and the screen owns
- * no colours of its own.
+ * wrong. Its amber endpoints supply the warm near-black and cream this design
+ * needs. Judged side by side against the original, amber read better, so no
+ * warm family enters constants/ and the screen owns no colours of its own.
  *
  * Which step plays which part:
  *
@@ -19,11 +18,6 @@
  *
  * The fault is red 700 and deliberately does not follow the hue: a wrong
  * password has to read as a fault and not as the screen's accent.
- *
- * These are still literals, so the "no colour literal outside constants/" rule
- * (issue #59) does not hold yet. They become var(--ds-amber-*) when the
- * geistdesign package exists (issue #58) — a mechanical swap, since the values
- * below are already that package's, spelled by hand.
  *
  * Fonts are named bare: a missing font is answered at the package level in
  * Nix, and a fallback chain would let a broken install land on something that
@@ -36,8 +30,8 @@
 }
 
 window {
-  background-color: #000000;
-  color: #fef3dd;
+  background-color: var(--ds-black);
+  color: var(--ds-amber-1000);
 }
 
 /* The real entry: focusable and invisible. Everything the password looks like
@@ -59,28 +53,28 @@ entry {
 /* ---------- the warm base ---------- */
 
 .warm {
-  background-image: radial-gradient(circle farthest-corner at 50% 45%, #271700 0%, #000000 72%);
+  background-image: radial-gradient(circle farthest-corner at 50% 45%, var(--ds-amber-100) 0%, var(--ds-black) 72%);
 }
 
 .time {
   font-size: 46px;
   font-weight: 600;
   letter-spacing: -1.84px;
-  color: #fef3dd;
+  color: var(--ds-amber-1000);
   /* The tungsten shape — a cream core (amber 1000) plus a wide falloff of the
    * vivid step (amber 900) turned well down. Warmer than a neutral halo,
    * nowhere near a filament. There is deliberately no ambient pool behind it:
    * spilling light onto the background read as a lamp sitting behind the
    * screen rather than as a lit display. */
   text-shadow:
-    0 0 12px rgba(254, 243, 221, 0.4),
-    0 0 30px rgba(241, 161, 13, 0.14);
+    0 0 12px color-mix(in srgb, var(--ds-amber-1000) 40%, transparent),
+    0 0 30px color-mix(in srgb, var(--ds-amber-900) 14%, transparent);
 }
 
 .date {
   font-size: 13px;
   letter-spacing: 1.2px;
-  color: #ffb224;
+  color: var(--ds-amber-700);
 }
 
 /* padding so the glow has somewhere to bloom into */
@@ -94,14 +88,14 @@ entry {
   min-width: 8px;
   min-height: 8px;
   border-radius: 4px;
-  background-color: #573300;
+  background-color: var(--ds-amber-400);
 }
 
 .dot.filled {
-  background-color: #fef3dd;
+  background-color: var(--ds-amber-1000);
 }
 .dot.bad {
-  background-color: #e5484d;
+  background-color: var(--ds-red-700);
 }
 
 /* A headshake on the dot row: two full swings, each smaller than the last,
@@ -157,7 +151,7 @@ entry {
 }
 
 .fault.shown {
-  color: #e5484d;
+  color: var(--ds-red-700);
 }
 
 /* ---------- shape, shared by both bottom corners ---------- */
@@ -181,7 +175,7 @@ entry {
   padding: 8px 10px;
   /* zero-alpha twin of the lit pool: a gradient can only cross-fade into
    * another gradient with the same stop count, so "none" would snap */
-  background-image: radial-gradient(circle closest-side, rgba(241, 161, 13, 0) 0%, rgba(0, 0, 0, 0) 100%);
+  background-image: radial-gradient(circle closest-side, transparent 0%, transparent 100%);
 }
 
 /* ---------- ghost / lit, one language for the whole bottom band ----------
@@ -192,25 +186,25 @@ entry {
  * came out either invisible or a smear. */
 
 .ghost .rail-key {
-  color: #341c00;
+  color: var(--ds-amber-200);
 }
 .ghost .rail-val {
-  color: #573300;
+  color: var(--ds-amber-400);
 }
 .lit .rail-key {
-  color: #e79c13;
+  color: var(--ds-amber-600);
 }
 .lit .rail-val {
-  color: #fef3dd;
+  color: var(--ds-amber-1000);
 }
 
 .verb-label {
-  color: #fef3dd;
+  color: var(--ds-amber-1000);
   /* resting shadow, present but invisible — a shadow can only ease into
    * another shadow, so an absent one would snap the way a gradient does */
   text-shadow:
-    0 0 8px rgba(254, 243, 221, 0),
-    0 0 18px rgba(241, 161, 13, 0);
+    0 0 8px transparent,
+    0 0 18px transparent;
 }
 
 .verb.ghost image {
@@ -229,19 +223,19 @@ entry {
 
 .verb-label.slot.lit {
   text-shadow:
-    0 0 8px rgba(254, 243, 221, 0.28),
-    0 0 18px rgba(241, 161, 13, 0.14);
+    0 0 8px color-mix(in srgb, var(--ds-amber-1000) 28%, transparent),
+    0 0 18px color-mix(in srgb, var(--ds-amber-900) 14%, transparent);
 }
 
 /* a PNG cannot cast light, so the icon's glow is painted behind it */
 .verb.lit {
-  background-image: radial-gradient(circle closest-side, rgba(241, 161, 13, 0.1) 0%, rgba(0, 0, 0, 0) 100%);
+  background-image: radial-gradient(circle closest-side, color-mix(in srgb, var(--ds-amber-900) 10%, transparent) 0%, transparent 100%);
 }
 
 /* second level of hover: which one you would actually click, lit harder */
 .verb.lit:hover {
-  border-color: #4a2900;
-  background-image: radial-gradient(circle closest-side, rgba(241, 161, 13, 0.22) 0%, rgba(0, 0, 0, 0) 100%);
+  border-color: var(--ds-amber-300);
+  background-image: radial-gradient(circle closest-side, color-mix(in srgb, var(--ds-amber-900) 22%, transparent) 0%, transparent 100%);
 }
 
 /* ---------- the lift is eased, not switched ----------

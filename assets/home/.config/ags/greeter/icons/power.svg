@@ -1,18 +1,14 @@
 <!-- Lucide "power" (ISC) — https://github.com/lucide-icons/lucide, see LICENSE.
-     currentColor is replaced by Geist amber 1000, the lit colour (issue #61):
-     resvg has no cascade to inherit from, and the icon is dimmed by widget
-     opacity rather than by colour, so one baked colour is all it ever needs.
-
-     This is the one colour on the surface that no stylesheet can reach — a PNG
-     cannot be recoloured by CSS — so it is a literal that lives outside CSS
-     entirely, and the compliance check (issue #59) has to read SVG to see it. -->
+     currentColor is replaced from constants/ by the greeter derivation before
+     resvg rasterises it. The icon is dimmed by widget opacity, so one generated
+     colour is all it ever needs. -->
 <svg
   xmlns="http://www.w3.org/2000/svg"
   width="24"
   height="24"
   viewBox="0 0 24 24"
   fill="none"
-  stroke="#FEF3DD"
+  stroke="currentColor"
   stroke-width="2"
   stroke-linecap="round"
   stroke-linejoin="round"

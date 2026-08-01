@@ -68,7 +68,7 @@
       # The login screen, built rather than run from source. system-nix
       # consumes this output and decides how it is launched (issue #38).
       greeter = import ./packages/greeter.nix {
-        inherit pkgs geistdesign;
+        inherit pkgs constants geistdesign;
         agsPackages = ags.packages.${system};
       };
 

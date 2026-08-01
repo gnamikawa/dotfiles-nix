@@ -14,6 +14,7 @@
 {
   pkgs,
   agsPackages,
+  constants,
   geistdesign,
 }:
 
@@ -69,6 +70,11 @@ pkgs.stdenv.mkDerivation {
     cp ${geistdesign}/geistdesign.css $out/share/geistdesign.css
 
     for icon in $out/share/greeter/icons/*.svg; do
+      # SVG stays diffable in the source tree without baking in a colour.
+      # resvg cannot inherit GTK CSS, so materialise the token in the derived
+      # copy immediately before rasterising it.
+      substituteInPlace "$icon" \
+        --replace-fail 'stroke="currentColor"' 'stroke="${constants.palette.dark.colors.amber."1000"}"'
       # 64px for a 16px slot, so the icon stays crisp on a scaled display.
       resvg -w 64 "$icon" "''${icon%.svg}.png"
     done
