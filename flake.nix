@@ -56,10 +56,19 @@
       # is applied after nixGL wrapping — the silent-drop failure of #37.
       agsFull = ags.packages.${system}.agsFull;
 
+      geistdesign = import ./packages/geistdesign.nix {
+        inherit pkgs constants;
+      };
+
+      agsAliasCheck = import ./packages/ags-alias-check.nix {
+        inherit pkgs geistdesign;
+        agsPackages = ags.packages.${system};
+      };
+
       # The login screen, built rather than run from source. system-nix
       # consumes this output and decides how it is launched (issue #38).
       greeter = import ./packages/greeter.nix {
-        inherit pkgs;
+        inherit pkgs geistdesign;
         agsPackages = ags.packages.${system};
       };
 
@@ -90,6 +99,7 @@
             inherit nur;
             inherit claude-desktop;
             inherit agsFull;
+            inherit geistdesign;
           };
         };
     in
@@ -98,7 +108,9 @@
       # the one surface outside the user session: it runs as its own system
       # user, under greetd, from system-nix — which cannot import a
       # home-manager module and must be handed a bin instead.
-      packages.${system}.greeter = greeter;
+      packages.${system} = {
+        inherit greeter geistdesign;
+      };
 
       nixosModules.default =
         { config, ... }:
@@ -117,6 +129,7 @@
             inherit nur;
             inherit claude-desktop;
             inherit agsFull;
+            inherit geistdesign;
           };
         };
 
@@ -186,6 +199,7 @@
         # before it reaches a machine. Runtime throws are caught instead by
         # system-nix's VM test, which boots the greeter and logs in through it.
         inherit greeter;
+        ags-alias = agsAliasCheck;
       };
     };
 }

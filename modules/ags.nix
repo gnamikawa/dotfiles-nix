@@ -11,6 +11,8 @@
 {
   config,
   agsFull,
+  geistdesign,
+  pkgs,
   ...
 }:
 
@@ -22,13 +24,22 @@ let
   agsPackage = config.lib.nixGL.wrap agsFull;
 in
 {
-  home.packages = [ agsPackage ];
+  home.packages = [
+    agsPackage
+    pkgs.geist-font
+  ];
 
   # The framework's own JS/TS library, at a path that never changes while its
   # target follows each update. assets/home/.config/ags/tsconfig.json points
   # its `paths` here so the editor can typecheck the shell; `ags run` does not
   # consult it — the CLI resolves the framework from its own store path.
   home.file.".local/share/ags".source = agsFull.jsPackage;
+
+  # Like the framework library above, this is a stable string for the editor
+  # and the live AGS bundler. Its target changes with constants/, not the
+  # committed tsconfig path. The greeter cannot read this home path and takes
+  # the same package directly from the store while it is bundled.
+  home.file.".local/share/geistdesign".source = geistdesign;
 
   systemd.user.services.ags = {
     Unit = {
