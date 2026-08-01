@@ -27,6 +27,8 @@ pkgs.stdenv.mkDerivation {
     mkdir -p $out/bin $out/share/ags-session-lock-prototype-73
     cp -r . $out/share/ags-session-lock-prototype-73/source
     cp ${geistdesign}/geistdesign.css ./geistdesign.css
+    substituteInPlace style.css \
+      --replace-fail './geistdesign.css' 'file://${geistdesign}/geistdesign.css'
     ags bundle --gtk 4 main.tsx $out/share/ags-session-lock-prototype-73/live -r .
     ags bundle --gtk 4 simulate.ts $out/share/ags-session-lock-prototype-73/simulate -r .
     substitute run.sh $out/bin/ags-session-lock-prototype-73 \

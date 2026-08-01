@@ -18,7 +18,8 @@ function render() {
   print("\x1b[1ma\x1b[0m acquire   \x1b[1ml\x1b[0m acquired   \x1b[1mf\x1b[0m acquisition failed")
   print("\x1b[1m+\x1b[0m add monitor   \x1b[1m-\x1b[0m remove monitor")
   print("\x1b[1ms\x1b[0m submit   \x1b[1mw\x1b[0m wrong password   \x1b[1my\x1b[0m auth succeeds")
-  print("\x1b[1mu\x1b[0m compositor unlock   \x1b[1mk\x1b[0m process death   \x1b[1mr\x1b[0m reset   \x1b[1mq\x1b[0m quit")
+  print("\x1b[1mu\x1b[0m unlock signal   \x1b[1mc\x1b[0m roundtrip complete   \x1b[1mk\x1b[0m process death")
+  print("\x1b[1mr\x1b[0m reset   \x1b[1mq\x1b[0m quit")
 }
 
 function eventFor(key: string): Event | null {
@@ -33,7 +34,8 @@ function eventFor(key: string): Event | null {
     case "s": return { type: "submit" }
     case "w": return { type: "authenticationFailed", attempt: state.attempt }
     case "y": return { type: "authenticationSucceeded", attempt: state.attempt }
-    case "u": return { type: "compositorUnlocked" }
+    case "u": return { type: "unlockSignalled" }
+    case "c": return { type: "unlockRoundtripCompleted" }
     case "k": return { type: "processDied" }
     default: return null
   }

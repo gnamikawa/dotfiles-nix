@@ -18,10 +18,18 @@ Exercise the real compositor lock from a Hyprland session:
 nix run .#lock-prototype -- live
 ```
 
-The live authentication check requires `/etc/pam.d/astal-auth`. It is absent
-on the current system as of 2026-08-02, so add `security.pam.services.astal-auth
-= { };` in system-nix and rebuild before taking the real lock. Do not treat an
-authentication failure while that service is absent as a wrong-password test.
+The live authentication check requires `/etc/pam.d/astal-auth`. The temporary
+GEN-DPC test generation provides it; do not treat an authentication failure on
+a generation without that file as a wrong-password test.
+
+Successful authentication does not terminate the process from the library's
+synchronous `unlocked` signal. The prototype holds itself alive, forces a GDK
+display roundtrip, then shows an ordinary control window on the restored
+desktop. Exit from that window. If the process instead dies between acquiring
+and completing that roundtrip, the launcher enables session-lock restore and
+starts hyprlock automatically; no command or approval is needed while locked.
+After a successful hyprlock recovery it disables the restore escape hatch
+again; if hyprlock itself fails, the hatch remains enabled for TTY recovery.
 
 Before deliberately killing the live prototype, confirm TTY recovery: switch
 to a TTY, log in, and terminate the user’s Hyprland session. The protocol is

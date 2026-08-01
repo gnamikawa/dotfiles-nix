@@ -10,6 +10,7 @@ export type Phase =
   | "acquiring"
   | "locked"
   | "authenticating"
+  | "unlocking"
   | "unlocked"
   | "failed"
   | "dead"
@@ -31,7 +32,8 @@ export type Event =
   | { type: "submit" }
   | { type: "authenticationFailed"; attempt: number }
   | { type: "authenticationSucceeded"; attempt: number }
-  | { type: "compositorUnlocked" }
+  | { type: "unlockSignalled" }
+  | { type: "unlockRoundtripCompleted" }
   | { type: "processDied" }
 
 export const initialState: State = {
@@ -79,10 +81,14 @@ export function reduce(state: State, event: Event): State {
     case "authenticationSucceeded":
       // The effect layer calls unlock only when this transition is accepted.
       return state.phase === "authenticating" && state.attempt === event.attempt
-        ? { ...state, phase: "unlocked", error: null }
+        ? { ...state, phase: "unlocking", error: null }
         : state
-    case "compositorUnlocked":
+    case "unlockSignalled":
       return state.phase === "locked" || state.phase === "authenticating"
+        ? { ...state, phase: "unlocking", error: null }
+        : state
+    case "unlockRoundtripCompleted":
+      return state.phase === "unlocking"
         ? { ...state, phase: "unlocked", error: null }
         : state
     case "processDied":

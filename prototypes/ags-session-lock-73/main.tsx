@@ -6,6 +6,7 @@ import app from "ags/gtk4/app"
 import { Gdk, Gtk } from "ags/gtk4"
 import Auth from "gi://AstalAuth"
 import SessionLock from "gi://Gtk4SessionLock?version=1.0"
+import GLib from "gi://GLib"
 import { initialState, reduce, type Event, type State } from "./machine"
 import css from "./style.css"
 
@@ -21,6 +22,12 @@ type Surface = {
 let state: State = initialState
 const surfaces = new Map<Gdk.Monitor, Surface>()
 const lock = SessionLock.Instance.new()
+const acquiredMarker = GLib.getenv("LOCK_PROTOTYPE_ACQUIRED_MARKER")
+const releasedMarker = GLib.getenv("LOCK_PROTOTYPE_RELEASED_MARKER")
+
+function mark(path: string | null) {
+  if (path) GLib.file_set_contents(path, "")
+}
 
 function monitorName(monitor: Gdk.Monitor): string {
   return monitor.connector ?? monitor.description ?? `monitor-${surfaces.size + 1}`
@@ -102,6 +109,40 @@ function createSurface(monitor: Gdk.Monitor): Surface {
   return surface
 }
 
+function showUnlockedControl() {
+  const window = new Gtk.Window({
+    application: app,
+    title: "Session lock prototype",
+    default_width: 420,
+  })
+  const box = new Gtk.Box({
+    orientation: Gtk.Orientation.VERTICAL,
+    spacing: 12,
+    margin_top: 24,
+    margin_bottom: 24,
+    margin_start: 24,
+    margin_end: 24,
+  })
+  box.append(new Gtk.Label({ label: "UNLOCK ROUNDTRIP COMPLETED" }))
+  box.append(
+    new Gtk.Label({
+      label: "If this window is on your normal desktop, the compositor restored the session.",
+      wrap: true,
+    }),
+  )
+  const exit = new Gtk.Button({ label: "Exit prototype" })
+  exit.connect("clicked", () => {
+    window.destroy()
+    app.release()
+    app.quit()
+  })
+  box.append(exit)
+  window.set_child(box)
+  window.set_default_widget(exit)
+  window.present()
+  exit.grab_focus()
+}
+
 lock.connect("monitor", (_, monitor: Gdk.Monitor) => {
   const surface = createSurface(monitor)
   const name = monitorName(monitor)
@@ -115,18 +156,34 @@ lock.connect("monitor", (_, monitor: Gdk.Monitor) => {
   surface.entry.grab_focus()
 })
 
-lock.connect("locked", () => dispatch({ type: "acquired" }))
+lock.connect("locked", () => {
+  dispatch({ type: "acquired" })
+  mark(acquiredMarker)
+})
 lock.connect("failed", () => {
   dispatch({ type: "acquisitionFailed" })
+  app.release()
   app.quit()
 })
 lock.connect("unlocked", () => {
-  dispatch({ type: "compositorUnlocked" })
-  app.quit()
+  // Gtk4SessionLock emits this signal synchronously *before* it queues its
+  // Wayland unlock request. Quitting here leaves Hyprland in its abandoned
+  // lock state. Return to the main loop, then force a display roundtrip: only
+  // after that can this prototype truthfully call the unlock complete.
+  dispatch({ type: "unlockSignalled" })
+  GLib.idle_add(GLib.PRIORITY_DEFAULT_IDLE, () => {
+    Gdk.Display.get_default()?.sync()
+    dispatch({ type: "unlockRoundtripCompleted" })
+    mark(releasedMarker)
+    showUnlockedControl()
+    return GLib.SOURCE_REMOVE
+  })
 })
 
 app.start({
-  instanceName: "ags-session-lock-prototype-73",
+  // Separate processes must reach the compositor independently so the second
+  // one genuinely exercises Gtk4SessionLock acquisition failure.
+  instanceName: `ags-session-lock-prototype-73-${Date.now()}`,
   css,
   main() {
     if (!SessionLock.is_supported()) {
@@ -134,6 +191,9 @@ app.start({
       app.quit()
       return
     }
+    // Lock surfaces are destroyed during unlock. Keep the process alive until
+    // the post-roundtrip control window explicitly exits the prototype.
+    app.hold()
     dispatch({ type: "acquire" })
     if (!lock.lock()) {
       // `failed` may already have fired synchronously; the reducer makes the

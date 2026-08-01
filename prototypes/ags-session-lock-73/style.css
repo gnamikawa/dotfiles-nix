@@ -1,4 +1,4 @@
-@import "./geistdesign.css";
+@import url("./geistdesign.css");
 
 /* Structural constraints are the question here; reuse the greeter's Geist
  * sheet while keeping the prototype visibly disposable. */
