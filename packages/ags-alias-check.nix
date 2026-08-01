@@ -18,7 +18,8 @@ pkgs.stdenv.mkDerivation {
   src = lib.fileset.toSource {
     root = ../assets/home/.config/ags;
     fileset = lib.fileset.unions [
-      ../assets/home/.config/ags/app.ts
+      ../assets/home/.config/ags/app.tsx
+      ../assets/home/.config/ags/bar
       ../assets/home/.config/ags/env.d.ts
       ../assets/home/.config/ags/tsconfig.json
     ];
@@ -35,7 +36,7 @@ pkgs.stdenv.mkDerivation {
     mkdir -p "$out/bin"
     substituteInPlace tsconfig.json \
       --replace-fail /home/genzo/.local/share/geistdesign ${geistdesign}
-    ags bundle app.ts "$out/bin/ags-alias-check" -r .
+    ags bundle app.tsx "$out/bin/ags-alias-check" -r .
 
     runHook postInstall
   '';
