@@ -1,0 +1,21 @@
+@import "./geistdesign.css";
+
+/* Structural constraints are the question here; reuse the greeter's Geist
+ * sheet while keeping the prototype visibly disposable. */
+window {
+  background: var(--ds-background-default);
+  color: var(--ds-text-primary-gray);
+}
+
+window > box {
+  min-width: 420px;
+}
+
+.title {
+  font-family: "Geist Mono";
+  color: var(--ds-text-primary-amber);
+}
+
+.error {
+  color: var(--ds-text-primary-red);
+}

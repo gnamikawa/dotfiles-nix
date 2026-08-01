@@ -72,6 +72,11 @@
         agsPackages = ags.packages.${system};
       };
 
+      lockPrototype = import ./packages/lock-prototype.nix {
+        inherit pkgs geistdesign;
+        agsPackages = ags.packages.${system};
+      };
+
       # Shared settings for the standalone (non-NixOS) profiles.
       standaloneModule =
         { ... }:
@@ -110,6 +115,7 @@
       # home-manager module and must be handed a bin instead.
       packages.${system} = {
         inherit greeter geistdesign;
+        lock-prototype = lockPrototype;
       };
 
       nixosModules.default =
