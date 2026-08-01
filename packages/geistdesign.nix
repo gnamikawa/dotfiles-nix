@@ -33,7 +33,8 @@ let
       "  ${propertyName path}: ${cssValue path values};\n";
 
   themeProperties = theme:
-    properties [ ] constants.palette.${theme}
+    properties [ ] (lib.removeAttrs constants.palette.${theme} [ "colors" ])
+    + properties [ ] constants.palette.${theme}.colors
     + properties [ ] constants.theme.${theme}
     + properties [ "shadow" ] constants.shadow.${theme}
     + properties [ "focus" ] constants.focus.${theme};
