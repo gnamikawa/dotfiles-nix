@@ -17,7 +17,7 @@
 # the backdrop goes the other way: it is a colour and the opacity that modulates
 # it, its colour half varies by theme (gray-100 light, background-200 dark), and
 # an opacity split from the colour it applies to means nothing. Both belong in
-# theme.nix, and neither is transcribed yet.
+# theme.nix.
 #
 # --ds-motion-overlay-scale stays here: the panel scaling from .96 is how the
 # overlay moves, not what it is coloured.
