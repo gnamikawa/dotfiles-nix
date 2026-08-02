@@ -23,7 +23,7 @@ let
   # override applied to an already-wrapped package alters the derivation hash
   # while reaching nothing, surfacing only as a failed TSX import at runtime.
   agsPackage = config.lib.nixGL.wrap agsFull;
-  # This is a complete package, so wrapping happens after its construction.
+  # Both hosts receive the production locker before their staggered cutover.
   # On NixOS the wrapper is the identity; standalone desktop profiles need it
   # to reach the host's graphics drivers.
   sessionLockPackage = config.lib.nixGL.wrap sessionLock;
