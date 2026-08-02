@@ -1,0 +1,27 @@
+/* Session-lock-only coverage for non-primary outputs. */
+
+.lock-secondary {
+  background-color: var(--ds-black);
+}
+
+/* Failure copy belongs to the amber system; the unfilled dots headshake to
+ * distinguish the error without introducing a second colour language. */
+.warm .fault.shown {
+  color: var(--ds-amber-700);
+}
+
+/* PAM activity is intentionally quiet: the existing password dots breathe
+ * without adding copy, changing layout, or implying progress we cannot know. */
+@keyframes authenticating-breathe {
+  0%,
+  100% {
+    opacity: 0.45;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.dots.authenticating {
+  animation: authenticating-breathe 1800ms ease-in-out infinite;
+}

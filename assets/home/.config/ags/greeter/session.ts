@@ -130,21 +130,3 @@ export async function login(password: string): Promise<void> {
     throw "could not reach greetd"
   }
 }
-
-// Absolute paths: the greeter's PATH is whatever greetd's PAM stack hands it,
-// which is not something this surface should depend on. Both actions need a
-// polkit rule for the greeter user, which system-nix installs.
-const SYSTEMCTL = "/run/current-system/sw/bin/systemctl"
-
-export const VERBS = [
-  { icon: "moon", label: "Hibernate", command: `${SYSTEMCTL} hibernate` },
-  { icon: "power", label: "Power off", command: `${SYSTEMCTL} poweroff` },
-] as const
-
-export function run(command: string) {
-  try {
-    GLib.spawn_command_line_async(command)
-  } catch (err) {
-    console.error(`${command}: ${err}`)
-  }
-}

@@ -31,20 +31,29 @@ written. The flake input is pinned, so upstream churn arrives only when
 asked for, and staying on the version that works is an acceptable answer
 for as long as it keeps working.
 
-The exclusion is gtk-session-lock specifically: hyprlock and hypridle
-stay. It is the least mature corner of the Astal ecosystem, and a lock
-screen that fails is a security hole rather than a glitch. The greetd
-greeter is *not* covered by that exclusion — it is a separate surface
-with its own first-party libraries (`greet`, plus `auth` for PAM), and
-sysc-greet is replaced.
+The original exclusion of session locking was superseded after
+`Gtk4SessionLock` gained maintained GTK4 bindings and a live prototype proved
+the full Hyprland lock/authentication/unlock round trip. The session lock is a
+separate on-demand AGS process: `Gtk4SessionLock` owns the compositor lock and
+per-monitor windows, while Astal Auth owns PAM authentication. It stays alive
+through a display round trip after requesting unlock; process death remains
+fail-closed and recovery is a deliberate TTY procedure, not an automatic
+restart loop. Hypridle stays. Hyprlock remains per host until that host is
+physically verified and cut over.
+
+The greetd greeter is likewise a separate process, with its own first-party
+libraries (`greet`, plus `auth` for PAM), and sysc-greet is replaced.
 
 Consequences: under ADR-0005 the project is a raw asset at
 `assets/home/.config/ags/`, live-edited with no rebuild in the loop, and
 Geist constants reach it as a generated computed slice rather than as
-Nix-rendered config. The greeter is the one exception on both counts —
-its copy is built into the store, because it runs as the `greeter` user
-which cannot read `/home/genzo`, and because a live-editable greeter
-makes a typo a lockout. It is therefore also the one surface configured
-outside this repo, in system-nix's `modules/desktop.nix`, rather than
-through home-manager. The bundled output is nixGL-wrapped per ADR-0003
-like every other GUI package here.
+Nix-rendered config. Two security boundaries take built copies of that same
+asset tree instead. The greeter is built into the store because it runs as the
+`greeter` user, which cannot read `/home/genzo`, and because a live-editable
+greeter makes a typo a full login lockout. It is configured outside this repo,
+in system-nix's `modules/desktop.nix`, rather than through home-manager. The
+session lock is built as its own stable executable because it must remain
+independent of the long-lived, live-edited shell process while it owns the
+compositor lock. Its source still lives in the raw asset tree; only the
+security-sensitive runnable copy is build-gated. User-session bundled outputs
+are nixGL-wrapped per ADR-0003 like every other GUI package here.
