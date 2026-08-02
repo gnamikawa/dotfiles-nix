@@ -8,6 +8,7 @@
     # modules/. Mako stays until the AGS notification surface replaces it;
     # waybar has already been replaced by the AGS bar on this host (#34).
     ../../modules/ags.nix
+    ../../modules/ags-session-lock.nix
     ../../modules/mako.nix
   ];
 }

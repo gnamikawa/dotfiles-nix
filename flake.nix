@@ -161,6 +161,7 @@
         "genzo-desktop" = standalone [
           ./modules
           ./modules/ags.nix
+          ./modules/ags-session-lock.nix
           nixGLModule
         ];
 

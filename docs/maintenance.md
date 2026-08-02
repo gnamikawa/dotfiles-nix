@@ -6,16 +6,48 @@ rules about how the code is kept.
 
 ## Manual session lock
 
-After activating the desktop profile, launch the production AGS session lock
-with:
+Every desktop profile exposes one host-selected command for manual locking:
 
 ```sh
-genzo-session-lock
+genzo-lock
 ```
 
-It is an on-demand process separate from the persistent AGS desktop shell.
-Hyprlock remains the active manual, idle, and pre-suspend locker until each
-host's cutover is completed; do not wire this command into Hypridle yet.
+On GEN-DPC this starts the production AGS locker through the on-demand
+`genzo-session-lock.service`; on GEN-LPC it starts Hyprlock. Hypridle uses the
+same command for logind lock requests and before-suspend locking.
+
+## Recover an abandoned AGS lock from a TTY
+
+The compositor stays fail-closed if the AGS locker dies after acquiring the
+session lock. Recovery is deliberately manual; there is no restart watchdog.
+
+1. Switch to a TTY, log in as `genzo`, and identify the active Hyprland
+   instance:
+
+   ```sh
+   export XDG_RUNTIME_DIR=/run/user/$(id -u)
+   export HYPRLAND_INSTANCE_SIGNATURE=$(ls -1 "$XDG_RUNTIME_DIR/hypr")
+   ```
+
+2. Allow one replacement lock client and restart the on-demand service:
+
+   ```sh
+   hyprctl keyword misc:allow_session_lock_restore true
+   systemctl --user restart genzo-session-lock.service
+   ```
+
+3. Once the Geist lock screen is visible, restore the fail-closed default:
+
+   ```sh
+   hyprctl keyword misc:allow_session_lock_restore false
+   ```
+
+4. If the replacement fails again, terminate the graphical session instead
+   of repeating a crash loop:
+
+   ```sh
+   systemctl --user stop wayland-wm@hyprland.desktop.service
+   ```
 
 ## Module granularity
 

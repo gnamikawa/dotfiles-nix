@@ -13,7 +13,7 @@
   imports = [
     ./apps.nix
     ./hyprland.nix
-    ./hyprlock.nix
+    ./hypridle.nix
   ];
 
   xdg = {

@@ -10,6 +10,7 @@
     # waybar module. This host keeps waybar until its own migration; ags is
     # here only because ags runs on both hosts today and renders nothing yet.
     ../../modules/ags.nix
+    ../../modules/hyprlock.nix
     ../../modules/mako.nix
     ../../modules/waybar.nix
   ];
