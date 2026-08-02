@@ -4,6 +4,19 @@ Working conventions for maintaining this repository. Unlike `CONTEXT.md`
 (glossary) and `docs/adr/` (decisions with trade-offs), these are standing
 rules about how the code is kept.
 
+## Manual session lock
+
+After activating the desktop profile, launch the production AGS session lock
+with:
+
+```sh
+genzo-session-lock
+```
+
+It is an on-demand process separate from the persistent AGS desktop shell.
+Hyprlock remains the active manual, idle, and pre-suspend locker until each
+host's cutover is completed; do not wire this command into Hypridle yet.
+
 ## Module granularity
 
 Modules are one flat file directly under `modules/`. Around 100 LOC, or when

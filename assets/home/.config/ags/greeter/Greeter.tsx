@@ -11,7 +11,8 @@ import { createPoll } from "ags/time"
 import { Gtk, Gdk } from "ags/gtk4"
 import GLib from "gi://GLib"
 import { host, kernel, nixosVersion, generation, uptime, battery } from "./sysinfo"
-import { VERBS, login, run } from "./session"
+import { VERBS, run } from "./power"
+import { login } from "./session"
 
 // Set by the bundler to the directory the entry file was built from, which is
 // the package's own share/ tree (cli/lib/esbuild.go). The icons ride along

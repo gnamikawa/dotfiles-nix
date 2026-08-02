@@ -72,6 +72,14 @@
         agsPackages = ags.packages.${system};
       };
 
+      # The user-session lock is packaged separately from both the greetd
+      # greeter and the persistent AGS shell. Hyprlock remains wired until each
+      # host cuts over in its own ticket.
+      sessionLock = import ./packages/session-lock.nix {
+        inherit pkgs constants geistdesign;
+        agsPackages = ags.packages.${system};
+      };
+
       # Shared settings for the standalone (non-NixOS) profiles.
       standaloneModule =
         { ... }:
@@ -100,6 +108,7 @@
             inherit claude-desktop;
             inherit agsFull;
             inherit geistdesign;
+            inherit sessionLock;
           };
         };
     in
@@ -110,6 +119,7 @@
       # home-manager module and must be handed a bin instead.
       packages.${system} = {
         inherit greeter geistdesign;
+        session-lock = sessionLock;
       };
 
       nixosModules.default =
@@ -130,6 +140,7 @@
             inherit claude-desktop;
             inherit agsFull;
             inherit geistdesign;
+            inherit sessionLock;
           };
         };
 
@@ -199,6 +210,7 @@
         # before it reaches a machine. Runtime throws are caught instead by
         # system-nix's VM test, which boots the greeter and logs in through it.
         inherit greeter;
+        session-lock = sessionLock;
         ags-alias = agsAliasCheck;
       };
     };
