@@ -4,6 +4,7 @@
     enable = true;
     package = config.lib.nixGL.wrap pkgs.firefox;
     nativeMessagingHosts = [ pkgs.keepassxc ];
+    configPath = "${config.xdg.configHome}/mozilla/firefox";
     profiles.minimal = {
       id = 0;
       name = "Minimal";
