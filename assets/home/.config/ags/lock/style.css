@@ -1,27 +1,8 @@
-/* Session-lock-only coverage for non-primary outputs. */
+/* Session-lock-only coverage for non-primary outputs. The screen's own
+ * stylesheet (components/screen/style.css) covers everything the primary
+ * surface shows; only the opaque cover on non-interactive monitors is
+ * a Gtk4SessionLock-shaped concern with no greeter equivalent. */
 
 .lock-secondary {
   background-color: var(--ds-black);
-}
-
-/* Failure copy belongs to the amber system; the unfilled dots headshake to
- * distinguish the error without introducing a second colour language. */
-.warm .fault.shown {
-  color: var(--ds-amber-700);
-}
-
-/* PAM activity is intentionally quiet: the existing password dots breathe
- * without adding copy, changing layout, or implying progress we cannot know. */
-@keyframes authenticating-breathe {
-  0%,
-  100% {
-    opacity: 0.45;
-  }
-  50% {
-    opacity: 1;
-  }
-}
-
-.dots.authenticating {
-  animation: authenticating-breathe 1800ms ease-in-out infinite;
 }

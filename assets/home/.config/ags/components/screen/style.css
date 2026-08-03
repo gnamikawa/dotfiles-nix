@@ -1,6 +1,7 @@
 @import "../geistdesign.css";
 
-/* The greeter's look, settled by prototype (issue #48).
+/* The auth screen's look, settled by prototype (issue #48) and shared by the
+ * greeter and the session lock.
  *
  * Every colour here is Geist's, from the dark AMBER ramp (issue #61). The
  * screen was first built on a warm palette of its own, on the assumption that
@@ -13,11 +14,13 @@
  *
  *   100   the wash                400   rail value at rest, resting dot
  *   200   rail key at rest        600   rail key when lit
- *   300   the hover border        700   the date
+ *   300   the hover border        700   the date, the fault
  *   900   glow falloff, pools     1000  clock, lit text, filled dots, glow core
  *
- * The fault is red 700 and deliberately does not follow the hue: a wrong
- * password has to read as a fault and not as the screen's accent.
+ * Failure copy is amber 700 — the same ramp everything else uses. The dot row
+ * blanks and headshakes to distinguish the error; a second colour language on
+ * top of that was tried and read as noise (issue #48). The greeter historically
+ * ran fault text in red 700 while the lock ran amber 700, resolved to amber.
  *
  * Fonts are named bare: a missing font is answered at the package level in
  * Nix, and a fallback chain would let a broken install land on something that
@@ -94,14 +97,11 @@ entry {
 .dot.filled {
   background-color: var(--ds-amber-1000);
 }
-.dot.bad {
-  background-color: var(--ds-red-700);
-}
 
 /* A headshake on the dot row: two full swings, each smaller than the last,
  * landing back on centre. Short and damped — a refusal, not a tantrum.
  *
- * .no0 and .no1 are the same animation twice. Greeter.tsx alternates between
+ * .no0 and .no1 are the same animation twice. Screen.tsx alternates between
  * them because a CSS animation only restarts when the class it hangs off
  * changes: a second wrong password in a row would otherwise land on the class
  * already applied and sit perfectly still. */
@@ -142,6 +142,23 @@ entry {
   animation: no 420ms cubic-bezier(0.36, 0.07, 0.19, 0.97);
 }
 
+/* Authentication activity is intentionally quiet: the existing password dots
+ * breathe without adding copy, changing layout, or implying progress we cannot
+ * know. */
+@keyframes authenticating-breathe {
+  0%,
+  100% {
+    opacity: 0.45;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.dots.authenticating {
+  animation: authenticating-breathe 1800ms ease-in-out infinite;
+}
+
 /* Reserved space at all times, coloured transparent when hidden, so revealing
  * the fault shifts nothing below it. */
 .fault {
@@ -151,7 +168,7 @@ entry {
 }
 
 .fault.shown {
-  color: var(--ds-red-700);
+  color: var(--ds-amber-700);
 }
 
 /* ---------- shape, shared by both bottom corners ---------- */

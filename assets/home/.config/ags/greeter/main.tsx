@@ -7,27 +7,30 @@
 // ~/.config/ags. The greeter is reached the other way: `ags bundle` takes this
 // path explicitly and produces the executable packages/greeter.nix installs.
 //
-// main.tsx and not greeter.tsx: esbuild resolves imports case-insensitively,
-// so an entry named after its own directory collides with the Greeter
-// component beside it and the bundle fails to resolve either.
-//
 // So this half of the tree moves only on a system rebuild, and that is the
 // point — /home/genzo is drwx------, the greeter runs as uid 988, and a
 // live-editable login screen would make a .tsx typo a full lockout.
 
 import app from "ags/gtk4/app"
 import Astal from "gi://Astal?version=4.0"
-import Greeter from "./Greeter"
-import css from "./style.css"
+import Screen from "../components/screen/Screen"
+import { findPrimaryMonitor } from "../common/monitors"
+import { createGreeterController } from "./controller"
+import css from "../components/screen/style.css"
 
 app.start({
   instanceName: "greeter",
   css,
   main() {
-    // One surface, on the first monitor. The warm wash is a radial centred on
-    // the screen, so repeating it across a multi-head desktop would read as
-    // several lamps rather than one; the rest of the seat stays dark.
-    const monitor = app.get_monitors()[0]
+    // The warm wash is a radial centred on the screen, so repeating it across
+    // a multi-head desktop would read as several lamps rather than one. The
+    // rest of the seat stays dark, and the surface lands on the compositor's
+    // logical primary — system-nix's hardware.primaryMonitor pins that output
+    // to 0x0 in greetd's Hyprland (modules/greeter.nix), and findPrimaryMonitor
+    // filters by geometry so GDK's driver-dependent enumeration order cannot
+    // put the warm surface on the wrong seat.
+    const monitor = findPrimaryMonitor()
+    const controller = createGreeterController(() => app.quit())
 
     return (
       <window
@@ -47,8 +50,9 @@ app.start({
         application={app}
       >
         {/* greetd hands the seat over only once the greeter process is gone,
-            so a started session is this process's cue to exit. */}
-        <Greeter onAuthenticated={() => app.quit()} />
+            so a started session is this process's cue to exit. The controller
+            calls the onAuthenticated callback above on a successful login. */}
+        <Screen controller={controller} />
       </window>
     )
   },
