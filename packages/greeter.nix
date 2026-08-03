@@ -67,7 +67,14 @@ pkgs.stdenv.mkDerivation {
 
     mkdir -p $out/bin $out/share
     cp -r . $out/share
-    cp ${geistdesign}/geistdesign.css $out/share/geistdesign.css
+
+    # main.tsx imports the stylesheet as text and hands it to
+    # Gtk.CssProvider.load_from_data, which has no source-file base to resolve
+    # a relative @import against. Point the token sheet at the immutable store
+    # path before bundling, mirroring session-lock.nix — otherwise every
+    # `var(--ds-...)` is invalid at runtime and the dot row disappears.
+    substituteInPlace $out/share/greeter/style.css \
+      --replace-fail '../geistdesign.css' 'file://${geistdesign}/geistdesign.css'
 
     for icon in $out/share/greeter/icons/*.svg; do
       # SVG stays diffable in the source tree without baking in a colour.
