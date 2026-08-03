@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ config, pkgs, ... }:
 {
   gtk = {
     enable = true;
@@ -7,6 +7,11 @@
       name = "Marwaita-Teal";
       package = pkgs.marwaita-teal;
     };
+
+    # Pin GTK4 theme to the legacy default (config.gtk.theme) so the
+    # home-manager 26.05 default-change warning stops firing without
+    # adopting the new null default.
+    gtk4.theme = config.gtk.theme;
 
     iconTheme = {
       name = "Papirus-Dark";
