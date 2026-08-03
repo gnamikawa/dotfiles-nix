@@ -1,7 +1,9 @@
 // Everything the status rail shows, read from paths an unprivileged user with
 // no home directory can reach — which is the greeter's situation exactly (uid
 // 988, /var/lib/greeter wiped at boot). Hence /proc, /sys and /run only: no
-// session bus, no user config, nothing behind a login.
+// session bus, no user config, nothing behind a login. The session lock reads
+// the same values from a logged-in user with a home, which works by
+// construction — these paths are world-readable.
 
 import GLib from "gi://GLib"
 

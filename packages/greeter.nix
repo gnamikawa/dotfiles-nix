@@ -36,10 +36,14 @@ pkgs.stdenv.mkDerivation {
   # The greeter half of the shared project tree, and nothing else. Narrowing it
   # to these paths is what keeps an edit to the session's app.tsx — which needs
   # no rebuild at all — from changing this package's hash and with it the whole
-  # system closure.
+  # system closure. The screen's view, its stylesheet, and the domain helpers
+  # (monitors, power, sysinfo) it consumes live in components/screen/ and
+  # common/ respectively, shared with packages/session-lock.nix.
   src = lib.fileset.toSource {
     root = ../assets/home/.config/ags;
     fileset = lib.fileset.unions [
+      ../assets/home/.config/ags/common
+      ../assets/home/.config/ags/components
       ../assets/home/.config/ags/greeter
       ../assets/home/.config/ags/tsconfig.json
     ];
@@ -73,10 +77,10 @@ pkgs.stdenv.mkDerivation {
     # a relative @import against. Point the token sheet at the immutable store
     # path before bundling, mirroring session-lock.nix — otherwise every
     # `var(--ds-...)` is invalid at runtime and the dot row disappears.
-    substituteInPlace $out/share/greeter/style.css \
+    substituteInPlace $out/share/components/screen/style.css \
       --replace-fail '../geistdesign.css' 'file://${geistdesign}/geistdesign.css'
 
-    for icon in $out/share/greeter/icons/*.svg; do
+    for icon in $out/share/components/screen/icons/*.svg; do
       # SVG stays diffable in the source tree without baking in a colour.
       # resvg cannot inherit GTK CSS, so materialise the token in the derived
       # copy immediately before rasterising it.
@@ -87,9 +91,11 @@ pkgs.stdenv.mkDerivation {
     done
 
     # No -d SRC: the bundler already defines it as the entry file's directory
-    # (cli/lib/esbuild.go), which is where the icons sit. -r points at the tree
-    # root so tsconfig.json is found — the bundler reads it, but its `paths`
-    # are overridden by the framework alias esbuild sets for `ags` and `gnim`.
+    # (cli/lib/esbuild.go), which is greeter/. Screen.tsx resolves the icons at
+    # ''${SRC}/../components/screen/icons, so the source-tree layout under
+    # share/ is what makes that path valid. -r points at the tree root so
+    # tsconfig.json is found — the bundler reads it, but its `paths` are
+    # overridden by the framework alias esbuild sets for `ags` and `gnim`.
     ags bundle $out/share/greeter/main.tsx $out/bin/genzo-greeter -r $out/share
 
     runHook postInstall

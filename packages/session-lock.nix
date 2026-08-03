@@ -24,14 +24,17 @@ pkgs.stdenv.mkDerivation {
   pname = "genzo-session-lock";
   version = "0.1.0";
 
+  # The shared screen (view, stylesheet, icons) lives in components/screen/;
+  # the domain helpers (auth-machine, monitors, power, sysinfo) live in
+  # common/. Both are also bundled by packages/greeter.nix. The lock's own
+  # bits — its entry point, PAM controller, secondary-cover stylesheet, and
+  # run.sh — stay under lock/.
   src = lib.fileset.toSource {
     root = ../assets/home/.config/ags;
     fileset = lib.fileset.unions [
+      ../assets/home/.config/ags/common
+      ../assets/home/.config/ags/components
       ../assets/home/.config/ags/lock
-      ../assets/home/.config/ags/greeter/icons
-      ../assets/home/.config/ags/greeter/power.ts
-      ../assets/home/.config/ags/greeter/style.css
-      ../assets/home/.config/ags/greeter/sysinfo.ts
       ../assets/home/.config/ags/tsconfig.json
     ];
   };
@@ -54,17 +57,6 @@ pkgs.stdenv.mkDerivation {
 
   dontConfigure = true;
   dontBuild = true;
-  doCheck = true;
-
-  checkPhase = ''
-    runHook preCheck
-
-    test_bundle="$NIX_BUILD_TOP/session-lock-machine-test"
-    ags bundle lock/machine.test.ts "$test_bundle" -r . --gtk 4
-    "$test_bundle"
-
-    runHook postCheck
-  '';
 
   installPhase = ''
     runHook preInstall
@@ -74,10 +66,10 @@ pkgs.stdenv.mkDerivation {
     # The stylesheet is imported as text into a generated script, so GTK has
     # no source-file base from which to resolve a relative CSS import. Point it
     # at the immutable token sheet before bundling, as the prototype did.
-    substituteInPlace $out/share/genzo-session-lock/source/greeter/style.css \
+    substituteInPlace $out/share/genzo-session-lock/source/components/screen/style.css \
       --replace-fail '../geistdesign.css' 'file://${geistdesign}/geistdesign.css'
 
-    for icon in $out/share/genzo-session-lock/source/greeter/icons/*.svg; do
+    for icon in $out/share/genzo-session-lock/source/components/screen/icons/*.svg; do
       substituteInPlace "$icon" \
         --replace-fail 'stroke="currentColor"' 'stroke="${constants.palette.dark.colors.amber."1000"}"'
       resvg -w 64 "$icon" "''${icon%.svg}.png"

@@ -1,11 +1,8 @@
-// The session-lock-flavoured Controller: PAM behind the shared auth-machine,
-// plus the compositor-lock lifecycle events that Gtk4SessionLock hands us
-// (acquired, unlockSignalled, ...). The lifecycle bits are exposed as extra
-// methods so main.tsx can drive them from Gtk4SessionLock's signal handlers.
+// The greeter-flavoured Controller: greetd's PAM conversation behind the
+// shared auth-machine, wired to the shared Screen through common/controller.
 
 import { createState } from "ags"
 import { Gtk } from "ags/gtk4"
-import Auth from "gi://AstalAuth"
 import GLib from "gi://GLib"
 import type { Controller } from "../common/controller"
 import {
@@ -16,18 +13,11 @@ import {
   type Phase,
   type State,
 } from "../common/auth-machine"
+import { login } from "./session"
 
 const FAULT_MS = 2000
 
-export type LockController = Controller & {
-  acquire: () => boolean
-  acquired: () => void
-  acquisitionFailed: () => boolean
-  unlockSignalled: () => boolean
-  unlockRoundtripCompleted: () => boolean
-}
-
-export function createLockController(unlock: () => void): LockController {
+export function createGreeterController(onAuthenticated: () => void): Controller {
   let state: State = initialState
   const [phase, setPhase] = createState<Phase>(state.phase)
   const [password, setPassword] = createState("")
@@ -54,12 +44,10 @@ export function createLockController(unlock: () => void): LockController {
   }
 
   function restoreFocus() {
-    // Sensitivity changes propagate through bindings before the next main-loop
-    // turn. Focusing sooner repeats the startup bug: grab_focus() is asked of
-    // an entry GTK still considers insensitive.
+    // Sensitivity/state changes propagate through bindings before the next
+    // main-loop turn. Focusing sooner reproduces the AGS startup bug:
+    // grab_focus is asked of an entry GTK still considers insensitive.
     GLib.idle_add(GLib.PRIORITY_DEFAULT_IDLE, () => {
-      // Give every toplevel an internal focus target. The compositor decides
-      // which monitor's lock surface receives keyboard events.
       for (const entry of entries) {
         entry.grab_focus()
       }
@@ -76,6 +64,8 @@ export function createLockController(unlock: () => void): LockController {
   }
 
   function showFailure(message: string) {
+    // clear first: a second wrong password gets its own full two seconds
+    // rather than inheriting whatever was left of the first one's
     clearFault()
     setFault(message)
     setShake(shake() === 0 ? 1 : 0)
@@ -88,9 +78,11 @@ export function createLockController(unlock: () => void): LockController {
   }
 
   function submit() {
-    // Blank attempts and every attempt made while PAM is already running are
-    // inert. The transition is the lock around the asynchronous call, so two
-    // monitor windows cannot race one another into overlapping PAM requests.
+    // Blank attempts and every attempt made while a login is already in flight
+    // are inert. The transition is the lock around the asynchronous call: two
+    // Enter presses cannot race the greetd protocol, which holds a single
+    // session under configuration at a time and would cancel the first attempt
+    // when a second CreateSession arrived (session.ts).
     if (!password() || !dispatch({ type: "submit" })) return
 
     const attempt = state.attempt
@@ -98,23 +90,22 @@ export function createLockController(unlock: () => void): LockController {
     clearFault()
     writePassword("")
 
-    Auth.Pam.authenticate(secret, (_, task) => {
-      // GJS strings are immutable; dropping the last JS reference is the
-      // strongest disposal available after PAM has consumed it.
-      secret = ""
-      try {
-        Auth.Pam.authenticate_finish(task)
-        // This accepted transition is the only application event that calls
-        // unlock. A late callback after compositor-initiated unlock is ignored.
-        if (dispatch({ type: "authenticationSucceeded", attempt })) unlock()
-      } catch (error) {
-        console.error(`authentication: ${error}`)
+    login(secret)
+      .then(() => {
+        // GJS strings are immutable; dropping the last JS reference is the
+        // strongest disposal available after greetd has consumed it.
+        secret = ""
+        if (dispatch({ type: "authenticationSucceeded", attempt })) {
+          onAuthenticated()
+        }
+      })
+      .catch((message: string) => {
+        secret = ""
         if (dispatch({ type: "authenticationFailed", attempt })) {
-          showFailure("authentication failed")
+          showFailure(message)
           restoreFocus()
         }
-      }
-    })
+      })
   }
 
   function register(entry: Gtk.Entry) {
@@ -135,10 +126,11 @@ export function createLockController(unlock: () => void): LockController {
     if (entry.text.length > 0) clearFault()
   }
 
-  function forgetSecret() {
-    clearFault()
-    writePassword("")
-  }
+  // The greeter's window mount is effectively synchronous — no compositor
+  // handshake, no async lock acquisition — so the machine moves from idle
+  // through acquiring to locked at construction time.
+  dispatch({ type: "acquire" })
+  dispatch({ type: "acquired" })
 
   return {
     phase,
@@ -149,15 +141,5 @@ export function createLockController(unlock: () => void): LockController {
     update,
     submit,
     focus: restoreFocus,
-    acquire: () => dispatch({ type: "acquire" }),
-    acquired: () => {
-      if (dispatch({ type: "acquired" })) restoreFocus()
-    },
-    acquisitionFailed: () => dispatch({ type: "acquisitionFailed" }),
-    unlockSignalled: () => {
-      forgetSecret()
-      return dispatch({ type: "unlockSignalled" })
-    },
-    unlockRoundtripCompleted: () => dispatch({ type: "unlockRoundtripCompleted" }),
   }
 }

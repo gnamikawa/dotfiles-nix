@@ -1,6 +1,17 @@
-// The security-relevant lifecycle of the production session lock. GTK and PAM
-// effects live in controller.ts; keeping the transition rules here makes it
-// explicit which events are allowed to advance or release the lock.
+// The auth-screen state machine, shared by the greeter and the session lock.
+//
+// The transitions the view cares about are the two the predicates below
+// answer: is the password entry accepting input (locked), and is an attempt in
+// flight (authenticating). The rest of the phases model each surface's own
+// lifecycle — the greeter is effectively synchronous (window mount, then
+// straight to locked), the session lock has to hand-shake with the compositor
+// (acquiring → locked, unlocking → unlocked). Keeping every phase in one
+// enum means both surfaces speak one vocabulary; each simply doesn't dispatch
+// the events its context has no analogue for.
+//
+// The attempt counter is what a controller uses to ignore a late
+// authentication callback belonging to a superseded attempt — a stale reply
+// arriving after the user has already retried.
 
 export type Phase =
   | "idle"

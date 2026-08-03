@@ -3,9 +3,10 @@ import { createRoot } from "ags"
 import { Gdk, Gtk } from "ags/gtk4"
 import SessionLock from "gi://Gtk4SessionLock?version=1.0"
 import GLib from "gi://GLib"
-import Lock from "./Lock"
+import Screen from "../components/screen/Screen"
+import { findPrimaryMonitor } from "../common/monitors"
 import { createLockController } from "./controller"
-import greeterCss from "../greeter/style.css"
+import screenCss from "../components/screen/style.css"
 import lockCss from "./style.css"
 
 const sessionLock = SessionLock.Instance.new()
@@ -19,35 +20,12 @@ const surfaces = new Map<Gdk.Monitor, Surface>()
 const controller = createLockController(() => sessionLock.unlock())
 let held = false
 
-function currentMonitors(): Set<Gdk.Monitor> {
-  const model = Gdk.Display.get_default()?.get_monitors()
-  const monitors = new Set<Gdk.Monitor>()
-  if (!model) return monitors
-  for (let index = 0; index < model.get_n_items(); index += 1) {
-    const monitor = model.get_item(index) as Gdk.Monitor | null
-    if (monitor) monitors.add(monitor)
-  }
-  return monitors
-}
-
-function findPrimaryMonitor(): Gdk.Monitor | undefined {
-  // Gtk4SessionLock does not destroy an assigned window when its output
-  // disappears. Intersect the lock surfaces with GDK's live inventory so a
-  // stale surface can never retain the interactive role.
-  const live = currentMonitors()
-  const monitors = [...surfaces.keys()].filter((monitor) => live.has(monitor))
-  // Hyprland's logical origin is the primary workspace output in this repo's
-  // host layouts. GDK enumeration order is unrelated and changes by driver.
-  return (
-    monitors.find((monitor) => {
-      const geometry = monitor.get_geometry()
-      return geometry.x === 0 && geometry.y === 0
-    }) ?? monitors[0]
-  )
-}
-
 function renderSurfaces() {
-  const primary = findPrimaryMonitor()
+  // Gtk4SessionLock does not destroy an assigned window when its output
+  // disappears. Intersect the lock surfaces with GDK's live inventory (via
+  // findPrimaryMonitor's `among` filter) so a stale surface can never retain
+  // the interactive role.
+  const primary = findPrimaryMonitor(surfaces.keys())
   for (const [monitor, surface] of surfaces) {
     const shouldBeInteractive = monitor === primary
     if (surface.interactive === shouldBeInteractive) continue
@@ -78,7 +56,7 @@ sessionLock.connect("monitor", (_, monitor: Gdk.Monitor) => {
   let cover!: Gtk.Widget
   const dispose = createRoot((dispose) => {
     const overlay = new Gtk.Overlay()
-    overlay.set_child(<Lock controller={controller} />)
+    overlay.set_child(<Screen controller={controller} />)
     cover = <box class="lock-secondary" hexpand vexpand />
     overlay.add_overlay(cover)
     window.set_child(overlay)
@@ -127,7 +105,7 @@ app.start({
   // A second invocation must independently reach Gtk4SessionLock so it can
   // fail acquisition cleanly instead of being routed to the first AGS process.
   instanceName: `genzo-session-lock-${Date.now()}`,
-  css: `${greeterCss}\n${lockCss}`,
+  css: `${screenCss}\n${lockCss}`,
   main() {
     if (!SessionLock.is_supported()) {
       console.error("compositor does not support ext-session-lock-v1")

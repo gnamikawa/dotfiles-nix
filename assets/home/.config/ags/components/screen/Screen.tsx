@@ -1,31 +1,31 @@
-// The login screen: a clock, a password prompt, and nothing to choose.
+// The auth screen shared by the greeter and the session lock. What is on
+// screen — a clock, a status rail, two power verbs, and eight password dots —
+// is the same in both contexts; only how the password is authenticated and how
+// the window is hosted differ, and both of those live behind the Controller
+// interface and each surface's own main.tsx.
 //
-// Three zones on a warm near-black wash — a centred clock, a bottom-left status
-// rail, and bottom-right power verbs. The whole bottom band rests nearly
-// invisible and lifts together when the pointer approaches; the clock is the
-// one light source on the screen. Settled by prototype (issue #48); style.css
-// carries the reasoning for the look and the timings.
+// Three zones on a warm near-black wash — a centred clock, a bottom-left
+// status rail, and bottom-right power verbs. The whole bottom band rests
+// nearly invisible and lifts together when the pointer approaches; the clock
+// is the one light source on the screen. Settled by prototype (issue #48);
+// style.css carries the reasoning for the look and the timings.
 
-import { createState, createComputed } from "ags"
+import { createComputed, createState } from "ags"
 import { createPoll } from "ags/time"
 import { Gtk, Gdk } from "ags/gtk4"
-import GLib from "gi://GLib"
-import { host, kernel, nixosVersion, generation, uptime, battery } from "./sysinfo"
-import { VERBS, run } from "./power"
-import { login } from "./session"
+import type { Controller } from "../../common/controller"
+import { showsAuthenticationActivity } from "../../common/auth-machine"
+import { VERBS, run } from "../../common/power"
+import { host, kernel, nixosVersion, generation, uptime, battery } from "../../common/sysinfo"
 
-// Set by the bundler to the directory the entry file was built from, which is
-// the package's own share/ tree (cli/lib/esbuild.go). The icons ride along
-// with it, so nothing here names a path outside the store.
+// SRC is the entry file's directory (env.d.ts). Both packages lay their source
+// out with `greeter/` (or `lock/`) as a sibling of `components/screen/`, so
+// this relative path resolves the same way from either entry.
 declare const SRC: string
+const ICON_BASE = `${SRC}/../components/screen/icons`
 
 // Height of the bottom band the rail and the verbs sit in, mirrored at the top.
 const BAND = 200
-
-// How long a wrong password stays on screen before the surface forgets it.
-// Long enough to read, short enough that walking back to the machine never
-// shows a stale accusation.
-const FAULT_MS = 2000
 
 // Two states. The fast-drop-then-crawl shape lives entirely in the easing
 // curve (see style.css) rather than in an intermediate state, so there is no
@@ -42,16 +42,7 @@ function createPhase() {
   }
 }
 
-export default function Greeter({ onAuthenticated }: { onAuthenticated: () => void }) {
-  let entry: Gtk.Entry
-
-  const [len, setLen] = createState(0)
-  const [fault, setFault] = createState("")
-  // A CSS animation only restarts when the class it hangs off changes, so a
-  // second wrong password would land on the class already applied and sit
-  // still. Alternating between two identical classes forces the change.
-  const [shake, setShake] = createState(0)
-
+export default function Screen({ controller }: { controller: Controller }) {
   const time = createPoll("", 1000, () =>
     new Date().toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }),
   )
@@ -66,53 +57,6 @@ export default function Greeter({ onAuthenticated }: { onAuthenticated: () => vo
   const batt = createPoll(battery(), 60000, battery)
   const hasBattery = battery() !== null
 
-  // The fault clears two ways — the timer below, or the first keystroke of the
-  // next attempt — so whichever comes first has to cancel the other.
-  let faultTimer = 0
-
-  function clearFault() {
-    if (faultTimer) {
-      GLib.source_remove(faultTimer)
-      faultTimer = 0
-    }
-    setFault("")
-  }
-
-  function fail(message: string) {
-    // clear first: a second wrong password gets its own full two seconds
-    // rather than inheriting whatever was left of the first one's
-    clearFault()
-    setFault(message)
-    setShake(shake() === 0 ? 1 : 0)
-    setLen(0)
-    entry.set_text("")
-    faultTimer = GLib.timeout_add(GLib.PRIORITY_DEFAULT, FAULT_MS, () => {
-      faultTimer = 0
-      setFault("")
-      return GLib.SOURCE_REMOVE
-    })
-  }
-
-  // greetd holds one session under configuration at a time; a second submit
-  // while login() is in flight makes the next CreateSession error, whose catch
-  // cancels the *first* attempt mid-authentication (session.ts, the cancel in
-  // login()). Drop the re-entry rather than race — two Enter presses is the
-  // easiest way to trigger it and the last thing a login screen may punish.
-  let busy = false
-
-  function submit() {
-    if (busy) return
-    busy = true
-    const password = entry.get_text()
-    // Blank the field before the round trip so the dots do not sit filled
-    // while greetd thinks; the entry is invisible, so only the dots move.
-    setLen(0)
-    entry.set_text("")
-    login(password).then(onAuthenticated, fail).finally(() => {
-      busy = false
-    })
-  }
-
   // The verbs are reachable from the keyboard as well as the pointer: the
   // ghost/lit language is proximity-driven, and a surface that needs a mouse to
   // power the machine off would be a defect (CONTEXT.md, Keyboard-first).
@@ -123,38 +67,41 @@ export default function Greeter({ onAuthenticated }: { onAuthenticated: () => vo
 
   const PasswordEntry = () => (
     <entry
-      $={(ref) => {
-        entry = ref
-      }}
-      // On map, not in the ref callback above: that one runs while the widget
-      // is still loose, before it has been added to a parent, and grab_focus
-      // on an unrooted widget fails and returns false. Nothing then takes the
+      $={controller.register}
+      // On map, not in the ref callback: that one runs while the widget is
+      // still loose, before it has been added to a parent, and grab_focus on
+      // an unrooted widget fails and returns false. Nothing then takes the
       // focus back up — the surface stays focusless and swallows every
       // keystroke, which looks exactly like a screen that ignores the
       // keyboard. `map` is the first moment the entry is both rooted and on
       // screen.
-      onMap={(self) => {
-        self.grab_focus()
-      }}
+      onMap={(self) => self.grab_focus()}
       visibility={false}
       hexpand
-      onNotifyText={({ text }) => {
-        setLen(text.length)
-        // > 0, so the blanking above does not cancel a timer just armed
-        if (text.length > 0) clearFault()
-      }}
-      onActivate={submit}
+      onNotifyText={(self) => controller.update(self)}
+      onActivate={controller.submit}
     />
   )
 
   const Dots = () => (
     <box
-      class={createComputed(() => (fault() ? `dots no${shake()}` : "dots"))}
+      class={createComputed(() =>
+        controller.fault()
+          ? `dots no${controller.shake()}`
+          : showsAuthenticationActivity(controller.phase())
+            ? "dots authenticating"
+            : "dots",
+      )}
       spacing={12}
       halign={Gtk.Align.CENTER}
     >
       {[0, 1, 2, 3, 4, 5, 6, 7].map((i) => (
-        <box class={createComputed(() => (fault() ? "dot bad" : len() > i ? "dot filled" : "dot"))} />
+        <box
+          class={createComputed(() => {
+            if (controller.fault()) return "dot"
+            return controller.password().length > i ? "dot filled" : "dot"
+          })}
+        />
       ))}
     </box>
   )
@@ -167,8 +114,8 @@ export default function Greeter({ onAuthenticated }: { onAuthenticated: () => vo
       {/* Always occupies its space, coloured transparent when empty, so
           revealing a fault shifts nothing below it. */}
       <label
-        class={createComputed(() => (fault() ? "fault shown" : "fault"))}
-        label={createComputed(() => fault() || "authentication failed")}
+        class={createComputed(() => (controller.fault() ? "fault shown" : "fault"))}
+        label={createComputed(() => controller.fault() || "authentication failed")}
       />
       <PasswordEntry />
     </box>
@@ -176,7 +123,7 @@ export default function Greeter({ onAuthenticated }: { onAuthenticated: () => vo
 
   // ---------- the rail: status only, ghosted until looked at ----------
 
-  const ROWS: Array<[string, any]> = [
+  const rows: Array<[string, any]> = [
     ["host", host],
     ["system", `NixOS ${nixosVersion}`],
     ["kernel", kernel],
@@ -186,7 +133,7 @@ export default function Greeter({ onAuthenticated }: { onAuthenticated: () => vo
   // Whether the row exists is fixed for the life of the screen — a machine does
   // not grow a battery — so this is a static push, not a <With>. Building it
   // reactively appends it after its siblings and reorders the rail.
-  if (hasBattery) ROWS.push(["battery", createComputed(() => `${batt()?.pct ?? 0}%`)])
+  if (hasBattery) rows.push(["battery", createComputed(() => `${batt()?.pct ?? 0}%`)])
 
   const Rail = () => {
     const near = createPhase()
@@ -197,7 +144,7 @@ export default function Greeter({ onAuthenticated }: { onAuthenticated: () => vo
         valign={Gtk.Align.END}
       >
         <Gtk.EventControllerMotion onEnter={near.on} onLeave={near.off} />
-        {ROWS.map(([key, value]) => (
+        {rows.map(([key, value]) => (
           <box>
             {/* 11, not 10: "generation" is exactly 10 and would touch its value */}
             <label class="rail-key" label={key} xalign={0} widthChars={11} />
@@ -243,7 +190,7 @@ export default function Greeter({ onAuthenticated }: { onAuthenticated: () => vo
               {/* Pre-rasterised PNGs: this GTK has no SVG loader, and a PNG
                   cannot be recoloured by CSS, so the icons are rendered at the
                   lit colour and dimmed by widget opacity instead. */}
-              <image file={`${SRC}/icons/${v.icon}.png`} pixelSize={16} valign={Gtk.Align.CENTER} />
+              <image file={`${ICON_BASE}/${v.icon}.png`} pixelSize={16} valign={Gtk.Align.CENTER} />
             </box>
           ))}
         </box>
