@@ -8,11 +8,6 @@
       package = pkgs.marwaita-teal;
     };
 
-    # Pin GTK4 theme to the legacy default (config.gtk.theme) so the
-    # home-manager 26.05 default-change warning stops firing without
-    # adopting the new null default.
-    gtk4.theme = config.gtk.theme;
-
     iconTheme = {
       name = "Papirus-Dark";
       package = pkgs.papirus-icon-theme;
@@ -39,6 +34,10 @@
 
     # GTK 4 — newer GNOME-stack apps (Files, Text Editor, etc.)
     # Note: GTK4 largely ignores full themes; color-scheme is what matters.
+    # Pin `gtk4.theme` to the legacy default (`config.gtk.theme`) so the
+    # home-manager 26.05 default-change warning stops firing without
+    # adopting the new null default.
+    gtk4.theme = config.gtk.theme;
     gtk4.extraConfig = {
       gtk-application-prefer-dark-theme = true;
     };
