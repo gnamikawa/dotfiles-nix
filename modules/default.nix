@@ -18,5 +18,10 @@
 
   xdg = {
     autostart.enable = true;
+
+    # Pin `userDirs.setSessionVariables` to the legacy default (`true`) so the
+    # home-manager 26.05 default-change warning stops firing without adopting
+    # the new `false` default.
+    userDirs.setSessionVariables = true;
   };
 }
