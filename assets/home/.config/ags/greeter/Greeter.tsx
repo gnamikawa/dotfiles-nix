@@ -93,13 +93,24 @@ export default function Greeter({ onAuthenticated }: { onAuthenticated: () => vo
     })
   }
 
+  // greetd holds one session under configuration at a time; a second submit
+  // while login() is in flight makes the next CreateSession error, whose catch
+  // cancels the *first* attempt mid-authentication (session.ts, the cancel in
+  // login()). Drop the re-entry rather than race — two Enter presses is the
+  // easiest way to trigger it and the last thing a login screen may punish.
+  let busy = false
+
   function submit() {
+    if (busy) return
+    busy = true
     const password = entry.get_text()
     // Blank the field before the round trip so the dots do not sit filled
     // while greetd thinks; the entry is invisible, so only the dots move.
     setLen(0)
     entry.set_text("")
-    login(password).then(onAuthenticated, fail)
+    login(password).then(onAuthenticated, fail).finally(() => {
+      busy = false
+    })
   }
 
   // The verbs are reachable from the keyboard as well as the pointer: the
