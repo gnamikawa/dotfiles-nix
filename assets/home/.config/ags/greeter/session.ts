@@ -70,6 +70,18 @@ async function converse(password: string): Promise<void> {
       continue
     }
 
+    // Positive gate: the one thing this screen holds is the password, so the
+    // only prompt it may answer with it is one the protocol has marked SECRET.
+    // A VISIBLE prompt (or any type not enumerated here) would be greetd
+    // asking for something else — a username, a security question, a token —
+    // and posting the password to it would put it somewhere it must not go.
+    // NixOS's default pam stack asks only SECRET, but a fingerprint reader or
+    // OTP module added later would break the assumption silently.
+    if (kind !== Greet.AuthMessageType.SECRET) {
+      console.error(`greetd asked a non-secret prompt (${kind}): ${res.get_message()}`)
+      throw new Fault("could not sign in")
+    }
+
     // A second question after the password was given is one this screen has no
     // way to ask — it collects a single secret and nothing else. Refusing is
     // the honest end; looping would post the same password forever.
