@@ -21,10 +21,6 @@
       url = "github:aylur/ags";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    claude-desktop-nix = {
-      url = "path:/home/genzo/repositories/claude-desktop-nix";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
   };
 
   outputs =
@@ -34,7 +30,6 @@
       nur,
       home-manager,
       nixgl,
-      claude-desktop-nix,
       ags,
       ...
     }:
@@ -47,9 +42,6 @@
         config.allowUnfree = true;
       };
       constants = import ./constants;
-
-      # Claude Desktop (official .deb, Cowork-enabled) from its own flake.
-      claude-desktop = claude-desktop-nix.packages.${system}.default;
 
       # agsFull rather than the bare `ags`: it sets extraPackages at
       # construction (every Astal library plus libadwaita), so no `.override`
@@ -105,7 +97,6 @@
           extraSpecialArgs = {
             inherit constants;
             inherit nur;
-            inherit claude-desktop;
             inherit agsFull;
             inherit geistdesign;
             inherit sessionLock;
@@ -137,7 +128,6 @@
           home-manager.extraSpecialArgs = {
             inherit constants;
             inherit nur;
-            inherit claude-desktop;
             inherit agsFull;
             inherit geistdesign;
             inherit sessionLock;
