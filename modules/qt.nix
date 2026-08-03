@@ -3,9 +3,9 @@
   qt = {
     enable = true;
 
-    # "gtk" makes Qt apps inherit the active GTK theme — the
-    # easiest way to get a unified look without separate styling.
-    platformTheme.name = "gtk";
+    # "gtk3" is the modern native Qt GTK3 plugin — Qt apps
+    # inherit the active GTK theme without separate styling.
+    platformTheme.name = "gtk3";
 
     # If you prefer a native Qt look instead, use:
     # platformTheme.name = "qtct";
