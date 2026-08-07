@@ -12,17 +12,17 @@
 // session lock) and need to intersect their own bookkeeping with GDK's live
 // inventory so a surface for a gone-away output cannot retain the primary role.
 
-import { Gdk } from "ags/gtk4"
+import { Gdk } from "ags/gtk4";
 
 export function currentMonitors(): Set<Gdk.Monitor> {
-  const model = Gdk.Display.get_default()?.get_monitors()
-  const monitors = new Set<Gdk.Monitor>()
-  if (!model) return monitors
+  const model = Gdk.Display.get_default()?.get_monitors();
+  const monitors = new Set<Gdk.Monitor>();
+  if (!model) return monitors;
   for (let index = 0; index < model.get_n_items(); index += 1) {
-    const monitor = model.get_item(index) as Gdk.Monitor | null
-    if (monitor) monitors.add(monitor)
+    const monitor = model.get_item(index) as Gdk.Monitor | null;
+    if (monitor) monitors.add(monitor);
   }
-  return monitors
+  return monitors;
 }
 
 // Restrict the candidate set with `among` when the caller is managing its own
@@ -30,14 +30,14 @@ export function currentMonitors(): Set<Gdk.Monitor> {
 export function findPrimaryMonitor(
   among?: Iterable<Gdk.Monitor>,
 ): Gdk.Monitor | undefined {
-  const live = currentMonitors()
+  const live = currentMonitors();
   const candidates = among
     ? [...among].filter((monitor) => live.has(monitor))
-    : [...live]
+    : [...live];
   return (
     candidates.find((monitor) => {
-      const geometry = monitor.get_geometry()
-      return geometry.x === 0 && geometry.y === 0
+      const geometry = monitor.get_geometry();
+      return geometry.x === 0 && geometry.y === 0;
     }) ?? candidates[0]
-  )
+  );
 }

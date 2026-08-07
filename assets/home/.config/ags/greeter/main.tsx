@@ -11,12 +11,12 @@
 // point — /home/genzo is drwx------, the greeter runs as uid 988, and a
 // live-editable login screen would make a .tsx typo a full lockout.
 
-import app from "ags/gtk4/app"
-import Astal from "gi://Astal?version=4.0"
-import Screen from "../components/screen/Screen"
-import { findPrimaryMonitor } from "../common/monitors"
-import { createGreeterController } from "./controller"
-import css from "../components/screen/style.css"
+import app from "ags/gtk4/app";
+import Astal from "gi://Astal?version=4.0";
+import Screen from "../components/screen/Screen";
+import { findPrimaryMonitor } from "../common/monitors";
+import { createGreeterController } from "./controller";
+import css from "../components/screen/style.css";
 
 app.start({
   instanceName: "greeter",
@@ -29,8 +29,8 @@ app.start({
     // to 0x0 in greetd's Hyprland (modules/greeter.nix), and findPrimaryMonitor
     // filters by geometry so GDK's driver-dependent enumeration order cannot
     // put the warm surface on the wrong seat.
-    const monitor = findPrimaryMonitor()
-    const controller = createGreeterController(() => app.quit())
+    const monitor = findPrimaryMonitor();
+    const controller = createGreeterController(() => app.quit());
 
     return (
       <window
@@ -54,6 +54,6 @@ app.start({
             calls the onAuthenticated callback above on a successful login. */}
         <Screen controller={controller} />
       </window>
-    )
+    );
   },
-})
+});

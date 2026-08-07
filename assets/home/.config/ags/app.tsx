@@ -6,9 +6,9 @@
 //
 // Restart after editing: systemctl --user restart ags
 
-import app from "ags/gtk4/app"
-import { createBinding, For, This } from "ags"
-import Bar from "./bar/Bar"
+import app from "ags/gtk4/app";
+import { createBinding, For, This } from "ags";
+import Bar from "./bar/Bar";
 
 app.start({
   css: `${SRC}/style.css`,
@@ -22,6 +22,6 @@ app.start({
           </This>
         )}
       </For>
-    )
+    );
   },
-})
+});

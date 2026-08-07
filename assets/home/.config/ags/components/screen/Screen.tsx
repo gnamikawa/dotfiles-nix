@@ -10,22 +10,29 @@
 // is the one light source on the screen. Settled by prototype (issue #48);
 // style.css carries the reasoning for the look and the timings.
 
-import { createComputed, createState } from "ags"
-import { createPoll } from "ags/time"
-import { Gtk, Gdk } from "ags/gtk4"
-import type { Controller } from "../../common/controller"
-import { showsAuthenticationActivity } from "../../common/auth-machine"
-import { VERBS, run } from "../../common/power"
-import { host, kernel, nixosVersion, generation, uptime, battery } from "../../common/sysinfo"
+import { createComputed, createState } from "ags";
+import { createPoll } from "ags/time";
+import { Gtk, Gdk } from "ags/gtk4";
+import type { Controller } from "../../common/controller";
+import { showsAuthenticationActivity } from "../../common/auth-machine";
+import { VERBS, run } from "../../common/power";
+import {
+  host,
+  kernel,
+  nixosVersion,
+  generation,
+  uptime,
+  battery,
+} from "../../common/sysinfo";
 
 // SRC is the entry file's directory (env.d.ts). Both packages lay their source
 // out with `greeter/` (or `lock/`) as a sibling of `components/screen/`, so
 // this relative path resolves the same way from either entry.
-declare const SRC: string
-const ICON_BASE = `${SRC}/../components/screen/icons`
+declare const SRC: string;
+const ICON_BASE = `${SRC}/../components/screen/icons`;
 
 // Height of the bottom band the rail and the verbs sit in, mirrored at the top.
-const BAND = 200
+const BAND = 200;
 
 // Two states. The fast-drop-then-crawl shape lives entirely in the easing
 // curve (see style.css) rather than in an intermediate state, so there is no
@@ -34,35 +41,38 @@ const BAND = 200
 // This still is not just a boolean: the name slot needs to keep its text while
 // it fades out, so "which button" and "is it showing" have to be separate.
 function createPhase() {
-  const [phase, setPhase] = createState("ghost")
+  const [phase, setPhase] = createState("ghost");
   return {
     phase,
     on: () => setPhase("lit"),
     off: () => setPhase("ghost"),
-  }
+  };
 }
 
 export default function Screen({ controller }: { controller: Controller }) {
   const time = createPoll("", 1000, () =>
-    new Date().toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }),
-  )
+    new Date().toLocaleTimeString("en-GB", {
+      hour: "2-digit",
+      minute: "2-digit",
+    }),
+  );
   const date = createPoll("", 60000, () =>
     new Date().toLocaleDateString("en-GB", {
       weekday: "long",
       day: "numeric",
       month: "long",
     }),
-  )
-  const up = createPoll("", 60000, uptime)
-  const batt = createPoll(battery(), 60000, battery)
-  const hasBattery = battery() !== null
+  );
+  const up = createPoll("", 60000, uptime);
+  const batt = createPoll(battery(), 60000, battery);
+  const hasBattery = battery() !== null;
 
   // The verbs are reachable from the keyboard as well as the pointer: the
   // ghost/lit language is proximity-driven, and a surface that needs a mouse to
   // power the machine off would be a defect (CONTEXT.md, Keyboard-first).
   function onKey(_e: Gtk.EventControllerKey, keyval: number) {
-    if (keyval === Gdk.KEY_F11) return run(VERBS[0].command)
-    if (keyval === Gdk.KEY_F12) return run(VERBS[1].command)
+    if (keyval === Gdk.KEY_F11) return run(VERBS[0].command);
+    if (keyval === Gdk.KEY_F12) return run(VERBS[1].command);
   }
 
   const PasswordEntry = () => (
@@ -81,7 +91,7 @@ export default function Screen({ controller }: { controller: Controller }) {
       onNotifyText={(self) => controller.update(self)}
       onActivate={controller.submit}
     />
-  )
+  );
 
   const Dots = () => (
     <box
@@ -98,28 +108,37 @@ export default function Screen({ controller }: { controller: Controller }) {
       {[0, 1, 2, 3, 4, 5, 6, 7].map((i) => (
         <box
           class={createComputed(() => {
-            if (controller.fault()) return "dot"
-            return controller.password().length > i ? "dot filled" : "dot"
+            if (controller.fault()) return "dot";
+            return controller.password().length > i ? "dot filled" : "dot";
           })}
         />
       ))}
     </box>
-  )
+  );
 
   const Core = () => (
-    <box class="core" orientation={Gtk.Orientation.VERTICAL} spacing={20} halign={Gtk.Align.CENTER}>
+    <box
+      class="core"
+      orientation={Gtk.Orientation.VERTICAL}
+      spacing={20}
+      halign={Gtk.Align.CENTER}
+    >
       <label class="date" label={date} />
       <label class="time" label={time} />
       <Dots />
       {/* Always occupies its space, coloured transparent when empty, so
           revealing a fault shifts nothing below it. */}
       <label
-        class={createComputed(() => (controller.fault() ? "fault shown" : "fault"))}
-        label={createComputed(() => controller.fault() || "authentication failed")}
+        class={createComputed(() =>
+          controller.fault() ? "fault shown" : "fault",
+        )}
+        label={createComputed(
+          () => controller.fault() || "authentication failed",
+        )}
       />
       <PasswordEntry />
     </box>
-  )
+  );
 
   // ---------- the rail: status only, ghosted until looked at ----------
 
@@ -129,14 +148,15 @@ export default function Screen({ controller }: { controller: Controller }) {
     ["kernel", kernel],
     ["generation", generation],
     ["uptime", up],
-  ]
+  ];
   // Whether the row exists is fixed for the life of the screen — a machine does
   // not grow a battery — so this is a static push, not a <With>. Building it
   // reactively appends it after its siblings and reorders the rail.
-  if (hasBattery) rows.push(["battery", createComputed(() => `${batt()?.pct ?? 0}%`)])
+  if (hasBattery)
+    rows.push(["battery", createComputed(() => `${batt()?.pct ?? 0}%`)]);
 
   const Rail = () => {
-    const near = createPhase()
+    const near = createPhase();
     return (
       <box
         class={createComputed(() => `rail ${near.phase()}`)}
@@ -152,8 +172,8 @@ export default function Screen({ controller }: { controller: Controller }) {
           </box>
         ))}
       </box>
-    )
-  }
+    );
+  };
 
   // ---------- the corner: verbs, ghosted the same way ----------
 
@@ -161,9 +181,9 @@ export default function Screen({ controller }: { controller: Controller }) {
   // so they can sit next to each other; the slot is a fixed width, so naming
   // the hovered button moves nothing.
   const Verbs = () => {
-    const near = createPhase()
-    const slot = createPhase()
-    const [name, setName] = createState("")
+    const near = createPhase();
+    const slot = createPhase();
+    const [name, setName] = createState("");
     return (
       <box class="rail" spacing={10} valign={Gtk.Align.END}>
         <Gtk.EventControllerMotion onEnter={near.on} onLeave={near.off} />
@@ -181,8 +201,8 @@ export default function Screen({ controller }: { controller: Controller }) {
             <box class={createComputed(() => `verb ${near.phase()}`)}>
               <Gtk.EventControllerMotion
                 onEnter={() => {
-                  setName(v.label)
-                  slot.on()
+                  setName(v.label);
+                  slot.on();
                 }}
                 onLeave={slot.off}
               />
@@ -190,13 +210,17 @@ export default function Screen({ controller }: { controller: Controller }) {
               {/* Pre-rasterised PNGs: this GTK has no SVG loader, and a PNG
                   cannot be recoloured by CSS, so the icons are rendered at the
                   lit colour and dimmed by widget opacity instead. */}
-              <image file={`${ICON_BASE}/${v.icon}.png`} pixelSize={16} valign={Gtk.Align.CENTER} />
+              <image
+                file={`${ICON_BASE}/${v.icon}.png`}
+                pixelSize={16}
+                valign={Gtk.Align.CENTER}
+              />
             </box>
           ))}
         </box>
       </box>
-    )
-  }
+    );
+  };
 
   // The bottom band is matched by an empty band of the same height at the top,
   // so the clock sits on the true centre of the screen rather than on the
@@ -217,5 +241,5 @@ export default function Screen({ controller }: { controller: Controller }) {
         </box>
       </box>
     </box>
-  )
+  );
 }
