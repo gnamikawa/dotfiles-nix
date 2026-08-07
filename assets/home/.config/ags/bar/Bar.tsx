@@ -50,7 +50,7 @@ export default function Bar({ gdkmonitor }: { gdkmonitor: Gdk.Monitor }) {
 
   onCleanup(() => window.destroy());
 
-  return (
+  return connector ? (
     <window
       $={(self) => (window = self)}
       visible
@@ -66,5 +66,7 @@ export default function Bar({ gdkmonitor }: { gdkmonitor: Gdk.Monitor }) {
         <Workspaces connector={connector} />
       </box>
     </window>
+  ) : (
+    <></>
   );
 }
