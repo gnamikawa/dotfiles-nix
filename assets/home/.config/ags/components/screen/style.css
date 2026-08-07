@@ -56,7 +56,11 @@ entry {
 /* ---------- the warm base ---------- */
 
 .warm {
-  background-image: radial-gradient(circle farthest-corner at 50% 45%, var(--ds-amber-100) 0%, var(--ds-black) 72%);
+  background-image: radial-gradient(
+    circle farthest-corner at 50% 45%,
+    var(--ds-amber-100) 0%,
+    var(--ds-black) 72%
+  );
 }
 
 .time {
@@ -192,7 +196,11 @@ entry {
   padding: 8px 10px;
   /* zero-alpha twin of the lit pool: a gradient can only cross-fade into
    * another gradient with the same stop count, so "none" would snap */
-  background-image: radial-gradient(circle closest-side, transparent 0%, transparent 100%);
+  background-image: radial-gradient(
+    circle closest-side,
+    transparent 0%,
+    transparent 100%
+  );
 }
 
 /* ---------- ghost / lit, one language for the whole bottom band ----------
@@ -246,13 +254,21 @@ entry {
 
 /* a PNG cannot cast light, so the icon's glow is painted behind it */
 .verb.lit {
-  background-image: radial-gradient(circle closest-side, color-mix(in srgb, var(--ds-amber-900) 10%, transparent) 0%, transparent 100%);
+  background-image: radial-gradient(
+    circle closest-side,
+    color-mix(in srgb, var(--ds-amber-900) 10%, transparent) 0%,
+    transparent 100%
+  );
 }
 
 /* second level of hover: which one you would actually click, lit harder */
 .verb.lit:hover {
   border-color: var(--ds-amber-300);
-  background-image: radial-gradient(circle closest-side, color-mix(in srgb, var(--ds-amber-900) 22%, transparent) 0%, transparent 100%);
+  background-image: radial-gradient(
+    circle closest-side,
+    color-mix(in srgb, var(--ds-amber-900) 22%, transparent) 0%,
+    transparent 100%
+  );
 }
 
 /* ---------- the lift is eased, not switched ----------

@@ -6,9 +6,10 @@
 //
 // Restart after editing: systemctl --user restart ags
 
-import app from "ags/gtk4/app"
-import { createBinding, For, This } from "ags"
-import Bar from "./bar/Bar"
+import app from "ags/gtk4/app";
+import { createBinding, For, This } from "ags";
+import Gdk from "gi://Gdk?version=4.0";
+import Bar from "./bar/Bar";
 
 app.start({
   css: `${SRC}/style.css`,
@@ -16,12 +17,12 @@ app.start({
   main() {
     return (
       <For each={createBinding(app, "monitors")}>
-        {(monitor) => (
+        {(monitor: Gdk.Monitor) => (
           <This this={app}>
             <Bar gdkmonitor={monitor} />
           </This>
         )}
       </For>
-    )
+    );
   },
-})
+});

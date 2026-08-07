@@ -20,12 +20,12 @@ export type Phase =
   | "authenticating"
   | "unlocking"
   | "unlocked"
-  | "failed"
+  | "failed";
 
 export type State = {
-  phase: Phase
-  attempt: number
-}
+  phase: Phase;
+  attempt: number;
+};
 
 export type Event =
   | { type: "acquire" }
@@ -35,48 +35,54 @@ export type Event =
   | { type: "authenticationFailed"; attempt: number }
   | { type: "authenticationSucceeded"; attempt: number }
   | { type: "unlockSignalled" }
-  | { type: "unlockRoundtripCompleted" }
+  | { type: "unlockRoundtripCompleted" };
 
 export const initialState: State = {
   phase: "idle",
   attempt: 0,
-}
+};
 
 export function acceptsPasswordInput(state: State): boolean {
-  return state.phase === "locked"
+  return state.phase === "locked";
 }
 
 export function showsAuthenticationActivity(phase: Phase): boolean {
-  return phase === "authenticating"
+  return phase === "authenticating";
 }
 
 export function reduce(state: State, event: Event): State {
   switch (event.type) {
     case "acquire":
-      return state.phase === "idle" ? { ...state, phase: "acquiring" } : state
+      return state.phase === "idle" ? { ...state, phase: "acquiring" } : state;
     case "acquired":
-      return state.phase === "acquiring" ? { ...state, phase: "locked" } : state
+      return state.phase === "acquiring"
+        ? { ...state, phase: "locked" }
+        : state;
     case "acquisitionFailed":
-      return state.phase === "acquiring" ? { ...state, phase: "failed" } : state
+      return state.phase === "acquiring"
+        ? { ...state, phase: "failed" }
+        : state;
     case "submit":
       return state.phase === "locked"
         ? { ...state, phase: "authenticating", attempt: state.attempt + 1 }
-        : state
+        : state;
     case "authenticationFailed":
       return state.phase === "authenticating" && state.attempt === event.attempt
         ? { ...state, phase: "locked" }
-        : state
+        : state;
     case "authenticationSucceeded":
       return state.phase === "authenticating" && state.attempt === event.attempt
         ? { ...state, phase: "unlocking" }
-        : state
+        : state;
     case "unlockSignalled":
       return state.phase === "acquiring" ||
         state.phase === "locked" ||
         state.phase === "authenticating"
         ? { ...state, phase: "unlocking" }
-        : state
+        : state;
     case "unlockRoundtripCompleted":
-      return state.phase === "unlocking" ? { ...state, phase: "unlocked" } : state
+      return state.phase === "unlocking"
+        ? { ...state, phase: "unlocked" }
+        : state;
   }
 }
