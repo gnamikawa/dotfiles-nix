@@ -53,11 +53,12 @@ sessionLock.connect("monitor", (_, monitor: Gdk.Monitor) => {
   // toplevel-session cleanup after the output surface has already vanished,
   // which crashes in gdk_wayland_toplevel_remove_from_session on hot-unplug.
   const window = new Gtk.Window();
-  let cover!: Gtk.Widget;
+  const cover = (<box class="lock-secondary" hexpand vexpand />) as Gtk.Widget;
+  const screen = (<Screen controller={controller} />) as Gtk.Widget;
+
   const dispose = createRoot((dispose) => {
     const overlay = new Gtk.Overlay();
-    overlay.set_child(<Screen controller={controller} />);
-    cover = <box class="lock-secondary" hexpand vexpand />;
+    overlay.set_child(screen);
     overlay.add_overlay(cover);
     window.set_child(overlay);
     return dispose;
