@@ -11,3 +11,20 @@ When several agents are working alongside one another, make any workspace edits 
 ## Pull requests
 
 Agents must never merge pull requests. Leave every pull request open for a human to review and merge.
+
+## Agent skills
+
+### Issue tracker
+
+Issues are tracked on GitHub. External pull requests are not an automatic
+triage surface. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Triage uses the canonical state label names. See
+`docs/agents/triage-labels.md`.
+
+### Domain docs
+
+`dotfiles-nix` is a standalone user-environment producer; `system-nix` is its
+NixOS consumer. See `docs/agents/domain.md`.
