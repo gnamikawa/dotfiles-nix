@@ -11,9 +11,7 @@
     evtest
     libimobiledevice
     ifuse
-    grim
-    slurp
-    wl-clipboard
+    grimblast
     inotify-tools
     v4l-utils
 
