@@ -10,9 +10,9 @@ This repository maintains structure parity with system-nix — see
 
 Answers are short and in plain language. A few sentences beats a structured
 write-up; length is earned only when the subject genuinely needs it, never
-spent on restating or on options that won't be pursued. This governs
-conversation, not the repository's prose — ADRs, research notes and the
-definitions below are reference material and stay as long as they must be.
+spent on restating or on options that won't be pursued. The length rule is
+for conversation — ADRs, research notes and the definitions below are
+reference material and stay as long as they must be.
 
 A sentence must stand on its own. Never let an issue number, a pull request
 number, a section marker or a file path do the work of an explanation: say the
@@ -22,6 +22,14 @@ can follow it in parentheses. Assume the reader has not read what is being
 cited and will not go and read it now. This applies to references backwards in
 the same conversation too — a decision made an hour ago still needs restating
 in a clause, not pointed at.
+
+Define specialist terms on first use in an exchange. If a reader would need a
+glossary to parse the sentence, either reword it or gloss the term in a clause
+before using it. And when the point turns on specific wording in a file, quote
+that wording into the sentence itself; a line number is a pointer, not an
+explanation. Both rules apply to the repository's prose (ADRs, research notes,
+commit messages) as well as to conversation — length can grow when a document
+needs it, but jargon-without-context and pointer-in-place-of-explanation cannot.
 
 ## Terms
 
