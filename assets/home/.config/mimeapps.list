@@ -1,6 +1,9 @@
 [Default Applications]
 application/pdf=org.pwmt.zathura-pdf-mupdf.desktop
 inode/directory=pcmanfm.desktop
+text/html=firefox.desktop
+x-scheme-handler/http=firefox.desktop
+x-scheme-handler/https=firefox.desktop
 image/png=feh.desktop
 image/*=feh.desktop
 x-scheme-handler/claude-cli=claude-code-url-handler.desktop
