@@ -2,10 +2,8 @@
 
 `dotfiles-nix` is the centralized, opinionated configuration of one user's
 applications, preferences, packages, development environments, and desktop
-behaviour. It is a personal system built for `genzo`. This page is primarily
-for technically capable visitors who want to evaluate it or learn from its
-design, and secondarily for the maintainer as a concise map back into the
-repository.
+behaviour. It is a personal system built for `genzo`. This page is written for
+interested individuals who want to evaluate it or learn from its design.
 
 The goal is one coherent user environment that travels without pretending the
 underlying machines are identical. [Nix](https://nix.dev/install-nix) makes the
