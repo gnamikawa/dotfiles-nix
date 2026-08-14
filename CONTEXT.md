@@ -33,6 +33,16 @@ needs it, but jargon-without-context and pointer-in-place-of-explanation cannot.
 
 ## Terms
 
+### Portable user environment
+The centralized, opinionated configuration of one user's applications,
+preferences, packages, development environments, and desktop behaviour. It
+travels across Linux distributions and remains usable in a distribution-owned
+graphical session, a graphical terminal, a Linux TTY, or an SSH session. The
+full desktop profile deliberately supplies its own graphical session, while
+the terminal profile deliberately configures Bash rather than promising
+shell-agnostic behaviour. Operating-system configuration, hardware setup,
+secrets, and mutable user data remain outside this environment.
+
 ### Module
 One concern, one file, directly under `modules/`. A module is shared by every
 host; anything host-specific does not belong in one. Modules are composed into
