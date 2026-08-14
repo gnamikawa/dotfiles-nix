@@ -26,6 +26,13 @@ local-only commit, or a remote branch without a pull request. If issue, branch,
 push, or pull-request access is unavailable, do not edit the repository; report
 the blocker instead.
 
+Open the pull request as a draft when the work is incomplete or should not be
+merged in its current state. The draft pull-request body must state the reason
+the change should not be merged and list objective criteria for marking the
+pull request ready. Keep the pull request in draft until every readiness
+criterion listed in its body is satisfied. A draft pull request lets reviewers
+inspect incomplete work but does not represent completed work.
+
 ## Pull requests
 
 Agents must never merge pull requests. Leave every pull request open for a human to review and merge.
