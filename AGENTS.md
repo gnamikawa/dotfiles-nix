@@ -6,17 +6,15 @@ prose written into the repository (ADRs, research notes, commit messages).
 
 ## Collaboration
 
-Treat the shared workspace as read-only. Every agent must make every repository
-edit in a dedicated Git worktree under a temporary directory.
-The dedicated-worktree requirement applies to every task regardless of its
-size, the number of active agents, or whether the agent believes it is working
-alone.
+Reserve the top-level checkout for human changes. To keep agents from
+overwriting one another's work, every agent must make repository edits in a
+dedicated Git worktree under a temporary directory. Attach the worktree to an
+issue-specific branch so the agent's work for that issue remains isolated
+until it is presented for human review in a pull request. Never place an
+agent-authored edit or commit directly in the top-level checkout.
 
 Before editing, make sure a GitHub issue records the requested change. Create a
-GitHub issue when none exists. Create an issue-specific branch from the
-intended base branch, then attach the temporary worktree to that branch. Never
-place an agent-authored edit or commit directly on the branch checked out in
-the shared workspace.
+GitHub issue when none exists.
 
 Every agent-authored change must be committed, pushed to its issue-specific
 branch, and submitted as an open pull request before the agent finishes. The
