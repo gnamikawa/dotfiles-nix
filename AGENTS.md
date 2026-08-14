@@ -6,12 +6,13 @@ prose written into the repository (ADRs, research notes, commit messages).
 
 ## Collaboration
 
-Reserve the top-level checkout for human changes. To keep agents from
-overwriting one another's work, every agent must make repository edits in a
-dedicated Git worktree under a temporary directory. Attach the worktree to an
-issue-specific branch so the agent's work for that issue remains isolated
-until it is presented for human review in a pull request. Never place an
-agent-authored edit or commit directly in the top-level checkout.
+Reserve the top-level checkout, which is the repository directory used by the
+human, for human changes. To keep agents from overwriting one another's work,
+every agent must make repository edits in a dedicated Git worktree, which is a
+separate checkout of the same repository under a temporary directory. Attach
+the worktree to a branch named for the issue so the agent's work remains
+isolated until it is presented for human review in a pull request. Never place
+an agent-authored edit or commit directly in the top-level checkout.
 
 Before editing, make sure a GitHub issue records the requested change. Create a
 GitHub issue when none exists.
@@ -20,8 +21,9 @@ Every agent-authored change must be committed, pushed to its issue-specific
 branch, and submitted as an open pull request before the agent finishes. The
 pull request must link the tracking issue, and the tracking issue must link the
 pull request. Never leave an agent-authored change as an uncommitted edit, a
-local-only commit, or a remote branch without a pull request. If issue, branch,
-push, or pull-request access is unavailable, do not edit the repository; report
+commit that exists only locally, or a branch on GitHub without a pull request.
+If the permissions needed to create the issue and branch, publish the branch,
+or open the pull request are unavailable, do not edit the repository; report
 the blocker instead.
 
 Open the pull request as a draft when the work is incomplete or should not be
