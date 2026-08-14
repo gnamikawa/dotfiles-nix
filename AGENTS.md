@@ -10,7 +10,7 @@ Reserve the top-level checkout, which is the repository directory used by the
 human, for human changes. To keep agents from overwriting one another's work,
 every agent must make repository edits in a dedicated Git worktree, which is a
 separate checkout of the same repository under a temporary directory. Attach
-the worktree to a branch named for the issue so the agent's work remains
+the worktree to a branch used only for that issue so the agent's work remains
 isolated until it is presented for human review in a pull request. Never place
 an agent-authored edit or commit directly in the top-level checkout.
 
