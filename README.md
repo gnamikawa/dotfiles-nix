@@ -78,9 +78,10 @@ requiring NixOS.
 
 ## Inspect before activating
 
-You need [Nix](https://nix.dev/install-nix) with
-[flakes enabled](https://nix.dev/concepts/flakes.html). Activation also needs
-the [Home Manager command](https://nix-community.github.io/home-manager/nix-flakes/standalone.html).
+You need [Nix](https://nix.dev/install-nix) with the `flakes` and
+`pipe-operators` [experimental features](https://nix.dev/manual/nix/latest/development/experimental-features.html)
+enabled. Activation also needs the
+[Home Manager command](https://nix-community.github.io/home-manager/nix-flakes/standalone.html).
 These links cover the wider Nix ecosystem; this README only describes this
 repository's entry points.
 
