@@ -1,6 +1,11 @@
 {
   description = "Home Manager configuration of genzo";
 
+  # Declare pipe-operators here so a fresh checkout evaluates with only the
+  # `flakes` feature pre-enabled. Users must either be in `trusted-users` or
+  # pass `--accept-flake-config`; otherwise Nix warns and ignores this block.
+  nixConfig.extra-experimental-features = [ "pipe-operators" ];
+
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     home-manager = {
