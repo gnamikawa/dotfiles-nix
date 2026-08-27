@@ -54,3 +54,8 @@ Triage uses the canonical state label names. See
 
 `dotfiles-nix` is a standalone user-environment producer; `system-nix` is its
 NixOS consumer. See `docs/agents/domain.md`.
+
+### Coding style
+
+Repository coding style — pipe-operator preference and multi-line
+argument handling. See `STYLE.md`.
