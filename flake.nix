@@ -161,6 +161,12 @@
         ];
 
         "genzo-terminal" = standalone [ ./modules/terminal.nix ];
+
+        # Default alias: `home-manager switch --flake .` on the `genzo`
+        # account falls through to homeConfigurations.<user>, which resolves
+        # here. Desktop is the loudest of the three; the two safer profiles
+        # remain reachable via their explicit attribute names.
+        "genzo" = self.homeConfigurations."genzo-desktop";
       };
 
       # Development environments (see CONTEXT.md): self-sufficient devShells
