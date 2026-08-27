@@ -24,7 +24,7 @@ pkgs.stdenv.mkDerivation {
   pname = "genzo-session-lock";
   version = "0.1.0";
 
-  # The shared screen (view, stylesheet, icons) lives in components/screen/;
+  # The shared auth panel (view, stylesheet, icons) lives in components/auth/;
   # the domain helpers (auth-machine, monitors, power, sysinfo) live in
   # common/. Both are also bundled by packages/greeter.nix. The lock's own
   # bits — its entry point, PAM controller, secondary-cover stylesheet, and
@@ -66,10 +66,10 @@ pkgs.stdenv.mkDerivation {
     # The stylesheet is imported as text into a generated script, so GTK has
     # no source-file base from which to resolve a relative CSS import. Point it
     # at the immutable token sheet before bundling, as the prototype did.
-    substituteInPlace $out/share/genzo-session-lock/source/components/screen/style.css \
+    substituteInPlace $out/share/genzo-session-lock/source/components/auth/style.css \
       --replace-fail '../geistdesign.css' 'file://${geistdesign}/geistdesign.css'
 
-    for icon in $out/share/genzo-session-lock/source/components/screen/icons/*.svg; do
+    for icon in $out/share/genzo-session-lock/source/components/auth/icons/*.svg; do
       substituteInPlace "$icon" \
         --replace-fail 'stroke="currentColor"' 'stroke="${constants.palette.dark.colors.amber."1000"}"'
       resvg -w 64 "$icon" "''${icon%.svg}.png"

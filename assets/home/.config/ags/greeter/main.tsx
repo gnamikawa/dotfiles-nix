@@ -13,10 +13,10 @@
 
 import app from "ags/gtk4/app";
 import Astal from "gi://Astal?version=4.0";
-import Screen from "../components/screen/Screen";
+import Auth from "../components/auth/Auth";
 import { findPrimaryMonitor } from "../common/monitors";
 import { createGreeterController } from "./controller";
-import css from "../components/screen/style.css";
+import css from "../components/auth/style.css";
 
 app.start({
   instanceName: "greeter",
@@ -52,7 +52,7 @@ app.start({
         {/* greetd hands the seat over only once the greeter process is gone,
             so a started session is this process's cue to exit. The controller
             calls the onAuthenticated callback above on a successful login. */}
-        <Screen controller={controller} />
+        <Auth controller={controller} />
       </window>
     );
   },

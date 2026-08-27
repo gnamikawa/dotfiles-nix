@@ -37,7 +37,7 @@ pkgs.stdenv.mkDerivation {
   # to these paths is what keeps an edit to the session's app.tsx — which needs
   # no rebuild at all — from changing this package's hash and with it the whole
   # system closure. The screen's view, its stylesheet, and the domain helpers
-  # (monitors, power, sysinfo) it consumes live in components/screen/ and
+  # (monitors, power, sysinfo) it consumes live in components/auth/ and
   # common/ respectively, shared with packages/session-lock.nix.
   src = lib.fileset.toSource {
     root = ../assets/home/.config/ags;
@@ -77,10 +77,10 @@ pkgs.stdenv.mkDerivation {
     # a relative @import against. Point the token sheet at the immutable store
     # path before bundling, mirroring session-lock.nix — otherwise every
     # `var(--ds-...)` is invalid at runtime and the dot row disappears.
-    substituteInPlace $out/share/components/screen/style.css \
+    substituteInPlace $out/share/components/auth/style.css \
       --replace-fail '../geistdesign.css' 'file://${geistdesign}/geistdesign.css'
 
-    for icon in $out/share/components/screen/icons/*.svg; do
+    for icon in $out/share/components/auth/icons/*.svg; do
       # SVG stays diffable in the source tree without baking in a colour.
       # resvg cannot inherit GTK CSS, so materialise the token in the derived
       # copy immediately before rasterising it.
@@ -91,8 +91,8 @@ pkgs.stdenv.mkDerivation {
     done
 
     # No -d SRC: the bundler already defines it as the entry file's directory
-    # (cli/lib/esbuild.go), which is greeter/. Screen.tsx resolves the icons at
-    # ''${SRC}/../components/screen/icons, so the source-tree layout under
+    # (cli/lib/esbuild.go), which is greeter/. Auth.tsx resolves the icons at
+    # ''${SRC}/../components/auth/icons, so the source-tree layout under
     # share/ is what makes that path valid. -r points at the tree root so
     # tsconfig.json is found — the bundler reads it, but its `paths` are
     # overridden by the framework alias esbuild sets for `ags` and `gnim`.

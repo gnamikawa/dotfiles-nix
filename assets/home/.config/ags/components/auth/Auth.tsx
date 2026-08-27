@@ -1,8 +1,8 @@
-// The auth screen shared by the greeter and the session lock. What is on
+// The auth panel shared by the greeter and the lock screens. What is on
 // screen — a clock, a status rail, two power verbs, and eight password dots —
 // is the same in both contexts; only how the password is authenticated and how
 // the window is hosted differ, and both of those live behind the Controller
-// interface and each surface's own main.tsx.
+// interface and each screen's own main.tsx.
 //
 // Three zones on a warm near-black wash — a centred clock, a bottom-left
 // status rail, and bottom-right power verbs. The whole bottom band rests
@@ -26,10 +26,10 @@ import {
 } from "../../common/sysinfo";
 
 // SRC is the entry file's directory (env.d.ts). Both packages lay their source
-// out with `greeter/` (or `lock/`) as a sibling of `components/screen/`, so
+// out with `greeter/` (or `lock/`) as a sibling of `components/auth/`, so
 // this relative path resolves the same way from either entry.
 declare const SRC: string;
-const ICON_BASE = `${SRC}/../components/screen/icons`;
+const ICON_BASE = `${SRC}/../components/auth/icons`;
 
 // Height of the bottom band the rail and the verbs sit in, mirrored at the top.
 const BAND = 200;
@@ -49,7 +49,7 @@ function createPhase() {
   };
 }
 
-export default function Screen({ controller }: { controller: Controller }) {
+export default function Auth({ controller }: { controller: Controller }) {
   const time = createPoll("", 1000, () =>
     new Date().toLocaleTimeString("en-GB", {
       hour: "2-digit",

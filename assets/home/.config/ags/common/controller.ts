@@ -1,4 +1,4 @@
-// The interface Screen consumes to drive the password entry and read the
+// The interface Auth consumes to drive the password entry and read the
 // authentication state, decoupled from any specific backend (greetd, PAM) or
 // window mechanism (layer-shell, Gtk4SessionLock). Concrete controllers under
 // greeter/ and lock/ implement this shape.

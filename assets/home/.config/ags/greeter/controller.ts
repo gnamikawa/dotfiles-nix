@@ -1,5 +1,5 @@
 // The greeter-flavoured Controller: greetd's PAM conversation behind the
-// shared auth-machine, wired to the shared Screen through common/controller.
+// shared auth-machine, wired to the shared Auth panel through common/controller.
 
 import { createState } from "ags";
 import { Gtk } from "ags/gtk4";

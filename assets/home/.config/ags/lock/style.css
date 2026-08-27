@@ -1,5 +1,5 @@
-/* Session-lock-only coverage for non-primary outputs. The screen's own
- * stylesheet (components/screen/style.css) covers everything the primary
+/* Session-lock-only coverage for non-primary outputs. The auth panel's own
+ * stylesheet (components/auth/style.css) covers everything the primary
  * surface shows; only the opaque cover on non-interactive monitors is
  * a Gtk4SessionLock-shaped concern with no greeter equivalent. */
 

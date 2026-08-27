@@ -3,10 +3,10 @@ import { createRoot } from "ags";
 import { Gdk, Gtk } from "ags/gtk4";
 import SessionLock from "gi://Gtk4SessionLock?version=1.0";
 import GLib from "gi://GLib";
-import Screen from "../components/screen/Screen";
+import Auth from "../components/auth/Auth";
 import { findPrimaryMonitor } from "../common/monitors";
 import { createLockController } from "./controller";
-import screenCss from "../components/screen/style.css";
+import authCss from "../components/auth/style.css";
 import lockCss from "./style.css";
 
 const sessionLock = SessionLock.Instance.new();
@@ -54,11 +54,11 @@ sessionLock.connect("monitor", (_, monitor: Gdk.Monitor) => {
   // which crashes in gdk_wayland_toplevel_remove_from_session on hot-unplug.
   const window = new Gtk.Window();
   const cover = (<box class="lock-secondary" hexpand vexpand />) as Gtk.Widget;
-  const screen = (<Screen controller={controller} />) as Gtk.Widget;
+  const auth = (<Auth controller={controller} />) as Gtk.Widget;
 
   const dispose = createRoot((dispose) => {
     const overlay = new Gtk.Overlay();
-    overlay.set_child(screen);
+    overlay.set_child(auth);
     overlay.add_overlay(cover);
     window.set_child(overlay);
     return dispose;
@@ -106,7 +106,7 @@ app.start({
   // A second invocation must independently reach Gtk4SessionLock so it can
   // fail acquisition cleanly instead of being routed to the first AGS process.
   instanceName: `genzo-session-lock-${Date.now()}`,
-  css: `${screenCss}\n${lockCss}`,
+  css: `${authCss}\n${lockCss}`,
   main() {
     if (!SessionLock.is_supported()) {
       console.error("compositor does not support ext-session-lock-v1");

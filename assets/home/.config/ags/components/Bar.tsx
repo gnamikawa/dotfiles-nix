@@ -1,11 +1,10 @@
-// The pathfinder bar: numbered Hyprland workspaces, and deliberately nothing
-// else. It grows in place as later surface tickets settle the final bar.
+// The workspaces bar's content: numbered Hyprland workspaces for one monitor,
+// and deliberately nothing else. The layer-shell surface that hosts it lives
+// in desktop/Desktop.tsx, so Bar takes only what it needs — the connector —
+// and grows in place as later components land beside it.
 
-import { createBinding, For, onCleanup } from "ags";
-import app from "ags/gtk4/app";
-import Astal from "gi://Astal?version=4.0";
+import { createBinding, For } from "ags";
 import AstalHyprland from "gi://AstalHyprland";
-import Gdk from "gi://Gdk?version=4.0";
 import { space } from "geistdesign";
 
 const hyprland = AstalHyprland.get_default();
@@ -43,30 +42,10 @@ function Workspaces({ connector }: { connector: string }) {
   );
 }
 
-export default function Bar({ gdkmonitor }: { gdkmonitor: Gdk.Monitor }) {
-  let window: Astal.Window;
-  const connector = gdkmonitor.connector;
-  const { TOP, LEFT, RIGHT } = Astal.WindowAnchor;
-
-  onCleanup(() => window.destroy());
-
-  return connector ? (
-    <window
-      $={(self) => (window = self)}
-      visible
-      class="bar"
-      namespace="ags-bar"
-      name={`bar-${connector}`}
-      gdkmonitor={gdkmonitor}
-      exclusivity={Astal.Exclusivity.EXCLUSIVE}
-      anchor={TOP | LEFT | RIGHT}
-      application={app}
-    >
-      <box class="bar-content">
-        <Workspaces connector={connector} />
-      </box>
-    </window>
-  ) : (
-    <></>
+export default function Bar({ connector }: { connector: string }) {
+  return (
+    <box class="bar-content">
+      <Workspaces connector={connector} />
+    </box>
   );
 }
