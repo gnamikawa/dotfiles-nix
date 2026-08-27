@@ -1,12 +1,58 @@
-// The alt-tab overlay's open/closed signal. Hyprland's alt-hold binds toggle
-// it via `ags request alt-tab-open` / `ags request alt-tab-close` — the IPC
+// The alt-tab overlay's open/closed signal plus the cycling primitive both
+// the overlay and the Hyprland Tab binds share, so the visible list and the
+// keypress-driven focus advance can't drift out of sync.
+//
+// Hyprland's alt-hold binds toggle the open state via `ags request
+// alt-tab-open` / `ags request alt-tab-close`, and its Tab binds advance the
+// focus via `ags request alt-tab-next` / `ags request alt-tab-prev`. The IPC
 // wiring lives in app.tsx (requestHandler) and hypr/binds.conf.
 //
-// State only, no view: the surface that consumes altTabOpen lives in
-// desktop/Desktop.tsx and its content in components/AltTab.tsx.
+// Sort order is spatial (top-to-bottom, then left-to-right), tie-broken by
+// address for stability. `layoutmsg cyclenext` walks the layout tree, which
+// doesn't match what the overlay renders — driving both from the same sorted
+// list is what keeps Tab/Shift-Tab walking down/up the visible rows.
+//
+// The surface that consumes altTabOpen lives in desktop/Desktop.tsx and its
+// content in components/AltTab.tsx.
 
 import { createState } from "ags";
+import AstalHyprland from "gi://AstalHyprland";
 
 const [state, set] = createState(false);
 export const altTabOpen = state;
 export const setAltTabOpen = set;
+
+const hyprland = AstalHyprland.get_default();
+
+// Hyprland's `address` property comes back without the 0x prefix on some
+// builds and with it on others; `focuswindow` wants the 0x form, so normalise
+// before dispatching.
+export function addressOf(client: AstalHyprland.Client): string {
+  const address = client.address ?? "";
+  return address.startsWith("0x") ? address : `0x${address}`;
+}
+
+export function sortedClientsOnWorkspace(
+  wsId: number,
+): AstalHyprland.Client[] {
+  return hyprland
+    .get_clients()
+    .filter((c) => c.workspace?.id === wsId)
+    .sort((a, b) => {
+      if (a.y !== b.y) return a.y - b.y;
+      if (a.x !== b.x) return a.x - b.x;
+      return a.address < b.address ? -1 : 1;
+    });
+}
+
+export function cycleAltTab(direction: 1 | -1): void {
+  const current = hyprland.get_focused_client();
+  const wsId = current?.workspace?.id;
+  if (wsId == null) return;
+  const list = sortedClientsOnWorkspace(wsId);
+  if (list.length === 0) return;
+  const currentIdx = list.findIndex((c) => c.address === current?.address);
+  const from = currentIdx < 0 ? 0 : currentIdx;
+  const next = list[(from + direction + list.length) % list.length];
+  hyprland.dispatch("focuswindow", `address:${addressOf(next)}`);
+}

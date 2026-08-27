@@ -8,7 +8,7 @@
 
 import app from "ags/gtk4/app";
 import Desktop from "./desktop/Desktop";
-import { setAltTabOpen } from "./common/alt-tab";
+import { cycleAltTab, setAltTabOpen } from "./common/alt-tab";
 import { setRunnerOpen } from "./common/runner";
 
 app.start({
@@ -30,6 +30,14 @@ app.start({
       case "alt-tab-close":
         setAltTabOpen(false);
         res("close");
+        return;
+      case "alt-tab-next":
+        cycleAltTab(1);
+        res("next");
+        return;
+      case "alt-tab-prev":
+        cycleAltTab(-1);
+        res("prev");
         return;
       case "runner-open":
         // The runner outlives Alt-hold: force the peek off so the two visibility

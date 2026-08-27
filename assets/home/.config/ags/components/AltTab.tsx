@@ -5,12 +5,14 @@
 // nothing about windows.
 //
 // Click a row to focus its client; releasing Alt drops the overlay via the
-// alt-tab-close IPC. Keyboard focus is not captured — cycling still happens
-// through Hyprland's own vim binds ($mod H/J/K/L).
+// alt-tab-close IPC. Keyboard focus is not captured — Alt+Tab and Alt+Shift+Tab
+// drive cycling through the alt-tab-next / alt-tab-prev IPCs (see
+// common/alt-tab.ts), and $mod H/J/K/L still moves focus spatially.
 
 import { createBinding, createComputed, With } from "ags";
 import { Gtk } from "ags/gtk4";
 import AstalHyprland from "gi://AstalHyprland";
+import { addressOf, sortedClientsOnWorkspace } from "../common/alt-tab";
 
 const hyprland = AstalHyprland.get_default();
 
@@ -23,26 +25,20 @@ function attachClick(self: Gtk.Widget, cb: () => void) {
   self.add_controller(gesture);
 }
 
-// Hyprland's `address` property comes back without the 0x prefix on some
-// builds and with it on others; `focuswindow` wants the 0x form, so normalise
-// before dispatching.
-function addressOf(client: AstalHyprland.Client): string {
-  const address = client.address ?? "";
-  return address.startsWith("0x") ? address : `0x${address}`;
-}
-
 export default function AltTab() {
   // A single computed carries everything the view needs — the current
   // workspace's clients, its name, and which one is focused — so the row
   // list rebuilds atomically when the workspace changes rather than in two
-  // out-of-order steps.
+  // out-of-order steps. `clients` is read only as a change trigger; the
+  // sorted list itself comes from the shared helper the Tab binds also use,
+  // so what the user sees and what Tab advances through stay in lockstep.
   const view = createComputed(() => {
     const current = focusedClient();
     const all = clients();
     if (!all || all.length === 0) return null;
     const wsId = current?.workspace?.id;
     if (wsId == null) return null;
-    const wsClients = all.filter((c) => c.workspace?.id === wsId);
+    const wsClients = sortedClientsOnWorkspace(wsId);
     if (wsClients.length === 0) return null;
     return {
       wsClients,
