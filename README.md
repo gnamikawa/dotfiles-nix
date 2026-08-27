@@ -78,9 +78,13 @@ requiring NixOS.
 
 ## Inspect before activating
 
-You need [Nix](https://nix.dev/install-nix) with the `flakes` and
-`pipe-operators` [experimental features](https://nix.dev/manual/nix/latest/development/experimental-features.html)
-enabled. Activation also needs the
+You need [Nix](https://nix.dev/install-nix) with the `flakes`
+[experimental feature](https://nix.dev/manual/nix/latest/development/experimental-features.html)
+enabled. The flake also uses the `pipe-operators` feature; it declares that
+itself, so you do not enable it in `nix.conf` — but Nix only trusts a flake's
+declared config for a trusted user, so either add yourself to `trusted-users`
+in `nix.conf` or pass `--accept-flake-config` on every command. Activation
+also needs the
 [Home Manager command](https://nix-community.github.io/home-manager/nix-flakes/standalone.html).
 These links cover the wider Nix ecosystem; this README only describes this
 repository's entry points.
@@ -118,7 +122,10 @@ $ home-manager switch --flake .#genzo-terminal
 
 Replace `genzo-terminal` with `genzo-apps` or `genzo-desktop` only after
 reviewing the larger profile. In particular, `genzo-desktop` supplies a
-graphical session rather than fitting beneath an existing one.
+graphical session rather than fitting beneath an existing one. Home Manager's
+default lookup on the `genzo` account resolves `home-manager switch --flake .`
+(no attribute) to `genzo-desktop`, so the attributeless form activates the
+full desktop.
 
 ## Compatibility and maturity
 
