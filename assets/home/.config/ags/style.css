@@ -7,33 +7,65 @@ window.bar {
   color: var(--ds-text-primary-gray);
 }
 
+/* Anchored only to TOP, the surface no longer spans the output — the bar is a
+ * pill hanging from the top edge, so its ends need a border and its bottom
+ * corners round off. */
 .bar-content {
   min-height: 32px;
-  padding: 4px 8px;
+  padding: 4px 12px;
   background-color: var(--ds-background-default);
-  border-bottom: 1px solid var(--ds-border-default-gray);
+  border: 1px solid var(--ds-border-default-gray);
+  border-top: none;
+  border-radius: 0 0 var(--ds-radius-base) var(--ds-radius-base);
 }
 
-.workspace {
-  min-width: 28px;
-  min-height: 28px;
-  padding: 0;
-  color: var(--ds-text-secondary-gray);
+/* Alt-tab overlay — a card floating below the bar while Alt is held.
+ * Exclusivity.IGNORE (see Desktop.tsx) means it overlays whatever's beneath
+ * without reserving space. */
+window.alt-tab-window {
   background: transparent;
-  border: 1px solid transparent;
-  border-radius: var(--ds-radius-base);
-  box-shadow: none;
-  outline: none;
-}
-
-.workspace:hover {
   color: var(--ds-text-primary-gray);
-  background-color: var(--ds-component-background-hover-gray);
-  border-color: var(--ds-border-hover-gray);
 }
 
-.workspace.active {
-  color: var(--ds-text-primary-blue);
+.alt-tab {
+  min-width: 340px;
+  padding: 8px 12px;
+  background-color: var(--ds-background-default);
+  border: 1px solid var(--ds-border-default-gray);
+  border-radius: var(--ds-radius-base);
+}
+
+.alt-tab-header {
+  padding: 0 4px 6px 4px;
+  border-bottom: 1px solid var(--ds-border-default-gray);
+  margin-bottom: 4px;
+}
+
+.alt-tab-header-label,
+.alt-tab-header-count {
+  color: var(--ds-text-secondary-gray);
+}
+
+.alt-tab-row {
+  padding: 6px 4px;
+  border-radius: var(--ds-radius-base);
+}
+
+.alt-tab-row:hover {
+  background-color: var(--ds-component-background-hover-gray);
+}
+
+.alt-tab-row.current {
   background-color: var(--ds-component-background-active-blue);
-  border-color: var(--ds-border-active-blue);
+  color: var(--ds-text-primary-blue);
+}
+
+.alt-tab-index {
+  min-width: 18px;
+  color: var(--ds-text-secondary-gray);
+}
+
+.alt-tab-title {
+  color: var(--ds-text-secondary-gray);
+  font-size: 12px;
 }
