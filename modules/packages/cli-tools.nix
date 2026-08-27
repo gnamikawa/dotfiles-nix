@@ -50,8 +50,5 @@
     fastfetch
     yt-dlp
 
-    # ── System Management ─────────────────────────────────────────────────────
-    home-manager
-
   ];
 }
