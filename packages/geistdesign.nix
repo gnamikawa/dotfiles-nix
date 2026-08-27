@@ -14,10 +14,10 @@ let
   inherit (pkgs) lib;
 
   kebab = value:
-    lib.concatMapStrings (
+    value |> lib.stringToCharacters |> lib.concatMapStrings (
       character:
       if builtins.match "[A-Z]" character != null then "-${lib.toLower character}" else character
-    ) (lib.stringToCharacters value);
+    );
 
   propertyName = path: "--ds-${lib.concatMapStringsSep "-" kebab path}";
 
@@ -26,46 +26,51 @@ let
 
   properties = path: values:
     if lib.isAttrs values then
-      lib.concatMapStrings (
+      values |> lib.attrNames |> lib.concatMapStrings (
         name: properties (path ++ [ name ]) values.${name}
-      ) (lib.attrNames values)
+      )
     else
       "  ${propertyName path}: ${cssValue path values};\n";
 
   themeProperties = theme:
-    properties [ ] (lib.removeAttrs constants.palette.${theme} [ "colors" ])
+    let
+      paletteMinusColors = lib.removeAttrs constants.palette.${theme} [ "colors" ];
+    in
+    properties [ ] paletteMinusColors
     + properties [ ] constants.palette.${theme}.colors
     + properties [ ] constants.theme.${theme}
     + properties [ "shadow" ] constants.shadow.${theme}
     + properties [ "focus" ] constants.focus.${theme};
 
   typeProperties = values:
-    lib.concatMapStrings (
-      name:
-      let
-        cssName = {
-          family = "font-family";
-          size = "font-size";
-          lineHeight = "line-height";
-          weight = "font-weight";
-          letterSpacing = "letter-spacing";
-        }.${name};
-        value = values.${name};
-        rendered = if name == "family" then "\"${value}\"" else toString value;
-      in
-      "  ${cssName}: ${rendered};\n"
-    ) (lib.attrNames values);
+    let
+      renderProperty = name:
+        let
+          cssName = {
+            family = "font-family";
+            size = "font-size";
+            lineHeight = "line-height";
+            weight = "font-weight";
+            letterSpacing = "letter-spacing";
+          }.${name};
+          value = values.${name};
+          rendered = if name == "family" then "\"${value}\"" else toString value;
+        in
+        "  ${cssName}: ${rendered};\n";
+    in
+    values |> lib.attrNames |> lib.concatMapStrings renderProperty;
 
   typeClasses =
-    lib.concatMapStrings (
-      family:
-      lib.concatMapStrings (
-        size:
-        ".text-${family}-${size} {\n${typeProperties constants.type.${family}.${size}}}\n\n"
-      ) (lib.attrNames constants.type.${family})
-    ) [ "heading" "copy" "label" "button" ];
+    let
+      perFamily = family:
+        constants.type.${family} |> lib.attrNames |> lib.concatMapStrings (
+          size:
+          ".text-${family}-${size} {\n${typeProperties constants.type.${family}.${size}}}\n\n"
+        );
+    in
+    [ "heading" "copy" "label" "button" ] |> lib.concatMapStrings perFamily;
 
-  stylesheet = pkgs.writeText "geistdesign.css" ''
+  stylesheetText = ''
     /* Generated from constants/. Do not edit: update the source token family. */
 
     :root {
@@ -83,8 +88,9 @@ let
 
     ${typeClasses}
   '';
+  stylesheet = pkgs.writeText "geistdesign.css" stylesheetText;
 
-  typescript = pkgs.writeText "index.ts" ''
+  typescriptText = ''
     // Generated from constants/. CSS owns every colour; this module carries
     // only values GTK widgets cannot consume from a stylesheet.
     export const space = ${builtins.toJSON constants.space} as const
@@ -94,9 +100,12 @@ let
       popover.duration = constants.motion.popover.duration;
     }} as const
   '';
+  typescript = pkgs.writeText "index.ts" typescriptText;
+
+  buildScript = ''
+    mkdir -p "$out"
+    cp ${stylesheet} "$out/geistdesign.css"
+    cp ${typescript} "$out/index.ts"
+  '';
 in
-pkgs.runCommand "geistdesign" { } ''
-  mkdir -p "$out"
-  cp ${stylesheet} "$out/geistdesign.css"
-  cp ${typescript} "$out/index.ts"
-''
+pkgs.runCommand "geistdesign" { } buildScript
