@@ -7,19 +7,34 @@ window.bar {
   color: var(--ds-text-primary-gray);
 }
 
-/* Anchored only to TOP, the surface no longer spans the output — the bar is a
- * pill hanging from the top edge, so its ends need a border and its bottom
- * corners round off. */
+/* Anchored TOP + LEFT + RIGHT (see Desktop.tsx BarSurface), so the bar spans
+ * the whole top edge — the drag-down surface will attach a swipe on the left
+ * zone once it lands. No radius; a thin bottom border seams it to the desktop. */
 .bar-content {
   min-height: 32px;
   padding: 4px 12px;
   background-color: var(--ds-background-default);
-  border: 1px solid var(--ds-border-default-gray);
-  border-top: none;
-  border-radius: 0 0 var(--ds-radius-base) var(--ds-radius-base);
+  border-bottom: 1px solid var(--ds-border-default-gray);
 }
 
-/* Alt-tab overlay — a card floating below the bar while Alt is held.
+.bar-left {
+  /* Reserved for the drag-down Control-Center summon. Empty on purpose. */
+  min-width: 40px;
+}
+
+.bar-right {
+  color: var(--ds-text-secondary-gray);
+}
+
+.bar-icon {
+  color: var(--ds-text-secondary-gray);
+}
+
+.bar-clock {
+  color: var(--ds-text-primary-gray);
+}
+
+/* Alt-tab peek — a card floating below the bar while Alt is held.
  * Exclusivity.IGNORE (see Desktop.tsx) means it overlays whatever's beneath
  * without reserving space. */
 window.alt-tab-window {
@@ -68,4 +83,61 @@ window.alt-tab-window {
 .alt-tab-title {
   color: var(--ds-text-secondary-gray);
   font-size: 12px;
+}
+
+/* Runner — its own summoned card, Alt+F3. Sits at the same top-of-screen
+ * offset as the alt-tab peek so the two feel like siblings, not layers. */
+window.runner-window {
+  background: transparent;
+  color: var(--ds-text-primary-gray);
+}
+
+.runner-wrap {
+  min-width: 420px;
+  padding: 8px 12px;
+  background-color: var(--ds-background-default);
+  border: 1px solid var(--ds-border-default-gray);
+  border-radius: var(--ds-radius-base);
+}
+
+.runner-input {
+  min-height: 28px;
+  padding: 2px 8px;
+  border-radius: var(--ds-radius-base);
+  background-color: var(--ds-background-default);
+  border: 1px solid var(--ds-border-default-gray);
+  color: var(--ds-text-primary-gray);
+}
+
+/* Workspace-viz — a screen-centered digit that blinks up on workspace change
+ * and hides itself (see common/workspace-viz.ts). Deliberately spartan. */
+window.ws-viz-window {
+  background: transparent;
+  color: var(--ds-text-primary-gray);
+}
+
+.ws-viz-wrap {
+  padding: 10px 14px;
+  background-color: var(--ds-background-default);
+  border: 1px solid var(--ds-border-default-gray);
+  border-radius: var(--ds-radius-base);
+}
+
+.ws-viz-monitor {
+  min-width: 72px;
+  color: var(--ds-text-secondary-gray);
+  font-size: 11px;
+}
+
+.ws-viz-ws {
+  min-width: 18px;
+  padding: 1px 5px;
+  border-radius: var(--ds-radius-base);
+  color: var(--ds-text-secondary-gray);
+  font-size: 12px;
+}
+
+.ws-viz-ws.current {
+  background-color: var(--ds-component-background-active-blue);
+  color: var(--ds-text-primary-blue);
 }

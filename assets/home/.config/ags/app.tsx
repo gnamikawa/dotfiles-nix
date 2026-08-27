@@ -9,6 +9,7 @@
 import app from "ags/gtk4/app";
 import Desktop from "./desktop/Desktop";
 import { setAltTabOpen } from "./common/alt-tab";
+import { setRunnerOpen } from "./common/runner";
 
 app.start({
   css: `${SRC}/style.css`,
@@ -28,6 +29,18 @@ app.start({
         return;
       case "alt-tab-close":
         setAltTabOpen(false);
+        res("close");
+        return;
+      case "runner-open":
+        // The runner outlives Alt-hold: force the peek off so the two visibility
+        // states don't stack, then flip the runner on. The bindrt Alt release
+        // fires alt-tab-close afterwards and finds nothing to close.
+        setAltTabOpen(false);
+        setRunnerOpen(true);
+        res("open");
+        return;
+      case "runner-close":
+        setRunnerOpen(false);
         res("close");
         return;
       default:
