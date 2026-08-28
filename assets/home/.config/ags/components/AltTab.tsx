@@ -13,6 +13,7 @@ import { createBinding, createComputed, With } from "ags";
 import { Gtk } from "ags/gtk4";
 import AstalHyprland from "gi://AstalHyprland";
 import { addressOf, sortedClientsOnWorkspace } from "../common/alt-tab";
+import { focusWindow } from "../common/hypr-dispatch";
 
 const hyprland = AstalHyprland.get_default();
 
@@ -79,10 +80,7 @@ export default function AltTab() {
                   spacing={10}
                   $={(self) =>
                     attachClick(self, () =>
-                      hyprland.dispatch(
-                        "focuswindow",
-                        `address:${addressOf(client)}`,
-                      ),
+                      focusWindow(addressOf(client)),
                     )
                   }
                 >

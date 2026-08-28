@@ -17,6 +17,7 @@
 
 import { createState } from "ags";
 import AstalHyprland from "gi://AstalHyprland";
+import { focusWindow } from "./hypr-dispatch";
 
 const [state, set] = createState(false);
 export const altTabOpen = state;
@@ -54,5 +55,5 @@ export function cycleAltTab(direction: 1 | -1): void {
   const currentIdx = list.findIndex((c) => c.address === current?.address);
   const from = currentIdx < 0 ? 0 : currentIdx;
   const next = list[(from + direction + list.length) % list.length];
-  hyprland.dispatch("focuswindow", `address:${addressOf(next)}`);
+  focusWindow(addressOf(next));
 }

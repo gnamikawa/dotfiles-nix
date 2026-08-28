@@ -12,14 +12,13 @@ import { createComputed, createEffect, createState, With } from "ags";
 import { Gtk } from "ags/gtk4";
 import Gdk from "gi://Gdk?version=4.0";
 import AstalApps from "gi://AstalApps";
-import AstalHyprland from "gi://AstalHyprland";
 import { runnerOpen, setRunnerOpen } from "../common/runner";
+import { execCmd } from "../common/hypr-dispatch";
 
 // Cap the visible list so a broad query (or an empty one) doesn't unfold into
 // a screen-tall menu — dmenu's terse ceiling, not wofi's scroller.
 const MAX_RESULTS = 10;
 
-const hyprland = AstalHyprland.get_default();
 // One Apps instance is enough — it caches its scan of desktop entries and
 // exposes fuzzy_query synchronously, so the runner can keep result assembly
 // inside a reactive computed instead of async plumbing.
@@ -54,9 +53,9 @@ export default function Runner() {
     // on `systemctl restart ags`. AstalApps.launch() doesn't detach.
     if (chosen) {
       const cmd = (chosen.executable || "").replace(/\s%[fFuU]/g, "").trim();
-      if (cmd) hyprland.dispatch("exec", cmd);
+      if (cmd) execCmd(cmd);
     } else if (raw) {
-      hyprland.dispatch("exec", raw);
+      execCmd(raw);
     }
   }
 
