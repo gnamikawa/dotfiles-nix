@@ -84,7 +84,28 @@ function computeWifiIcon(): string {
   return "network-wireless-signal-none-symbolic";
 }
 
+function computeWifiTooltip(): string {
+  const wifi = getWifiDevice();
+  if (!wifi) return "No Wi-Fi adapter";
+  if (!nmClient.wireless_enabled) return "Wi-Fi off";
+
+  const state = wifi.get_state();
+  const DS = NM.DeviceState;
+  if (state === DS.UNAVAILABLE) return "Wi-Fi unavailable";
+  if (state === DS.DISCONNECTED) return "Not connected";
+  if (state === DS.FAILED) return "Connection failed";
+  if (state !== DS.ACTIVATED) return "Connecting…";
+
+  const name = wifi.get_active_connection()?.get_id() ?? "Wi-Fi";
+  if (nmClient.get_connectivity() !== NM.ConnectivityState.FULL) {
+    return `${name} — no internet`;
+  }
+  const strength = wifi.get_active_access_point()?.get_strength() ?? 0;
+  return `${name} · ${strength}%`;
+}
+
 const wifiIconName = createPoll<string>(computeWifiIcon(), 3000, computeWifiIcon);
+const wifiTooltip = createPoll<string>(computeWifiTooltip(), 3000, computeWifiTooltip);
 
 const isPowered = createBinding(bluetooth, "isPowered");
 const isConnected = createBinding(bluetooth, "isConnected");
@@ -93,15 +114,28 @@ const btIconName = createComputed(() => {
   if (isConnected()) return "bluetooth-active-symbolic";
   return "bluetooth-symbolic";
 });
+const btTooltip = createComputed(() => {
+  if (!isPowered()) return "Bluetooth off";
+  if (isConnected()) return "Bluetooth connected";
+  return "Bluetooth on";
+});
 
 export default function Bar() {
-  const time = createPoll("", 1000, () =>
+  const fmtTime = () =>
     new Date().toLocaleTimeString("en-US", {
       hour: "numeric",
       minute: "2-digit",
       hour12: true,
-    }),
-  );
+    });
+  const fmtDate = () =>
+    new Date().toLocaleDateString("en-US", {
+      weekday: "long",
+      month: "long",
+      day: "numeric",
+      year: "numeric",
+    });
+  const time = createPoll(fmtTime(), 1000, fmtTime);
+  const clockTooltip = createPoll(fmtDate(), 60_000, fmtDate);
 
   return (
     <box class="bar-content" spacing={0}>
@@ -109,9 +143,23 @@ export default function Bar() {
           attach here when the iOS-style Control-Center surface lands. */}
       <box class="bar-left" hexpand />
       <box class="bar-right" spacing={10} valign={Gtk.Align.CENTER}>
-        <image class="bar-icon" iconName={btIconName} pixelSize={16} />
-        <image class="bar-icon" iconName={wifiIconName} pixelSize={16} />
-        <label class="bar-clock text-button-14" label={time} />
+        <image
+          class="bar-icon"
+          iconName={btIconName}
+          tooltipText={btTooltip}
+          pixelSize={16}
+        />
+        <image
+          class="bar-icon"
+          iconName={wifiIconName}
+          tooltipText={wifiTooltip}
+          pixelSize={16}
+        />
+        <label
+          class="bar-clock text-button-14"
+          label={time}
+          tooltipText={clockTooltip}
+        />
       </box>
     </box>
   );
