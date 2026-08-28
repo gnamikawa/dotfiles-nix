@@ -10,20 +10,81 @@
 import { createBinding, createComputed } from "ags";
 import { createPoll } from "ags/time";
 import { Gtk } from "ags/gtk4";
-import AstalNetwork from "gi://AstalNetwork";
+import NM from "gi://NM";
 import AstalBluetooth from "gi://AstalBluetooth";
 
-const network = AstalNetwork.get_default();
 const bluetooth = AstalBluetooth.get_default();
 
-// Prototype: poll every 3 s rather than wire notify:: chains through wifi's
-// appear/disappear lifetime. Adequate for at-a-glance icon state; revisit
-// when the drag-down surface arrives and wants richer detail.
-const wifiIconName = createPoll<string>(
-  network.wifi?.iconName ?? "network-wireless-offline-symbolic",
-  3000,
-  () => network.wifi?.iconName ?? "network-wireless-offline-symbolic",
-);
+// We talk to NetworkManager directly instead of via AstalNetwork. Three
+// upstream bugs live in astal-network's Wifi wrapper — merely constructing
+// the `AstalNetwork.Network` singleton triggers all of them by way of the
+// Wifi constructor:
+//
+//   1. `on_active_connection` never syncs `internet` from the current state,
+//      only wires a notify callback. When the active connection reaches
+//      ACTIVATED before the callback is attached (typical after a reconnect
+//      or resume), `internet` latches at DISCONNECTED and `iconName` sticks
+//      at `network-wireless-offline-symbolic` forever.
+//
+//   2. The `access_point_added` handler inserts into a string-keyed
+//      hashtable without null-checking `ap.bssid`. NM emits AP events with
+//      null bssid for transient management frames during association, and
+//      `g_str_hash(NULL)` segfaults the whole shell (six coredumps in a row
+//      when `nmcli connection up` reactivates wifi).
+//
+//   3. `on_active_access_point` dereferences the AP wrapper without null-
+//      checking after a `_access_points.get()` miss, spraying assertion
+//      failures at boot.
+//
+// gi://NM is the same NetworkManager introspection lib astal-network wraps,
+// so we get identical properties (state, connectivity, strength) with none
+// of the caching bugs, and no crashes on association.
+const nmClient = NM.Client.new(null);
+
+function getWifiDevice(): NM.DeviceWifi | null {
+  for (const d of nmClient.get_devices()) {
+    if (d.get_device_type() === NM.DeviceType.WIFI) {
+      return d as NM.DeviceWifi;
+    }
+  }
+  return null;
+}
+
+function computeWifiIcon(): string {
+  const wifi = getWifiDevice();
+  if (!wifi) return "network-wireless-offline-symbolic";
+  if (!nmClient.wireless_enabled) return "network-wireless-disabled-symbolic";
+
+  const state = wifi.get_state();
+  const DS = NM.DeviceState;
+
+  if (state !== DS.ACTIVATED) {
+    if (
+      state === DS.PREPARE ||
+      state === DS.CONFIG ||
+      state === DS.NEED_AUTH ||
+      state === DS.IP_CONFIG ||
+      state === DS.IP_CHECK ||
+      state === DS.SECONDARIES
+    ) {
+      return "network-wireless-acquiring-symbolic";
+    }
+    return "network-wireless-offline-symbolic";
+  }
+
+  if (nmClient.get_connectivity() !== NM.ConnectivityState.FULL) {
+    return "network-wireless-no-route-symbolic";
+  }
+
+  const strength = wifi.get_active_access_point()?.get_strength() ?? 0;
+  if (strength >= 80) return "network-wireless-signal-excellent-symbolic";
+  if (strength >= 60) return "network-wireless-signal-good-symbolic";
+  if (strength >= 40) return "network-wireless-signal-ok-symbolic";
+  if (strength >= 20) return "network-wireless-signal-weak-symbolic";
+  return "network-wireless-signal-none-symbolic";
+}
+
+const wifiIconName = createPoll<string>(computeWifiIcon(), 3000, computeWifiIcon);
 
 const isPowered = createBinding(bluetooth, "isPowered");
 const isConnected = createBinding(bluetooth, "isConnected");
