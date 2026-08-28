@@ -18,3 +18,21 @@ hl.window_rule({ match = { class = "firefox", title = "Picture-in-Picture" }, fl
 hl.window_rule({ match = { class = "firefox", title = "Picture-in-Picture" }, size  = "426 240"             })
 hl.window_rule({ match = { class = "firefox", title = "Picture-in-Picture" }, move  = "1462 0"              })
 hl.window_rule({ match = { class = "firefox", title = "Picture-in-Picture" }, pin   = true                  })
+
+-- ── AGS surfaces — physical motion per panel ─────────────────────────────
+-- Two motion families:
+--   Drawer — attached to an edge, slides in/out along that edge's normal.
+--   HUD    — not attached to any edge, materializes in place with a fade.
+--
+-- Bar is a shelf: bolted to the top edge, never moves once it's there.
+-- Alt-tab and runner are drawers pulled out from behind the bar — same
+-- top region, same slide motion. Ws-viz is a projected HUD, transient
+-- and unattached, so it fades in place.
+--
+-- The `layers` default in hyprland.lua is `fade`; only the drawers need
+-- an explicit slide override.
+
+hl.layer_rule({ match = { namespace = "^ags-bar$"     }, no_anim   = true    })
+hl.layer_rule({ match = { namespace = "^ags-alt-tab$" }, animation = "slide" })
+hl.layer_rule({ match = { namespace = "^ags-runner$"  }, animation = "slide" })
+hl.layer_rule({ match = { namespace = "^ags-ws-viz$"  }, animation = "fade"  })

@@ -74,7 +74,10 @@ hl.curve("ease", { type = "bezier", points = { {0.16, 1}, {0.3, 1} } })
 
 hl.animation({ leaf = "windows",    enabled = true, speed = 3, bezier = "ease", style = "popin 80%" })
 hl.animation({ leaf = "workspaces", enabled = true, speed = 4, bezier = "ease", style = "slide"      })
-hl.animation({ leaf = "layers",     enabled = true, speed = 3, bezier = "ease", style = "slide"      })
+-- Layer default is fade — the HUD metaphor (materialize in place). Surfaces
+-- that need to feel attached to an edge (drawers) opt into slide via
+-- per-namespace `hl.layer_rule` in rules.lua.
+hl.animation({ leaf = "layers",     enabled = true, speed = 3, bezier = "ease", style = "fade"       })
 hl.animation({ leaf = "border",     enabled = true, speed = 6, bezier = "ease"                       })
 hl.animation({ leaf = "fade",       enabled = true, speed = 3, bezier = "ease"                       })
 
