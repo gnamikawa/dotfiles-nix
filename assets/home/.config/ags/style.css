@@ -148,58 +148,69 @@ window.runner-window {
   font-size: 12px;
 }
 
-/* Workspace-viz — a screen-centered digit that blinks up on workspace change
- * and hides itself (see common/workspace-viz.ts). Deliberately spartan. */
-window.ws-viz-window {
-  background: transparent;
-  color: var(--ds-text-primary-gray);
-}
-
-.ws-viz-wrap {
-  padding: 10px 14px;
-  background-color: var(--ds-background-default);
-  border: 1px solid var(--ds-border-default-gray);
-  border-radius: var(--ds-radius-base);
-}
-
-.ws-viz-monitor {
-  min-width: 72px;
-  color: var(--ds-text-secondary-gray);
-  font-size: 11px;
-}
-
-.ws-viz-ws {
-  min-width: 18px;
-  padding: 1px 5px;
-  border-radius: var(--ds-radius-base);
-  color: var(--ds-text-secondary-gray);
-  font-size: 12px;
-}
-
-.ws-viz-ws.current {
-  background-color: var(--ds-component-background-active-blue);
-  color: var(--ds-text-primary-blue);
-}
-
-/* Monitor-id — a square HUD nameplate at the bottom-left of each output.
- * Fixed square footprint so all three screens present the same silhouette;
- * font sized to fit the widest connector name (HDMI-A-1). */
+/* Monitor plate — per-screen key card, bottom-left of each output. An
+ * adaptive workspace grid up top (ADR-0011: 1 / 1×2 / 2×2 / 3×3, chosen
+ * by peer count), current cell bright and peers dim, with a small
+ * connector caption below. The plate is a documented ADR-0009 exception:
+ * at this size, physical-object metaphors for the peer strip failed to
+ * hold identity, so density wins. Fixed footprint so every screen's
+ * plate has the same silhouette; the internal grid does the shape work. */
 window.monitor-id-window {
   background: transparent;
   color: var(--ds-text-primary-gray);
 }
 
-.monitor-id-wrap {
-  min-width: 96px;
-  min-height: 96px;
-  padding: 12px;
+.monitor-plate {
+  min-width: 120px;
+  min-height: 132px;
+  padding: 10px 12px;
   background-color: var(--ds-background-default);
   border: 1px solid var(--ds-border-default-gray);
+  border-radius: var(--ds-radius-base);
   box-shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.45);
 }
 
-.monitor-id-name {
-  font-size: 18px;
-  font-family: monospace;
+/* Grid area — font size scales down as the grid packs more cells in.
+ * Cells are plain <label>s; the current cell brightens, peer cells stay
+ * dim, empty cells hold layout space to keep the grid symmetric. */
+/* Every level of the plate hierarchy has an opaque background so any dirty
+ * pixel from a prior render gets overpainted this frame — With disposes and
+ * rebuilds the grid subtree on switch and GTK's dirty-region tracking can
+ * miss the old widget's full allocation. */
+.plate-grid {
+  min-width: 96px;
+  min-height: 96px;
+  background-color: var(--ds-background-default);
+}
+
+.plate-cell {
+  background-color: var(--ds-background-default);
+  font-weight: 600;
   color: var(--ds-text-secondary-gray);
+  opacity: 0.45;
+}
+
+.plate-cell.current {
+  color: var(--ds-text-primary-gray);
+  opacity: 1;
+}
+
+.plate-grid-1 .plate-cell {
+  font-size: 48px;
+}
+.plate-grid-2 .plate-cell {
+  font-size: 36px;
+}
+.plate-grid-4 .plate-cell {
+  font-size: 26px;
+}
+.plate-grid-9 .plate-cell {
+  font-size: 18px;
+}
+
+.monitor-plate-connector {
+  font-family: monospace;
+  font-size: 12px;
+  color: var(--ds-text-secondary-gray);
+  opacity: 0.75;
 }

@@ -1,14 +1,17 @@
-// The workspace-viz's open/closed signal. Two triggers combine:
+// The monitor-plate HUD's open/closed signal. Two triggers combine:
 //
 //   1. A transient blink on every focused-workspace change — the surface pops
 //      for HIDE_MS and hides itself. The compositor's switch caused it, so no
 //      user-facing trigger is involved.
-//   2. Alt-hold (altTabOpen). The visualization lists which workspaces sit on
-//      which monitors, so the user pressing Alt can immediately read the
-//      mapping and pick a number.
+//   2. Alt-hold (altTabOpen). The plate carries the active-workspace name for
+//      each screen, so during peek the user sees where each output currently
+//      is at a glance.
 //
 // The subscription is set up once at module load — the state is a singleton.
 // The surface that consumes workspaceVizOpen lives in desktop/Desktop.tsx.
+// (Name kept as `workspaceVizOpen` for continuity — the earlier ws-viz
+// surface was folded into MonitorId; the signal it drove did not need to
+// change.)
 
 import { createComputed, createState } from "ags";
 import AstalHyprland from "gi://AstalHyprland";

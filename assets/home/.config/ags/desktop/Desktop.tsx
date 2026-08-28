@@ -8,11 +8,10 @@
 //                     workspace's monitor.
 //   Runner          — every output; visible on Alt+F3, only on the focused
 //                     workspace's monitor. Owns keyboard focus while up.
-//   WorkspaceViz    — every output; blinks up on workspace change, only on
-//                     the focused workspace's monitor.
-//   MonitorId       — every output; blinks up on the same trigger as
-//                     WorkspaceViz, but visible on every output at once so
-//                     each screen carries its own big connector-name label.
+//   MonitorId       — every output; blinks up on workspace change or
+//                     Alt-hold. Every screen carries its own key card —
+//                     which physical screen this is (connector) plus which
+//                     workspace is currently in front on it (ADR-0009).
 // The leaf components stay just their content and know nothing about which
 // monitor they are on beyond a connector string, when they need it.
 
@@ -24,7 +23,6 @@ import AstalHyprland from "gi://AstalHyprland";
 import Bar from "../components/Bar";
 import AltTab from "../components/AltTab";
 import Runner from "../components/Runner";
-import WorkspaceViz from "../components/WorkspaceViz";
 import MonitorId from "../components/MonitorId";
 import { findPrimaryMonitor } from "../common/monitors";
 import { altTabOpen } from "../common/alt-tab";
@@ -137,45 +135,12 @@ function RunnerSurface({ gdkmonitor }: { gdkmonitor: Gdk.Monitor }) {
   );
 }
 
-// No anchor value — the layer-shell surface floats free, which the compositor
-// renders centred by default. The visualization is small and transient, so
-// centring keeps it out of the way of the workspace's contents.
-function WorkspaceVizSurface({ gdkmonitor }: { gdkmonitor: Gdk.Monitor }) {
-  let window: Astal.Window;
-  const connector = gdkmonitor.connector;
-
-  onCleanup(() => window.destroy());
-
-  const visible = createComputed(
-    () =>
-      workspaceVizOpen() && focusedWorkspace()?.monitor?.name === connector,
-  );
-
-  return connector ? (
-    <window
-      $={(self) => (window = self)}
-      visible={visible}
-      class="ws-viz-window"
-      namespace="ags-ws-viz"
-      name={`ws-viz-${connector}`}
-      gdkmonitor={gdkmonitor}
-      exclusivity={Astal.Exclusivity.IGNORE}
-      application={app}
-    >
-      <WorkspaceViz />
-    </window>
-  ) : (
-    <></>
-  );
-}
-
-// The monitor identifier: a square connector-name HUD anchored to the
-// bottom-left of every output at once (unlike ws-viz, which only shows on
-// the focused monitor). Shares workspaceVizOpen as its open signal — same
-// trigger, same dwell time — so during Alt-hold and workspace changes
-// every screen carries its own nameplate. Margins are deliberately offset
-// from the tile gap (gaps_out=20) so the HUD's corner doesn't sit on the
-// same pixel line as the adjacent window's corner.
+// The per-screen key card: connector name + active workspace, anchored
+// bottom-left of every output at once. Shares workspaceVizOpen as its open
+// signal, so during Alt-hold and on every workspace change each screen
+// blinks up its own plate. Margins are deliberately offset from the tile
+// gap (gaps_out=20) so the HUD's corner doesn't sit on the same pixel line
+// as the adjacent window's corner.
 function MonitorIdSurface({ gdkmonitor }: { gdkmonitor: Gdk.Monitor }) {
   let window: Astal.Window;
   const connector = gdkmonitor.connector;
@@ -233,13 +198,6 @@ export default function Desktop() {
         {(monitor: Gdk.Monitor) => (
           <This this={app}>
             <RunnerSurface gdkmonitor={monitor} />
-          </This>
-        )}
-      </For>
-      <For each={monitors}>
-        {(monitor: Gdk.Monitor) => (
-          <This this={app}>
-            <WorkspaceVizSurface gdkmonitor={monitor} />
           </This>
         )}
       </For>
