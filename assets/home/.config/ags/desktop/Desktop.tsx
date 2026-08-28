@@ -10,8 +10,11 @@
 //                     workspace's monitor. Owns keyboard focus while up.
 //   WorkspaceViz    — every output; blinks up on workspace change, only on
 //                     the focused workspace's monitor.
+//   MonitorId       — every output; blinks up on the same trigger as
+//                     WorkspaceViz, but visible on every output at once so
+//                     each screen carries its own big connector-name label.
 // The leaf components stay just their content and know nothing about which
-// monitor they are on.
+// monitor they are on beyond a connector string, when they need it.
 
 import { createBinding, createComputed, For, onCleanup, This } from "ags";
 import app from "ags/gtk4/app";
@@ -22,6 +25,7 @@ import Bar from "../components/Bar";
 import AltTab from "../components/AltTab";
 import Runner from "../components/Runner";
 import WorkspaceViz from "../components/WorkspaceViz";
+import MonitorId from "../components/MonitorId";
 import { findPrimaryMonitor } from "../common/monitors";
 import { altTabOpen } from "../common/alt-tab";
 import { runnerOpen } from "../common/runner";
@@ -165,6 +169,39 @@ function WorkspaceVizSurface({ gdkmonitor }: { gdkmonitor: Gdk.Monitor }) {
   );
 }
 
+// The monitor identifier: a big connector-name HUD anchored to the top of
+// every output at once (unlike ws-viz, which only shows on the focused
+// monitor). Shares workspaceVizOpen as its open signal — same trigger, same
+// dwell time — so during Alt-hold and workspace changes every screen
+// carries its own nameplate. Anchored TOP with a margin so it sits below
+// the bar and clear of the ws-viz's centered card.
+function MonitorIdSurface({ gdkmonitor }: { gdkmonitor: Gdk.Monitor }) {
+  let window: Astal.Window;
+  const connector = gdkmonitor.connector;
+  const { TOP } = Astal.WindowAnchor;
+
+  onCleanup(() => window.destroy());
+
+  return connector ? (
+    <window
+      $={(self) => (window = self)}
+      visible={workspaceVizOpen}
+      class="monitor-id-window"
+      namespace="ags-monitor-id"
+      name={`monitor-id-${connector}`}
+      gdkmonitor={gdkmonitor}
+      exclusivity={Astal.Exclusivity.IGNORE}
+      anchor={TOP}
+      marginTop={80}
+      application={app}
+    >
+      <MonitorId connector={connector} />
+    </window>
+  ) : (
+    <></>
+  );
+}
+
 export default function Desktop() {
   const monitors = createBinding(app, "monitors");
   // Wrap the primary monitor (or nothing, when none is live) as a single-item
@@ -201,6 +238,13 @@ export default function Desktop() {
         {(monitor: Gdk.Monitor) => (
           <This this={app}>
             <WorkspaceVizSurface gdkmonitor={monitor} />
+          </This>
+        )}
+      </For>
+      <For each={monitors}>
+        {(monitor: Gdk.Monitor) => (
+          <This this={app}>
+            <MonitorIdSurface gdkmonitor={monitor} />
           </This>
         )}
       </For>

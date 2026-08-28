@@ -180,3 +180,24 @@ window.ws-viz-window {
   background-color: var(--ds-component-background-active-blue);
   color: var(--ds-text-primary-blue);
 }
+
+/* Monitor-id — a big HUD nameplate on each output. Anchored TOP with a
+ * margin below the bar (see MonitorIdSurface). Deliberately spare: just
+ * the connector name, large enough to read from across the room. */
+window.monitor-id-window {
+  background: transparent;
+  color: var(--ds-text-primary-gray);
+}
+
+.monitor-id-wrap {
+  padding: 6px 14px;
+  background-color: var(--ds-background-default);
+  border: 1px solid var(--ds-border-default-gray);
+  border-radius: var(--ds-radius-base);
+}
+
+.monitor-id-name {
+  font-size: 28px;
+  font-family: monospace;
+  color: var(--ds-text-secondary-gray);
+}
