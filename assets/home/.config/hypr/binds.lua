@@ -10,12 +10,40 @@ local win = "SUPER"
 hl.bind(mod .. " + R",         hl.dsp.exec_cmd("ranger"))
 hl.bind(mod .. " + F4",        hl.dsp.window.close())
 hl.bind(mod .. " + F3",        hl.dsp.exec_cmd("ags request runner-open"))
-hl.bind(mod .. " + SHIFT + E", hl.dsp.exec_cmd("hyprctl dispatch exit"))
-hl.bind(mod .. " + SHIFT + R", hl.dsp.exec_cmd("systemctl restart --user ags.service"))
 hl.bind(win .. " + F",         hl.dsp.window.float({ action = "toggle" }))
 hl.bind(win .. " + T",         hl.dsp.exec_cmd("kitty -e bash -lc yazi"))
 hl.bind(win .. " + B",         hl.dsp.exec_cmd(os.getenv("BROWSER") or "xdg-open about:blank"))
 hl.bind(win .. " + SPACE",     hl.dsp.exec_cmd("fcitx5-remote -t"))
+
+-- ── System menu (Alt+Shift hold) ─────────────────────────────────────────
+-- Holding Alt+Shift shades the whole screen and pops the AGS system menu
+-- (components/SystemMenu.tsx). Each row's chord stands on its own bind
+-- below so the action fires whether or not the menu is currently up —
+-- the menu is a legend, not a gate.
+--
+-- The open/close pattern mirrors the alt-tab peek: the modifier state at
+-- press excludes the key being pressed, so ADD-Shift-while-Alt-held is
+-- `ALT + Shift_L`, and ADD-Alt-while-Shift-held is `SHIFT + Alt_L`. At
+-- release the released key still contributes to the mask, so the release
+-- pattern is the full `ALT + SHIFT + <key>`.
+hl.bind(mod .. " + Shift_L", hl.dsp.exec_cmd("ags request system-menu-open"))
+hl.bind(mod .. " + Shift_R", hl.dsp.exec_cmd("ags request system-menu-open"))
+hl.bind("SHIFT + Alt_L",     hl.dsp.exec_cmd("ags request system-menu-open"))
+hl.bind("SHIFT + Alt_R",     hl.dsp.exec_cmd("ags request system-menu-open"))
+hl.bind(mod .. " + SHIFT + Shift_L", hl.dsp.exec_cmd("ags request system-menu-close"), { release = true, transparent = true })
+hl.bind(mod .. " + SHIFT + Shift_R", hl.dsp.exec_cmd("ags request system-menu-close"), { release = true, transparent = true })
+hl.bind(mod .. " + SHIFT + Alt_L",   hl.dsp.exec_cmd("ags request system-menu-close"), { release = true, transparent = true })
+hl.bind(mod .. " + SHIFT + Alt_R",   hl.dsp.exec_cmd("ags request system-menu-close"), { release = true, transparent = true })
+
+-- Verbs listed in the menu. Kept in the same order as common/system-menu.ts
+-- VERBS so the labels and chords stay in lockstep.
+hl.bind(mod .. " + SHIFT + R",  hl.dsp.exec_cmd("systemctl restart --user ags.service"))
+hl.bind(mod .. " + SHIFT + E",  hl.dsp.exec_cmd("hyprctl dispatch exit"))
+hl.bind(mod .. " + SHIFT + W",  hl.dsp.exec_cmd("loginctl lock-session"))
+hl.bind(mod .. " + SHIFT + F1",  hl.dsp.exec_cmd("bash -lc 'nmcli radio wifi off && sleep 0.5 && nmcli radio wifi on'"))
+hl.bind(mod .. " + SHIFT + F2",  hl.dsp.exec_cmd("bash -lc 'rfkill block bluetooth && sleep 0.5 && rfkill unblock bluetooth'"))
+hl.bind(mod .. " + SHIFT + F11", hl.dsp.exec_cmd("systemctl hibernate"))
+hl.bind(mod .. " + SHIFT + F12", hl.dsp.exec_cmd("systemctl poweroff"))
 
 -- ── Screenshots ──────────────────────────────────────────────────────────
 hl.bind("CTRL + SHIFT + 2", hl.dsp.exec_cmd("grimblast copy output"))

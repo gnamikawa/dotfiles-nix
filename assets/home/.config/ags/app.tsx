@@ -10,6 +10,7 @@ import app from "ags/gtk4/app";
 import Desktop from "./desktop/Desktop";
 import { cycleAltTab, setAltTabOpen } from "./common/alt-tab";
 import { setRunnerOpen } from "./common/runner";
+import { setSystemMenuOpen } from "./common/system-menu";
 
 app.start({
   css: `${SRC}/style.css`,
@@ -49,6 +50,18 @@ app.start({
         return;
       case "runner-close":
         setRunnerOpen(false);
+        res("close");
+        return;
+      case "system-menu-open":
+        // The two peeks are mutually exclusive — the shaded system menu
+        // supersedes the alt-tab card, so drop the tab overlay before
+        // showing the menu.
+        setAltTabOpen(false);
+        setSystemMenuOpen(true);
+        res("open");
+        return;
+      case "system-menu-close":
+        setSystemMenuOpen(false);
         res("close");
         return;
       default:

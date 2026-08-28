@@ -8,6 +8,9 @@
 //                     workspace's monitor.
 //   Runner          — every output; visible on Alt+F3, only on the focused
 //                     workspace's monitor. Owns keyboard focus while up.
+//   SystemMenu      — every output; visible on Alt+Shift-hold, only on the
+//                     focused workspace's monitor. Anchors to all four edges
+//                     so the scrim covers the whole screen.
 //   MonitorId       — every output; blinks up on workspace change or
 //                     Alt-hold. Every screen carries its own key card —
 //                     which physical screen this is (connector) plus which
@@ -23,10 +26,12 @@ import AstalHyprland from "gi://AstalHyprland";
 import Bar from "../components/Bar";
 import AltTab from "../components/AltTab";
 import Runner from "../components/Runner";
+import SystemMenu from "../components/SystemMenu";
 import MonitorId from "../components/MonitorId";
 import { findPrimaryMonitor } from "../common/monitors";
 import { altTabOpen } from "../common/alt-tab";
 import { runnerOpen } from "../common/runner";
+import { systemMenuOpen } from "../common/system-menu";
 import { workspaceVizOpen } from "../common/workspace-viz";
 
 const hyprland = AstalHyprland.get_default();
@@ -135,6 +140,45 @@ function RunnerSurface({ gdkmonitor }: { gdkmonitor: Gdk.Monitor }) {
   );
 }
 
+// The uncommon-actions menu: Alt+Shift-hold shades the whole screen and
+// shows a legend of session verbs each row keyed by an Alt+Shift+<key>
+// chord. Anchored to all four edges so the layer-shell surface fills the
+// output — the wrap inside paints the scrim. Layer.OVERLAY so the scrim
+// covers maximized clients (the default TOP layer sits under fullscreen
+// windows). Exclusivity.IGNORE so the tiles beneath stay put; no keymode
+// because the chords are ordinary Hyprland binds (see hypr/binds.lua),
+// not entries this window intercepts.
+function SystemMenuSurface({ gdkmonitor }: { gdkmonitor: Gdk.Monitor }) {
+  let window: Astal.Window;
+  const connector = gdkmonitor.connector;
+  const { TOP, BOTTOM, LEFT, RIGHT } = Astal.WindowAnchor;
+
+  onCleanup(() => window.destroy());
+
+  const visible = createComputed(
+    () => systemMenuOpen() && focusedWorkspace()?.monitor?.name === connector,
+  );
+
+  return connector ? (
+    <window
+      $={(self) => (window = self)}
+      visible={visible}
+      class="system-menu-window"
+      namespace="ags-system-menu"
+      name={`system-menu-${connector}`}
+      gdkmonitor={gdkmonitor}
+      layer={Astal.Layer.OVERLAY}
+      exclusivity={Astal.Exclusivity.IGNORE}
+      anchor={TOP | BOTTOM | LEFT | RIGHT}
+      application={app}
+    >
+      <SystemMenu />
+    </window>
+  ) : (
+    <></>
+  );
+}
+
 // The per-screen key card: connector name + active workspace, anchored
 // bottom-left of every output at once. Shares workspaceVizOpen as its open
 // signal, so during Alt-hold and on every workspace change each screen
@@ -198,6 +242,13 @@ export default function Desktop() {
         {(monitor: Gdk.Monitor) => (
           <This this={app}>
             <RunnerSurface gdkmonitor={monitor} />
+          </This>
+        )}
+      </For>
+      <For each={monitors}>
+        {(monitor: Gdk.Monitor) => (
+          <This this={app}>
+            <SystemMenuSurface gdkmonitor={monitor} />
           </This>
         )}
       </For>
