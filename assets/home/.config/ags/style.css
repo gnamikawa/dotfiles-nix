@@ -181,23 +181,25 @@ window.ws-viz-window {
   color: var(--ds-text-primary-blue);
 }
 
-/* Monitor-id — a big HUD nameplate on each output. Anchored TOP with a
- * margin below the bar (see MonitorIdSurface). Deliberately spare: just
- * the connector name, large enough to read from across the room. */
+/* Monitor-id — a square HUD nameplate at the bottom-left of each output.
+ * Fixed square footprint so all three screens present the same silhouette;
+ * font sized to fit the widest connector name (HDMI-A-1). */
 window.monitor-id-window {
   background: transparent;
   color: var(--ds-text-primary-gray);
 }
 
 .monitor-id-wrap {
-  padding: 6px 14px;
+  min-width: 96px;
+  min-height: 96px;
+  padding: 12px;
   background-color: var(--ds-background-default);
   border: 1px solid var(--ds-border-default-gray);
-  border-radius: var(--ds-radius-base);
+  box-shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.45);
 }
 
 .monitor-id-name {
-  font-size: 28px;
+  font-size: 18px;
   font-family: monospace;
   color: var(--ds-text-secondary-gray);
 }

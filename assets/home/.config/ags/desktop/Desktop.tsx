@@ -169,16 +169,17 @@ function WorkspaceVizSurface({ gdkmonitor }: { gdkmonitor: Gdk.Monitor }) {
   );
 }
 
-// The monitor identifier: a big connector-name HUD anchored to the top of
-// every output at once (unlike ws-viz, which only shows on the focused
-// monitor). Shares workspaceVizOpen as its open signal — same trigger, same
-// dwell time — so during Alt-hold and workspace changes every screen
-// carries its own nameplate. Anchored TOP with a margin so it sits below
-// the bar and clear of the ws-viz's centered card.
+// The monitor identifier: a square connector-name HUD anchored to the
+// bottom-left of every output at once (unlike ws-viz, which only shows on
+// the focused monitor). Shares workspaceVizOpen as its open signal — same
+// trigger, same dwell time — so during Alt-hold and workspace changes
+// every screen carries its own nameplate. Margins are deliberately offset
+// from the tile gap (gaps_out=20) so the HUD's corner doesn't sit on the
+// same pixel line as the adjacent window's corner.
 function MonitorIdSurface({ gdkmonitor }: { gdkmonitor: Gdk.Monitor }) {
   let window: Astal.Window;
   const connector = gdkmonitor.connector;
-  const { TOP } = Astal.WindowAnchor;
+  const { BOTTOM, LEFT } = Astal.WindowAnchor;
 
   onCleanup(() => window.destroy());
 
@@ -191,8 +192,9 @@ function MonitorIdSurface({ gdkmonitor }: { gdkmonitor: Gdk.Monitor }) {
       name={`monitor-id-${connector}`}
       gdkmonitor={gdkmonitor}
       exclusivity={Astal.Exclusivity.IGNORE}
-      anchor={TOP}
-      marginTop={80}
+      anchor={BOTTOM | LEFT}
+      marginBottom={32}
+      marginLeft={32}
       application={app}
     >
       <MonitorId connector={connector} />
