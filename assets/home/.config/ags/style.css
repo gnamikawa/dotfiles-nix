@@ -100,13 +100,46 @@ window.runner-window {
   border-radius: var(--ds-radius-base);
 }
 
-.runner-input {
-  min-height: 28px;
-  padding: 2px 8px;
-  border-radius: var(--ds-radius-base);
-  background-color: var(--ds-background-default);
-  border: 1px solid var(--ds-border-default-gray);
+/* Flat: the entry is the search prompt of a menu, not a widget inside a widget.
+ * has-frame is off on the Gtk.Entry itself (see components/Runner.tsx), and
+ * these rules override Adwaita's own decoration on both the entry and its
+ * inner `text` element — both draw a background/border by default. */
+.runner-input,
+.runner-input > text {
+  background: none;
+  background-color: transparent;
+  border: none;
+  box-shadow: none;
+  outline: none;
+  min-height: 0;
+  padding: 0;
   color: var(--ds-text-primary-gray);
+  font-size: 13px;
+}
+
+.runner-input > text > placeholder {
+  color: var(--ds-text-secondary-gray);
+  opacity: 0.6;
+}
+
+.runner-list {
+  padding-top: 6px;
+  border-top: 1px solid var(--ds-border-default-gray);
+}
+
+.runner-row {
+  padding: 6px 8px;
+  border-radius: var(--ds-radius-base);
+}
+
+.runner-row.selected {
+  background-color: var(--ds-component-background-active-blue);
+  color: var(--ds-text-primary-blue);
+}
+
+.runner-desc {
+  color: var(--ds-text-secondary-gray);
+  font-size: 12px;
 }
 
 /* Workspace-viz — a screen-centered digit that blinks up on workspace change
