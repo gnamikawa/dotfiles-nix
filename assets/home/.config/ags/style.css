@@ -117,6 +117,12 @@ window.runner-window {
   font-size: 13px;
 }
 
+/* Caret sits at the same weight as the description/placeholder layer so it
+ * doesn't scream white against the wrap's grey. */
+.runner-input > text {
+  caret-color: var(--ds-text-secondary-gray);
+}
+
 .runner-input > text > placeholder {
   color: var(--ds-text-secondary-gray);
   opacity: 0.6;
@@ -128,7 +134,7 @@ window.runner-window {
 }
 
 .runner-row {
-  padding: 6px 8px;
+  padding: 8px 10px;
   border-radius: var(--ds-radius-base);
 }
 
