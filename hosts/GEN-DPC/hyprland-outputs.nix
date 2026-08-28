@@ -22,58 +22,42 @@ let
   viewteckDesc = "Viewteck Co. Ltd. GFV22CB";
 in
 {
-  xdg.configFile."generated/hypr/monitors.conf".text = ''
-    monitorv2 {
-        output = desc:${ioDataDesc}
-        mode = 2560x1440@59.95
-        position = -2560x-360
-        scale = 1
-    }
+  xdg.configFile."generated/hypr/monitors.lua".text = ''
+    hl.monitor({ output = "desc:${ioDataDesc}", mode = "2560x1440@59.95", position = "-2560x-360", scale = 1 })
+    hl.monitor({ output = "desc:${cintiqDesc}",  mode = "3840x2160@120",  position = "-1920x1080", scale = 1 })
+    hl.monitor({ output = "desc:${viewteckDesc}", mode = "1920x1080@144.00", position = "0x0",        scale = 1 })
 
-    monitorv2 {
-        output = desc:${cintiqDesc}
-        mode = 3840x2160@120
-        position = -1920x1080
-        scale = 1
-    }
+    -- default = true is required for the binding to hold at startup — without
+    -- it Hyprland hands each monitor the lowest unused workspace instead.
+    hl.workspace_rule({ workspace = "8", monitor = "desc:${cintiqDesc}",  default = true })
+    hl.workspace_rule({ workspace = "9", monitor = "desc:${ioDataDesc}", default = true })
 
-    monitorv2 {
-        output = desc:${viewteckDesc}
-        mode = 1920x1080@144.00
-        position = 0x0
-        scale = 1
-    }
+    -- Pen and touch both land on the Cintiq. Cutover-verified against
+    -- hyprctl devices (wacom-cintiq-pro-22-pen / -finger): the tablet block
+    -- maps the pen regardless of focus; touch is bound per-device by
+    -- connector because the generic tablet.output silently ignores desc: for
+    -- touch, only for pen.
+    hl.config({
+        input = {
+            tablet = {
+                output = "desc:${cintiqDesc}",
+            },
+        },
+    })
 
-    # default:true is required for the binding to hold at startup — without
-    # it Hyprland hands each monitor the lowest unused workspace instead.
-    workspace = 8, monitor:desc:${cintiqDesc}, default:true
-    workspace = 9, monitor:desc:${ioDataDesc}, default:true
-
-    # Pen and touch both land on the Cintiq. Cutover-verified against
-    # hyprctl devices (wacom-cintiq-pro-22-pen / -finger): the tablet
-    # binding maps the pen regardless of focus; touch is bound per-device
-    # by connector (see cintiqConnector above). device blocks are
-    # top-level, not nested under input.
-    input {
-        tablet {
-            output = desc:${cintiqDesc}
-        }
-    }
-
-    device {
-        name = wacom-cintiq-pro-22-finger
-        output = ${cintiqConnector}
-    }
+    hl.device({ name = "wacom-cintiq-pro-22-finger", output = "${cintiqConnector}" })
   '';
 
   # The usual Hyprland-on-NVIDIA setup (ADR-0007 accepted this work).
-  xdg.configFile."generated/hypr/env.conf".text = ''
-    env = LIBVA_DRIVER_NAME,nvidia
-    env = __GLX_VENDOR_LIBRARY_NAME,nvidia
-    env = NVD_BACKEND,direct
+  xdg.configFile."generated/hypr/env.lua".text = ''
+    hl.env("LIBVA_DRIVER_NAME",         "nvidia")
+    hl.env("__GLX_VENDOR_LIBRARY_NAME", "nvidia")
+    hl.env("NVD_BACKEND",               "direct")
 
-    cursor {
-        no_hardware_cursors = true
-    }
+    hl.config({
+        cursor = {
+            no_hardware_cursors = true,
+        },
+    })
   '';
 }
