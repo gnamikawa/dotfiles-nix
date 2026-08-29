@@ -85,6 +85,71 @@ window.window-menu-window {
   font-size: 12px;
 }
 
+/* Window-context — a contextual card pinned to the focused client's outer
+ * edge, toggled by a Super tap. The layer-shell surface itself is sized to
+ * the card and positioned by anchored margins (see Desktop.tsx
+ * WindowContextSurface), so no scrim: click-through is preserved and the
+ * card just floats over the target window. */
+window.window-context-window {
+  background: transparent;
+  color: var(--ds-text-primary-gray);
+}
+
+.window-context-card {
+  min-width: 280px;
+  padding: 8px 12px;
+  background-color: var(--ds-background-default);
+  border: 1px solid var(--ds-border-default-gray);
+  border-radius: var(--ds-radius-base);
+}
+
+.window-context-header {
+  padding: 0 4px 6px 4px;
+  border-bottom: 1px solid var(--ds-border-default-gray);
+  margin-bottom: 4px;
+}
+
+.window-context-header-label {
+  color: var(--ds-text-secondary-gray);
+}
+
+.window-context-row {
+  padding: 6px 4px;
+  border-radius: var(--ds-radius-base);
+}
+
+.window-context-row:hover {
+  background-color: var(--ds-component-background-hover-gray);
+}
+
+/* The "current" sink now shows a check-mark on the row instead of the
+ * blue background — that background was indistinguishable from a hover /
+ * cursor state, so the two states could not coexist visually. Cursor
+ * keeps the soft grey; current is a small icon that shows regardless of
+ * cursor position. */
+.window-context-row.cursored {
+  background-color: var(--ds-component-background-hover-gray);
+}
+
+.window-context-check {
+  color: var(--ds-text-primary-blue);
+  min-width: 14px;
+}
+
+.window-context-empty {
+  padding: 8px 4px;
+  color: var(--ds-text-secondary-gray);
+}
+
+.window-context-empty-title {
+  color: var(--ds-text-primary-gray);
+}
+
+.window-context-empty-hint {
+  color: var(--ds-text-secondary-gray);
+  font-size: 12px;
+}
+
 /* Runner — its own summoned card, Alt+F3. Sits at the same top-of-screen
  * offset as the window-menu peek so the two feel like siblings, not layers. */
 window.runner-window {

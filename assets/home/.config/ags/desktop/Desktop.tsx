@@ -6,6 +6,12 @@
 //   Bar             — primary output only. One clock per session.
 //   WindowMenu      — every output; visible on Alt-hold, only on the focused
 //                     workspace's monitor.
+//   WindowContext   — every output; rides on the Alt-hold with WindowMenu
+//                     (both open together, both close together), only when
+//                     the focused client has audio (pw-dump-driven pid
+//                     index) and only on that client's monitor. Pinned to
+//                     the client's outer edge (right, else left, else
+//                     overlaid) and re-anchored via a 32ms poll.
 //   Runner          — every output; visible on Alt+F3, only on the focused
 //                     workspace's monitor. Owns keyboard focus while up.
 //   SystemMenu      — every output; visible on Alt+Shift-hold, only on the
@@ -25,11 +31,17 @@ import Gdk from "gi://Gdk?version=4.0";
 import AstalHyprland from "gi://AstalHyprland";
 import Bar from "../components/Bar";
 import WindowMenu from "../components/WindowMenu";
+import WindowContext from "../components/WindowContext";
 import Runner from "../components/Runner";
 import SystemMenu from "../components/SystemMenu";
 import MonitorId from "../components/MonitorId";
 import { findPrimaryMonitor } from "../common/monitors";
 import { windowMenuOpen } from "../common/window-menu";
+import {
+  computePlacement,
+  liveGeom,
+  windowContextOpen,
+} from "../common/window-context";
 import { runnerOpen } from "../common/runner";
 import { systemMenuOpen } from "../common/system-menu";
 import { workspaceVizOpen } from "../common/workspace-viz";
@@ -98,6 +110,60 @@ function WindowMenuSurface({ gdkmonitor }: { gdkmonitor: Gdk.Monitor }) {
       application={app}
     >
       <WindowMenu />
+    </window>
+  ) : (
+    <></>
+  );
+}
+
+// A per-window contextual card. Anchors TOP|LEFT and slides the surface
+// into place by margin — right of the focused client if the outer gap
+// fits, else left, else overlaid at the client's top-left corner.
+// Placement is a computed off liveGeom, which polls `hyprctl -j
+// activewindow` every 32ms while the peek is open (Hyprland's socket2
+// doesn't emit movewindow events for interactive drags, so the poll is the
+// only way to keep the card glued during a drag). Peek shape: rides on
+// Alt-hold with the WindowMenu (see app.tsx). Layer.OVERLAY floats it
+// above fullscreen clients. Visibility is gated on the focused client
+// having audio — the card is a router, not a system tray.
+function WindowContextSurface({ gdkmonitor }: { gdkmonitor: Gdk.Monitor }) {
+  let window: Astal.Window;
+  const connector = gdkmonitor.connector;
+  const { TOP, LEFT } = Astal.WindowAnchor;
+
+  onCleanup(() => window.destroy());
+
+  const placement = liveGeom((g) => computePlacement(g));
+  // Visibility gate: peek is open AND this monitor holds the focused
+  // client. The card itself decides whether to show routing rows or a
+  // "silent window" hint (see components/WindowContext.tsx) — deciding
+  // that here would force the surface to unmount when audio state flips
+  // and take any in-flight click with it.
+  const visible = createComputed(() => {
+    if (!windowContextOpen()) return false;
+    const g = liveGeom();
+    if (!g) return false;
+    return g.connector === connector;
+  });
+  const marginTop = placement((p) => p.marginTop);
+  const marginLeft = placement((p) => p.marginLeft);
+
+  return connector ? (
+    <window
+      $={(self) => (window = self)}
+      visible={visible}
+      class="window-context-window"
+      namespace="ags-window-context"
+      name={`window-context-${connector}`}
+      gdkmonitor={gdkmonitor}
+      layer={Astal.Layer.OVERLAY}
+      exclusivity={Astal.Exclusivity.IGNORE}
+      anchor={TOP | LEFT}
+      marginTop={marginTop}
+      marginLeft={marginLeft}
+      application={app}
+    >
+      <WindowContext />
     </window>
   ) : (
     <></>
@@ -235,6 +301,13 @@ export default function Desktop() {
         {(monitor: Gdk.Monitor) => (
           <This this={app}>
             <WindowMenuSurface gdkmonitor={monitor} />
+          </This>
+        )}
+      </For>
+      <For each={monitors}>
+        {(monitor: Gdk.Monitor) => (
+          <This this={app}>
+            <WindowContextSurface gdkmonitor={monitor} />
           </This>
         )}
       </For>

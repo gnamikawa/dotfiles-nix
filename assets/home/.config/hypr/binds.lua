@@ -7,13 +7,13 @@ local mod = "ALT"
 local win = "SUPER"
 
 -- ── Applications ─────────────────────────────────────────────────────────
-hl.bind(mod .. " + R",         hl.dsp.exec_cmd("ranger"))
-hl.bind(mod .. " + F4",        hl.dsp.window.close())
-hl.bind(mod .. " + F3",        hl.dsp.exec_cmd("ags request runner-open"))
-hl.bind(win .. " + F",         hl.dsp.window.float({ action = "toggle" }))
-hl.bind(win .. " + T",         hl.dsp.exec_cmd("kitty -e bash -lc yazi"))
-hl.bind(win .. " + B",         hl.dsp.exec_cmd(os.getenv("BROWSER") or "xdg-open about:blank"))
-hl.bind(win .. " + SPACE",     hl.dsp.exec_cmd("fcitx5-remote -t"))
+hl.bind(mod .. " + R", hl.dsp.exec_cmd("ranger"))
+hl.bind(mod .. " + F4", hl.dsp.window.close())
+hl.bind(mod .. " + F3", hl.dsp.exec_cmd("ags request runner-open"))
+hl.bind(win .. " + F", hl.dsp.window.float({ action = "toggle" }))
+hl.bind(win .. " + T", hl.dsp.exec_cmd("kitty -e bash -lc yazi"))
+hl.bind(win .. " + B", hl.dsp.exec_cmd(os.getenv("BROWSER") or "xdg-open about:blank"))
+hl.bind(win .. " + SPACE", hl.dsp.exec_cmd("fcitx5-remote -t"))
 
 -- ── System menu (Alt+Shift hold) ─────────────────────────────────────────
 -- Holding Alt+Shift shades the whole screen and pops the AGS system menu
@@ -33,55 +33,80 @@ hl.bind(win .. " + SPACE",     hl.dsp.exec_cmd("fcitx5-remote -t"))
 -- whole peek down and just closes the system menu.
 hl.bind(mod .. " + Shift_L", hl.dsp.exec_cmd("ags request system-menu-open"))
 hl.bind(mod .. " + Shift_R", hl.dsp.exec_cmd("ags request system-menu-open"))
-hl.bind("SHIFT + Alt_L",     hl.dsp.exec_cmd("ags request system-menu-open"))
-hl.bind("SHIFT + Alt_R",     hl.dsp.exec_cmd("ags request system-menu-open"))
-hl.bind(mod .. " + SHIFT + Shift_L", hl.dsp.exec_cmd("ags request window-menu-open"),  { release = true, transparent = true })
-hl.bind(mod .. " + SHIFT + Shift_R", hl.dsp.exec_cmd("ags request window-menu-open"),  { release = true, transparent = true })
-hl.bind(mod .. " + SHIFT + Alt_L",   hl.dsp.exec_cmd("ags request system-menu-close"), { release = true, transparent = true })
-hl.bind(mod .. " + SHIFT + Alt_R",   hl.dsp.exec_cmd("ags request system-menu-close"), { release = true, transparent = true })
+hl.bind("SHIFT + Alt_L", hl.dsp.exec_cmd("ags request system-menu-open"))
+hl.bind("SHIFT + Alt_R", hl.dsp.exec_cmd("ags request system-menu-open"))
+hl.bind(
+	mod .. " + SHIFT + Shift_L",
+	hl.dsp.exec_cmd("ags request window-menu-open"),
+	{ release = true, transparent = true }
+)
+hl.bind(
+	mod .. " + SHIFT + Shift_R",
+	hl.dsp.exec_cmd("ags request window-menu-open"),
+	{ release = true, transparent = true }
+)
+hl.bind(
+	mod .. " + SHIFT + Alt_L",
+	hl.dsp.exec_cmd("ags request system-menu-close"),
+	{ release = true, transparent = true }
+)
+hl.bind(
+	mod .. " + SHIFT + Alt_R",
+	hl.dsp.exec_cmd("ags request system-menu-close"),
+	{ release = true, transparent = true }
+)
 
 -- Verbs listed in the menu. Kept in the same order as common/system-menu.ts
 -- VERBS so the labels and chords stay in lockstep.
-hl.bind(mod .. " + SHIFT + R",  hl.dsp.exec_cmd("systemctl restart --user ags.service"))
-hl.bind(mod .. " + SHIFT + E",  hl.dsp.exec_cmd("hyprctl dispatch exit"))
-hl.bind(mod .. " + SHIFT + W",  hl.dsp.exec_cmd("loginctl lock-session"))
-hl.bind(mod .. " + SHIFT + F1",  hl.dsp.exec_cmd("bash -lc 'nmcli radio wifi off && sleep 0.5 && nmcli radio wifi on'"))
-hl.bind(mod .. " + SHIFT + F2",  hl.dsp.exec_cmd("bash -lc 'rfkill block bluetooth && sleep 0.5 && rfkill unblock bluetooth'"))
+hl.bind(mod .. " + SHIFT + R", hl.dsp.exec_cmd("systemctl restart --user ags.service"))
+hl.bind(mod .. " + SHIFT + E", hl.dsp.exec_cmd("hyprctl dispatch exit"))
+hl.bind(mod .. " + SHIFT + W", hl.dsp.exec_cmd("loginctl lock-session"))
+hl.bind(mod .. " + SHIFT + F1", hl.dsp.exec_cmd("bash -lc 'nmcli radio wifi off && sleep 0.5 && nmcli radio wifi on'"))
+hl.bind(
+	mod .. " + SHIFT + F2",
+	hl.dsp.exec_cmd("bash -lc 'rfkill block bluetooth && sleep 0.5 && rfkill unblock bluetooth'")
+)
 hl.bind(mod .. " + SHIFT + F11", hl.dsp.exec_cmd("systemctl hibernate"))
 hl.bind(mod .. " + SHIFT + F12", hl.dsp.exec_cmd("systemctl poweroff"))
 
 -- ── Screenshots ──────────────────────────────────────────────────────────
 hl.bind("CTRL + SHIFT + 2", hl.dsp.exec_cmd("grimblast copy output"))
 hl.bind("CTRL + SHIFT + 3", hl.dsp.exec_cmd("grimblast copy active"))
-hl.bind("CTRL + SHIFT + 4", hl.dsp.exec_cmd(
-    'SLURP_ARGS="-b' .. slurpBackground ..
-    ' -c' .. slurpBorder ..
-    ' -s' .. slurpSelection ..
-    ' -w1" grimblast copy area'
-))
+hl.bind(
+	"CTRL + SHIFT + 4",
+	hl.dsp.exec_cmd(
+		'SLURP_ARGS="-b'
+			.. slurpBackground
+			.. " -c"
+			.. slurpBorder
+			.. " -s"
+			.. slurpSelection
+			.. ' -w1" grimblast copy area'
+	)
+)
 
 -- ── Audio ────────────────────────────────────────────────────────────────
 hl.bind("XF86AudioRaiseVolume", hl.dsp.exec_cmd("pactl set-sink-volume @DEFAULT_SINK@ +5%"))
 hl.bind("XF86AudioLowerVolume", hl.dsp.exec_cmd("pactl set-sink-volume @DEFAULT_SINK@ -5%"))
-hl.bind("XF86AudioMute",        hl.dsp.exec_cmd("pactl set-sink-mute @DEFAULT_SINK@ toggle"))
+hl.bind("XF86AudioMute", hl.dsp.exec_cmd("pactl set-sink-mute @DEFAULT_SINK@ toggle"))
 
 -- ── Workspace layout ─────────────────────────────────────────────────
 hl.bind(mod .. " + GRAVE", hl.dsp.exec_cmd(os.getenv("HOME") .. "/.config/hypr/scripts/toggle-workspace-layout.sh"))
 
 -- ── Workspace focus ──────────────────────────────────────────────────────
 for i = 1, 9 do
-    hl.bind(mod .. " + " .. i, hl.dsp.focus({ workspace = i }))
+	hl.bind(mod .. " + " .. i, hl.dsp.focus({ workspace = i }))
 end
 
 -- ── Window focus (vim) ───────────────────────────────────────────────────
-hl.bind(mod .. " + H",         hl.dsp.focus({ direction = "left"  }))
-hl.bind(mod .. " + J",         hl.dsp.focus({ direction = "down"  }))
-hl.bind(mod .. " + K",         hl.dsp.focus({ direction = "up"    }))
-hl.bind(mod .. " + L",         hl.dsp.focus({ direction = "right" }))
+hl.bind(mod .. " + H", hl.dsp.focus({ direction = "left" }))
+hl.bind(mod .. " + J", hl.dsp.focus({ direction = "down" }))
+hl.bind(mod .. " + K", hl.dsp.focus({ direction = "up" }))
+hl.bind(mod .. " + L", hl.dsp.focus({ direction = "right" }))
 -- Cycle through the window-menu overlay's list in its exact display order.
 -- `layoutmsg cyclenext` walks the layout tree, which doesn't match what the
 -- overlay renders — see common/window-menu.ts for the shared sort.
-hl.bind(mod .. " + TAB",         hl.dsp.exec_cmd("ags request window-menu-next"))
+hl.bind(mod .. " + TAB", hl.dsp.exec_cmd("ags request window-menu-next"))
 hl.bind(mod .. " + SHIFT + TAB", hl.dsp.exec_cmd("ags request window-menu-prev"))
 
 -- ── Alt-hold window-menu overlay ─────────────────────────────────────────
@@ -98,6 +123,17 @@ hl.bind("Alt_R", hl.dsp.exec_cmd("ags request window-menu-open"))
 hl.bind(mod .. " + Alt_L", hl.dsp.exec_cmd("ags request window-menu-close"), { release = true, transparent = true })
 hl.bind(mod .. " + Alt_R", hl.dsp.exec_cmd("ags request window-menu-close"), { release = true, transparent = true })
 
+-- ── Alt-hold summoned-surface navigation ─────────────────────────────────
+-- Reserved for controlling whatever surface the Alt-hold has open. Right
+-- now that's the window-context router (audio-output picker per focused
+-- window); if a future peek reuses the same up/down/enter convention it
+-- can multiplex via the IPC handler in app.tsx. Bare arrows/enter aren't
+-- consumed elsewhere while Alt is held, so this doesn't clash with any
+-- app's native shortcuts.
+hl.bind(mod .. " + UP",     hl.dsp.exec_cmd("ags request window-context-cursor-up"))
+hl.bind(mod .. " + DOWN",   hl.dsp.exec_cmd("ags request window-context-cursor-down"))
+hl.bind(mod .. " + RETURN", hl.dsp.exec_cmd("ags request window-context-activate"))
+
 -- ── Window move (vim) ────────────────────────────────────────────────────
 hl.bind(mod .. " + SHIFT + H", hl.dsp.window.move({ direction = "l" }))
 hl.bind(mod .. " + SHIFT + J", hl.dsp.window.move({ direction = "d" }))
@@ -106,7 +142,7 @@ hl.bind(mod .. " + SHIFT + L", hl.dsp.window.move({ direction = "r" }))
 
 -- ── Move window to workspace (stay put, like sway's move) ────────────────
 for i = 1, 9 do
-    hl.bind(win .. " + " .. i, hl.dsp.window.move({ workspace = i, silent = true }))
+	hl.bind(win .. " + " .. i, hl.dsp.window.move({ workspace = i, silent = true }))
 end
 
 -- ── Move workspace to output ─────────────────────────────────────────────
@@ -126,9 +162,9 @@ hl.bind(win .. " + RIGHT", hl.dsp.window.resize({ x = 50, y = 0, relative = true
 hl.bind(win .. " + LEFT", hl.dsp.window.resize({ x = -50, y = 0, relative = true }), { repeating = true })
 
 -- ── Splits (nearest dwindle equivalent of sway's split h/v) ──────────────
-hl.bind(win .. " + PLUS",  hl.dsp.layout("preselect r"))
+hl.bind(win .. " + PLUS", hl.dsp.layout("preselect r"))
 hl.bind(win .. " + MINUS", hl.dsp.layout("preselect d"))
 
 -- ── Floating drag (sway floating_modifier) ───────────────────────────────
-hl.bind(win .. " + mouse:272", hl.dsp.window.drag(),   { mouse = true })
+hl.bind(win .. " + mouse:272", hl.dsp.window.drag(), { mouse = true })
 hl.bind(win .. " + mouse:273", hl.dsp.window.resize(), { mouse = true })
