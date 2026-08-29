@@ -115,15 +115,15 @@ hl.bind(win .. " + J", hl.dsp.workspace.move({ monitor = "d" }))
 hl.bind(win .. " + K", hl.dsp.workspace.move({ monitor = "u" }))
 hl.bind(win .. " + L", hl.dsp.workspace.move({ monitor = "r" }))
 
--- ── Resize (1 px steps) ──────────────────────────────────────────────────
+-- ── Resize (50 px steps) ──────────────────────────────────────────────────
 -- `relative = true` is load-bearing — without it hl.window.resize interprets
--- x/y as ABSOLUTE size (resize to `0×1` px, which fails with "Invalid size"
+-- x/y as ABSOLUTE size (resize to `0×50` px, which fails with "Invalid size"
 -- in Hyprland's Lua binding). See LuaBindingsDispatchers.cpp:614 (dsp_resize
 -- routes to CA::resize with the `relative` upval).
-hl.bind(win .. " + UP",    hl.dsp.window.resize({ x = 0,  y = 1,  relative = true }))
-hl.bind(win .. " + DOWN",  hl.dsp.window.resize({ x = 0,  y = -1, relative = true }))
-hl.bind(win .. " + RIGHT", hl.dsp.window.resize({ x = 1,  y = 0,  relative = true }))
-hl.bind(win .. " + LEFT",  hl.dsp.window.resize({ x = -1, y = 0,  relative = true }))
+hl.bind(win .. " + UP", hl.dsp.window.resize({ x = 0, y = 50, relative = true }), { repeating = true })
+hl.bind(win .. " + DOWN", hl.dsp.window.resize({ x = 0, y = -50, relative = true }), { repeating = true })
+hl.bind(win .. " + RIGHT", hl.dsp.window.resize({ x = 50, y = 0, relative = true }), { repeating = true })
+hl.bind(win .. " + LEFT", hl.dsp.window.resize({ x = -50, y = 0, relative = true }), { repeating = true })
 
 -- ── Splits (nearest dwindle equivalent of sway's split h/v) ──────────────
 hl.bind(win .. " + PLUS",  hl.dsp.layout("preselect r"))
