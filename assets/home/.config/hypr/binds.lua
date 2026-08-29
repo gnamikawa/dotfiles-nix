@@ -26,12 +26,17 @@ hl.bind(win .. " + SPACE",     hl.dsp.exec_cmd("fcitx5-remote -t"))
 -- `ALT + Shift_L`, and ADD-Alt-while-Shift-held is `SHIFT + Alt_L`. At
 -- release the released key still contributes to the mask, so the release
 -- pattern is the full `ALT + SHIFT + <key>`.
+--
+-- Release is asymmetric on purpose: dropping Shift while Alt is still held
+-- returns the user to the Alt-hold state, so those release binds re-open the
+-- window-menu (which also closes the system menu). Dropping Alt tears the
+-- whole peek down and just closes the system menu.
 hl.bind(mod .. " + Shift_L", hl.dsp.exec_cmd("ags request system-menu-open"))
 hl.bind(mod .. " + Shift_R", hl.dsp.exec_cmd("ags request system-menu-open"))
 hl.bind("SHIFT + Alt_L",     hl.dsp.exec_cmd("ags request system-menu-open"))
 hl.bind("SHIFT + Alt_R",     hl.dsp.exec_cmd("ags request system-menu-open"))
-hl.bind(mod .. " + SHIFT + Shift_L", hl.dsp.exec_cmd("ags request system-menu-close"), { release = true, transparent = true })
-hl.bind(mod .. " + SHIFT + Shift_R", hl.dsp.exec_cmd("ags request system-menu-close"), { release = true, transparent = true })
+hl.bind(mod .. " + SHIFT + Shift_L", hl.dsp.exec_cmd("ags request window-menu-open"),  { release = true, transparent = true })
+hl.bind(mod .. " + SHIFT + Shift_R", hl.dsp.exec_cmd("ags request window-menu-open"),  { release = true, transparent = true })
 hl.bind(mod .. " + SHIFT + Alt_L",   hl.dsp.exec_cmd("ags request system-menu-close"), { release = true, transparent = true })
 hl.bind(mod .. " + SHIFT + Alt_R",   hl.dsp.exec_cmd("ags request system-menu-close"), { release = true, transparent = true })
 

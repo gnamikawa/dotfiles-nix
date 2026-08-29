@@ -25,6 +25,11 @@ app.start({
   requestHandler(argv, res) {
     switch (argv[0]) {
       case "window-menu-open":
+        // Symmetric with system-menu-open: the two peeks are mutually
+        // exclusive, so opening this one drops the shaded menu. Also serves
+        // as the "Shift released while Alt held" restore path — after the
+        // system menu closes, this rehydrates the window-menu underneath.
+        setSystemMenuOpen(false);
         setWindowMenuOpen(true);
         res("open");
         return;
