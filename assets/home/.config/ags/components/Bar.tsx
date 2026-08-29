@@ -7,13 +7,39 @@
 // The layer-shell surface that hosts this lives in desktop/Desktop.tsx, so
 // Bar takes no props and knows nothing about which monitor it is on.
 
-import { createBinding, createComputed } from "ags";
+import { createBinding, createComputed, Accessor } from "ags";
 import { createPoll } from "ags/time";
 import { Gtk } from "ags/gtk4";
+import Gio from "gi://Gio";
+import GLib from "gi://GLib";
 import NM from "gi://NM";
 import AstalBluetooth from "gi://AstalBluetooth";
 
 const bluetooth = AstalBluetooth.get_default();
+
+// Lucide SVGs live in the geistdesign package, symlinked to this path by
+// modules/ags.nix. Loaded via `Gtk.Image.set_from_gicon(FileIcon)` so
+// `pixel-size` still constrains the render, and the imperative subscribe
+// below actually repaints on binding change — ags gtk4's declarative
+// `iconName={binding}` was proven inert against Gtk.Image, and the file-
+// backed path bypasses GTK's theme lookup entirely (which had been
+// collapsing every `network-wireless-signal-*-symbolic` request through
+// Papirus-Dark's suffix-stripping fallback to a single generic glyph).
+const LUCIDE_DIR = GLib.build_filenamev([
+  GLib.get_home_dir(),
+  ".local",
+  "share",
+  "geistdesign",
+  "icons",
+  "lucide",
+]);
+const lucideIcon = (name: string): Gio.Icon =>
+  Gio.FileIcon.new(Gio.File.new_for_path(`${LUCIDE_DIR}/${name}.svg`));
+
+function bindLucideIcon(image: Gtk.Image, name: Accessor<string>): () => void {
+  image.set_from_gicon(lucideIcon(name.get()));
+  return name.subscribe(() => image.set_from_gicon(lucideIcon(name.get())));
+}
 
 // We talk to NetworkManager directly instead of via AstalNetwork. Three
 // upstream bugs live in astal-network's Wifi wrapper — merely constructing
@@ -52,36 +78,19 @@ function getWifiDevice(): NM.DeviceWifi | null {
 
 function computeWifiIcon(): string {
   const wifi = getWifiDevice();
-  if (!wifi) return "network-wireless-offline-symbolic";
-  if (!nmClient.wireless_enabled) return "network-wireless-disabled-symbolic";
+  if (!wifi || !nmClient.wireless_enabled) return "wifi-off";
 
   const state = wifi.get_state();
-  const DS = NM.DeviceState;
-
-  if (state !== DS.ACTIVATED) {
-    if (
-      state === DS.PREPARE ||
-      state === DS.CONFIG ||
-      state === DS.NEED_AUTH ||
-      state === DS.IP_CONFIG ||
-      state === DS.IP_CHECK ||
-      state === DS.SECONDARIES
-    ) {
-      return "network-wireless-acquiring-symbolic";
-    }
-    return "network-wireless-offline-symbolic";
-  }
-
+  if (state !== NM.DeviceState.ACTIVATED) return "wifi-off";
   if (nmClient.get_connectivity() !== NM.ConnectivityState.FULL) {
-    return "network-wireless-no-route-symbolic";
+    return "wifi-zero";
   }
 
   const strength = wifi.get_active_access_point()?.get_strength() ?? 0;
-  if (strength >= 80) return "network-wireless-signal-excellent-symbolic";
-  if (strength >= 60) return "network-wireless-signal-good-symbolic";
-  if (strength >= 40) return "network-wireless-signal-ok-symbolic";
-  if (strength >= 20) return "network-wireless-signal-weak-symbolic";
-  return "network-wireless-signal-none-symbolic";
+  if (strength >= 75) return "wifi";
+  if (strength >= 50) return "wifi-high";
+  if (strength >= 25) return "wifi-low";
+  return "wifi-zero";
 }
 
 function computeWifiTooltip(): string {
@@ -110,9 +119,9 @@ const wifiTooltip = createPoll<string>(computeWifiTooltip(), 3000, computeWifiTo
 const isPowered = createBinding(bluetooth, "isPowered");
 const isConnected = createBinding(bluetooth, "isConnected");
 const btIconName = createComputed(() => {
-  if (!isPowered()) return "bluetooth-disabled-symbolic";
-  if (isConnected()) return "bluetooth-active-symbolic";
-  return "bluetooth-symbolic";
+  if (!isPowered()) return "bluetooth-off";
+  if (isConnected()) return "bluetooth-connected";
+  return "bluetooth";
 });
 const btTooltip = createComputed(() => {
   if (!isPowered()) return "Bluetooth off";
@@ -145,15 +154,15 @@ export default function Bar() {
       <box class="bar-right" spacing={10} valign={Gtk.Align.CENTER}>
         <image
           class="bar-icon"
-          iconName={btIconName}
           tooltipText={btTooltip}
           pixelSize={16}
+          $={(self) => bindLucideIcon(self, btIconName)}
         />
         <image
           class="bar-icon"
-          iconName={wifiIconName}
           tooltipText={wifiTooltip}
           pixelSize={16}
+          $={(self) => bindLucideIcon(self, wifiIconName)}
         />
         <label
           class="bar-clock text-button-14"

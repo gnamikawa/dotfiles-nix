@@ -102,10 +102,30 @@ let
   '';
   typescript = pkgs.writeText "index.ts" typescriptText;
 
+  # Lucide's SVG icon set, fetched from the npm registry rather than the
+  # nixpkgs `lucide` package — that one ships only the icon font (TTF).
+  # Version pinned; bump alongside a design review of new/removed glyphs.
+  lucideStatic = pkgs.fetchzip {
+    url = "https://registry.npmjs.org/lucide-static/-/lucide-static-0.563.0.tgz";
+    hash = "sha256-mBeO8NhPOQjWNScprXVqsTzWbBVFpRFd0jg2s8r3yuo=";
+  };
+
+  # Bake the dark theme's text-primary-gray into every SVG's stroke.
+  # Lucide files declare `stroke="currentColor"`, which resolves to black
+  # when GTK loads the file directly (no CSS context reaches the raster).
+  # Baking sidesteps GTK's symbolic-icon rewiring for now; add a per-token
+  # sibling directory here when a second colour needs its own set.
+  lucideStrokeColour = constants.palette.dark.colors.gray."1000";
+
   buildScript = ''
-    mkdir -p "$out"
+    mkdir -p "$out" "$out/icons/lucide"
     cp ${stylesheet} "$out/geistdesign.css"
     cp ${typescript} "$out/index.ts"
+    for svg in ${lucideStatic}/icons/*.svg; do
+      name="$(basename "$svg")"
+      sed 's|stroke="currentColor"|stroke="${lucideStrokeColour}"|g' \
+        "$svg" > "$out/icons/lucide/$name"
+    done
   '';
 in
 pkgs.runCommand "geistdesign" { } buildScript

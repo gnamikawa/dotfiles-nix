@@ -27,7 +27,7 @@ window.bar {
 }
 
 .bar-icon {
-  color: var(--ds-text-secondary-gray);
+  color: var(--ds-text-primary-gray);
 }
 
 .bar-clock {
