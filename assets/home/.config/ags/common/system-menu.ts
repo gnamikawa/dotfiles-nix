@@ -1,15 +1,15 @@
 // The system-menu overlay's open signal and its verb table.
 //
-// Sibling of the alt-tab peek: Alt held alone peeks the workspace's clients;
-// Alt+Shift held together shades the whole screen and shows a menu of uncommon
-// session actions (reload UI, logout, lock, reconnect wifi, reconnect
+// Sibling of the window-menu peek: Alt held alone peeks the workspace's
+// clients; Alt+Shift held together shades the whole screen and shows a menu of
+// uncommon session actions (reload UI, logout, lock, reconnect wifi, reconnect
 // bluetooth). Each row's chord is Alt+Shift+<key> — pressed once the modifiers
 // are already held, the letter/F-key fires the action without dismissing the
 // menu, so the user can visually confirm the chord before releasing.
 //
-// The two peeks are mutually exclusive. Opening this one closes alt-tab
-// (see app.tsx); the letter/F-key binds themselves are ordinary Hyprland binds
-// that stand on their own even when the menu isn't up.
+// The two peeks are mutually exclusive. Opening this one closes the
+// window-menu (see app.tsx); the letter/F-key binds themselves are ordinary
+// Hyprland binds that stand on their own even when the menu isn't up.
 //
 // The surface that consumes systemMenuOpen lives in desktop/Desktop.tsx and
 // its content in components/SystemMenu.tsx.

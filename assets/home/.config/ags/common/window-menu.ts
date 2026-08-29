@@ -1,27 +1,28 @@
-// The alt-tab overlay's open/closed signal plus the cycling primitive both
-// the overlay and the Hyprland Tab binds share, so the visible list and the
-// keypress-driven focus advance can't drift out of sync.
+// The window-menu overlay's open/closed signal plus the cycling primitive
+// both the overlay and the Hyprland Tab binds share, so the visible list and
+// the keypress-driven focus advance can't drift out of sync.
 //
 // Hyprland's alt-hold binds toggle the open state via `ags request
-// alt-tab-open` / `ags request alt-tab-close`, and its Tab binds advance the
-// focus via `ags request alt-tab-next` / `ags request alt-tab-prev`. The IPC
-// wiring lives in app.tsx (requestHandler) and hypr/binds.conf.
+// window-menu-open` / `ags request window-menu-close`, and its Tab binds
+// advance the focus via `ags request window-menu-next` / `ags request
+// window-menu-prev`. The IPC wiring lives in app.tsx (requestHandler) and
+// hypr/binds.conf.
 //
 // Sort order is spatial (top-to-bottom, then left-to-right), tie-broken by
 // address for stability. `layoutmsg cyclenext` walks the layout tree, which
 // doesn't match what the overlay renders — driving both from the same sorted
 // list is what keeps Tab/Shift-Tab walking down/up the visible rows.
 //
-// The surface that consumes altTabOpen lives in desktop/Desktop.tsx and its
-// content in components/AltTab.tsx.
+// The surface that consumes windowMenuOpen lives in desktop/Desktop.tsx and
+// its content in components/WindowMenu.tsx.
 
 import { createState } from "ags";
 import AstalHyprland from "gi://AstalHyprland";
 import { focusWindow } from "./hypr-dispatch";
 
 const [state, set] = createState(false);
-export const altTabOpen = state;
-export const setAltTabOpen = set;
+export const windowMenuOpen = state;
+export const setWindowMenuOpen = set;
 
 const hyprland = AstalHyprland.get_default();
 
@@ -46,7 +47,7 @@ export function sortedClientsOnWorkspace(
     });
 }
 
-export function cycleAltTab(direction: 1 | -1): void {
+export function cycleWindowMenu(direction: 1 | -1): void {
   const current = hyprland.get_focused_client();
   const wsId = current?.workspace?.id;
   if (wsId == null) return;

@@ -33,6 +33,6 @@ hl.window_rule({ match = { class = "firefox", title = "Picture-in-Picture" }, pi
 -- an explicit slide override.
 
 hl.layer_rule({ match = { namespace = "^ags-bar$"     }, no_anim   = true    })
-hl.layer_rule({ match = { namespace = "^ags-alt-tab$" }, animation = "slide" })
+hl.layer_rule({ match = { namespace = "^ags-window-menu$" }, animation = "slide" })
 hl.layer_rule({ match = { namespace = "^ags-runner$"  }, animation = "slide" })
 hl.layer_rule({ match = { namespace = "^ags-ws-viz$"  }, animation = "fade"  })

@@ -21,7 +21,7 @@ hl.bind(win .. " + SPACE",     hl.dsp.exec_cmd("fcitx5-remote -t"))
 -- below so the action fires whether or not the menu is currently up —
 -- the menu is a legend, not a gate.
 --
--- The open/close pattern mirrors the alt-tab peek: the modifier state at
+-- The open/close pattern mirrors the window-menu peek: the modifier state at
 -- press excludes the key being pressed, so ADD-Shift-while-Alt-held is
 -- `ALT + Shift_L`, and ADD-Alt-while-Shift-held is `SHIFT + Alt_L`. At
 -- release the released key still contributes to the mask, so the release
@@ -73,14 +73,14 @@ hl.bind(mod .. " + H",         hl.dsp.focus({ direction = "left"  }))
 hl.bind(mod .. " + J",         hl.dsp.focus({ direction = "down"  }))
 hl.bind(mod .. " + K",         hl.dsp.focus({ direction = "up"    }))
 hl.bind(mod .. " + L",         hl.dsp.focus({ direction = "right" }))
--- Cycle through the alt-tab overlay's list in its exact display order.
+-- Cycle through the window-menu overlay's list in its exact display order.
 -- `layoutmsg cyclenext` walks the layout tree, which doesn't match what the
--- overlay renders — see common/alt-tab.ts for the shared sort.
-hl.bind(mod .. " + TAB",         hl.dsp.exec_cmd("ags request alt-tab-next"))
-hl.bind(mod .. " + SHIFT + TAB", hl.dsp.exec_cmd("ags request alt-tab-prev"))
+-- overlay renders — see common/window-menu.ts for the shared sort.
+hl.bind(mod .. " + TAB",         hl.dsp.exec_cmd("ags request window-menu-next"))
+hl.bind(mod .. " + SHIFT + TAB", hl.dsp.exec_cmd("ags request window-menu-prev"))
 
--- ── Alt-hold alt-tab overlay ─────────────────────────────────────────────
--- Pressing Alt alone pops the AGS alt-tab overlay (the current workspace's
+-- ── Alt-hold window-menu overlay ─────────────────────────────────────────
+-- Pressing Alt alone pops the AGS window-menu overlay (the current workspace's
 -- clients); releasing Alt closes it.
 --
 -- On release, Hyprland reports the modifier state at the moment of the
@@ -88,10 +88,10 @@ hl.bind(mod .. " + SHIFT + TAB", hl.dsp.exec_cmd("ags request alt-tab-prev"))
 -- release bind needs the ALT modifier in the pattern (bare-modifier
 -- release-only binds don't fire in this Hyprland build). Both Alt_L and
 -- Alt_R are covered so either physical Alt key closes it.
-hl.bind("Alt_L", hl.dsp.exec_cmd("ags request alt-tab-open"))
-hl.bind("Alt_R", hl.dsp.exec_cmd("ags request alt-tab-open"))
-hl.bind(mod .. " + Alt_L", hl.dsp.exec_cmd("ags request alt-tab-close"), { release = true, transparent = true })
-hl.bind(mod .. " + Alt_R", hl.dsp.exec_cmd("ags request alt-tab-close"), { release = true, transparent = true })
+hl.bind("Alt_L", hl.dsp.exec_cmd("ags request window-menu-open"))
+hl.bind("Alt_R", hl.dsp.exec_cmd("ags request window-menu-open"))
+hl.bind(mod .. " + Alt_L", hl.dsp.exec_cmd("ags request window-menu-close"), { release = true, transparent = true })
+hl.bind(mod .. " + Alt_R", hl.dsp.exec_cmd("ags request window-menu-close"), { release = true, transparent = true })
 
 -- ── Window move (vim) ────────────────────────────────────────────────────
 hl.bind(mod .. " + SHIFT + H", hl.dsp.window.move({ direction = "l" }))

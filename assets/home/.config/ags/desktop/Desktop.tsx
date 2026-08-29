@@ -4,7 +4,7 @@
 //
 // Surface mounting rules:
 //   Bar             — primary output only. One clock per session.
-//   AltTab          — every output; visible on Alt-hold, only on the focused
+//   WindowMenu      — every output; visible on Alt-hold, only on the focused
 //                     workspace's monitor.
 //   Runner          — every output; visible on Alt+F3, only on the focused
 //                     workspace's monitor. Owns keyboard focus while up.
@@ -24,12 +24,12 @@ import Astal from "gi://Astal?version=4.0";
 import Gdk from "gi://Gdk?version=4.0";
 import AstalHyprland from "gi://AstalHyprland";
 import Bar from "../components/Bar";
-import AltTab from "../components/AltTab";
+import WindowMenu from "../components/WindowMenu";
 import Runner from "../components/Runner";
 import SystemMenu from "../components/SystemMenu";
 import MonitorId from "../components/MonitorId";
 import { findPrimaryMonitor } from "../common/monitors";
-import { altTabOpen } from "../common/alt-tab";
+import { windowMenuOpen } from "../common/window-menu";
 import { runnerOpen } from "../common/runner";
 import { systemMenuOpen } from "../common/system-menu";
 import { workspaceVizOpen } from "../common/workspace-viz";
@@ -70,10 +70,10 @@ function BarSurface({ gdkmonitor }: { gdkmonitor: Gdk.Monitor }) {
 // Exclusivity.IGNORE: the surface is a summoned interruption, not persistent
 // chrome. marginTop clears the bar so the two don't overlap on Alt-hold.
 //
-// Visible only when altTabOpen is set AND the focused workspace lives on this
-// output — that is what makes the peek follow focus rather than always
+// Visible only when windowMenuOpen is set AND the focused workspace lives on
+// this output — that is what makes the peek follow focus rather than always
 // showing on the pinned primary.
-function AltTabSurface({ gdkmonitor }: { gdkmonitor: Gdk.Monitor }) {
+function WindowMenuSurface({ gdkmonitor }: { gdkmonitor: Gdk.Monitor }) {
   let window: Astal.Window;
   const connector = gdkmonitor.connector;
   const { TOP } = Astal.WindowAnchor;
@@ -81,30 +81,30 @@ function AltTabSurface({ gdkmonitor }: { gdkmonitor: Gdk.Monitor }) {
   onCleanup(() => window.destroy());
 
   const visible = createComputed(
-    () => altTabOpen() && focusedWorkspace()?.monitor?.name === connector,
+    () => windowMenuOpen() && focusedWorkspace()?.monitor?.name === connector,
   );
 
   return connector ? (
     <window
       $={(self) => (window = self)}
       visible={visible}
-      class="alt-tab-window"
-      namespace="ags-alt-tab"
-      name={`alt-tab-${connector}`}
+      class="window-menu-window"
+      namespace="ags-window-menu"
+      name={`window-menu-${connector}`}
       gdkmonitor={gdkmonitor}
       exclusivity={Astal.Exclusivity.IGNORE}
       anchor={TOP}
       marginTop={80}
       application={app}
     >
-      <AltTab />
+      <WindowMenu />
     </window>
   ) : (
     <></>
   );
 }
 
-// Same follow-focus rule as AltTabSurface, but keymode EXCLUSIVE — the entry
+// Same follow-focus rule as WindowMenuSurface, but keymode EXCLUSIVE — the entry
 // must receive keystrokes until the user submits or Escapes. The Runner
 // component owns its own submit/dismiss wiring; this surface only decides
 // where and when the layer-shell window shows up.
@@ -234,7 +234,7 @@ export default function Desktop() {
       <For each={monitors}>
         {(monitor: Gdk.Monitor) => (
           <This this={app}>
-            <AltTabSurface gdkmonitor={monitor} />
+            <WindowMenuSurface gdkmonitor={monitor} />
           </This>
         )}
       </For>

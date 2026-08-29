@@ -34,15 +34,15 @@ window.bar {
   color: var(--ds-text-primary-gray);
 }
 
-/* Alt-tab peek — a card floating below the bar while Alt is held.
+/* Window-menu peek — a card floating below the bar while Alt is held.
  * Exclusivity.IGNORE (see Desktop.tsx) means it overlays whatever's beneath
  * without reserving space. */
-window.alt-tab-window {
+window.window-menu-window {
   background: transparent;
   color: var(--ds-text-primary-gray);
 }
 
-.alt-tab {
+.window-menu {
   min-width: 340px;
   padding: 8px 12px;
   background-color: var(--ds-background-default);
@@ -50,43 +50,43 @@ window.alt-tab-window {
   border-radius: var(--ds-radius-base);
 }
 
-.alt-tab-header {
+.window-menu-header {
   padding: 0 4px 6px 4px;
   border-bottom: 1px solid var(--ds-border-default-gray);
   margin-bottom: 4px;
 }
 
-.alt-tab-header-label,
-.alt-tab-header-count {
+.window-menu-header-label,
+.window-menu-header-count {
   color: var(--ds-text-secondary-gray);
 }
 
-.alt-tab-row {
+.window-menu-row {
   padding: 6px 4px;
   border-radius: var(--ds-radius-base);
 }
 
-.alt-tab-row:hover {
+.window-menu-row:hover {
   background-color: var(--ds-component-background-hover-gray);
 }
 
-.alt-tab-row.current {
+.window-menu-row.current {
   background-color: var(--ds-component-background-active-blue);
   color: var(--ds-text-primary-blue);
 }
 
-.alt-tab-index {
+.window-menu-index {
   min-width: 18px;
   color: var(--ds-text-secondary-gray);
 }
 
-.alt-tab-title {
+.window-menu-title {
   color: var(--ds-text-secondary-gray);
   font-size: 12px;
 }
 
 /* Runner — its own summoned card, Alt+F3. Sits at the same top-of-screen
- * offset as the alt-tab peek so the two feel like siblings, not layers. */
+ * offset as the window-menu peek so the two feel like siblings, not layers. */
 window.runner-window {
   background: transparent;
   color: var(--ds-text-primary-gray);
