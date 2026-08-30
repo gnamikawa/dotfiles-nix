@@ -1,6 +1,6 @@
 # Coding style
 
-Applies to every `.nix` file authored in this repository.
+Applies to every `.nix` file authored in this repository, except where a section declares its own scope.
 
 ## 1. Function composition: use `|>`
 
@@ -68,3 +68,22 @@ Let-bind the multi-line argument and pass the name.
 
 Single-argument calls are untouched — `stdenv.mkDerivation { … }` and
 `pkgs.writeTextFile { … }` stay in their idiomatic attrset form.
+
+## 3. Docstrings on every named function
+
+Applies to every named function authored in this repository, in any
+language.
+
+Every named function must carry a docstring in that language's default
+format — TSDoc for TypeScript, JSDoc for JavaScript, PEP 257 for
+Python, godoc for Go, rustdoc for Rust, and a `#`-comment block above
+the binding for Nix. Public API surfaces first; the rule extends to
+every named function, including private helpers, methods, and named
+handlers. It does not apply to inline anonymous callbacks
+(`onClick={() => …}`, `.map(x => …)`, `useEffect(() => …)`).
+
+Code-smell corollary: if writing a docstring for a small named helper
+feels excessive, treat that friction as a signal the helper lacks a
+real reason to exist. Fix the structure — inline it, or promote it to
+something worth naming and describing — rather than skip the
+docstring.
