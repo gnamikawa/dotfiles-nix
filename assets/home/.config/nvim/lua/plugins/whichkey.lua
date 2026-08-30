@@ -1,10 +1,11 @@
 return {
   "folke/which-key.nvim",
   keys = {
-    { 
-      "<c-\\>", 
+    {
+      "<c-\\>",
       "<cmd>!$TERMINAL<CR>",
-      mode = "n", desc = "Create new terminal instance"
+      mode = "n",
+      desc = "Create new terminal instance",
     },
-  }
+  },
 }

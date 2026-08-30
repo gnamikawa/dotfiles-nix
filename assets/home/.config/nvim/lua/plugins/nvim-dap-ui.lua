@@ -1,35 +1,23 @@
 return {
   {
     "rcarriga/nvim-dap-ui",
-    dependencies = { "nvim-neotest/nvim-nio" },
-    keys = {
-      {
-        "<leader>du",
-        function()
-          require("dapui").toggle({})
-        end,
-        desc = "Dap UI",
-      },
-      {
-        "<leader>de",
-        function()
-          require("dapui").eval()
-        end,
-        desc = "Eval",
-        mode = { "n", "x" },
-      },
-    },
-    opts = {},
-    config = function(_, opts)
-      local dap = require("dap")
-      local dapui = require("dapui")
+    init = function()
+      local group = vim.api.nvim_create_augroup("nvim_dap_ui_overrides", { clear = true })
+      vim.api.nvim_create_autocmd("User", {
+        group = group,
+        pattern = "LazyLoad",
+        callback = function(event)
+          if event.data ~= "nvim-dap-ui" then
+            return
+          end
 
-      dapui.setup(opts)
-      dap.configurations.rust = dap.configurations.rust or {}
+          local listeners = require("dap").listeners.before
+          listeners.event_terminated["dapui_config"] = nil
+          listeners.event_exited["dapui_config"] = nil
 
-      dap.listeners.after.event_initialized["dapui_config"] = function()
-        dapui.open({})
-      end
+          return true
+        end,
+      })
     end,
   },
 }
