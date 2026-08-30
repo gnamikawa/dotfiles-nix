@@ -62,6 +62,10 @@
         agsPackages = ags.packages.${system};
       };
 
+      agsEventCoordinatorCheck = import ./packages/ags-event-coordinator-check.nix {
+        inherit pkgs;
+      };
+
       # The login screen, built rather than run from source. system-nix
       # consumes this output and decides how it is launched (issue #38).
       greeter = import ./packages/greeter.nix {
@@ -214,6 +218,7 @@
         inherit greeter;
         session-lock = sessionLock;
         ags-alias = agsAliasCheck;
+        ags-event-coordinator = agsEventCoordinatorCheck;
       };
     };
 }
