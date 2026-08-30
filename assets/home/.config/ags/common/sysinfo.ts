@@ -7,6 +7,17 @@
 
 import GLib from "gi://GLib";
 
+/**
+ * Read a small text file and return its trimmed contents, or `""` on any
+ * failure.
+ *
+ * Every read here targets a world-readable pseudo-file (`/proc`, `/sys`,
+ * `/run`), so the fallback is silent — a missing entry means "the machine
+ * doesn't have this", not "something is wrong".
+ *
+ * @param path - Absolute path to a small text-shaped file.
+ * @returns Trimmed contents, or the empty string when the read fails.
+ */
 function read(path: string): string {
   try {
     const [ok, bytes] = GLib.file_get_contents(path);
@@ -36,6 +47,14 @@ export const generation = (() => {
   }
 })();
 
+/**
+ * Format system uptime as the largest two units — `"3d 4h"`, `"4h 12m"`, or
+ * `"7m"`.
+ *
+ * Reads `/proc/uptime` on each call; the caller controls refresh cadence.
+ *
+ * @returns Human-readable uptime, always at least one unit wide.
+ */
 export function uptime(): string {
   const secs = Number(read("/proc/uptime").split(" ")[0]);
   const d = Math.floor(secs / 86400);
@@ -46,9 +65,16 @@ export function uptime(): string {
   return `${m}m`;
 }
 
-// null on a machine with no battery, which is how the rail decides whether the
-// row exists at all. GEN-DPC is a desktop and /sys/class/power_supply is empty
-// there; GEN-LPC reads real values.
+/**
+ * Read the first `power_supply` entry of type `"Battery"` from sysfs.
+ *
+ * Returns `null` on a machine with no battery, which is how the status rail
+ * decides whether to render the row at all — GEN-DPC is a desktop and
+ * `/sys/class/power_supply` is empty there; GEN-LPC reads real values.
+ *
+ * @returns `{ pct, charging }` for the first battery, or `null` when none
+ *   exists.
+ */
 export function battery(): { pct: number; charging: boolean } | null {
   const dir = "/sys/class/power_supply";
   try {

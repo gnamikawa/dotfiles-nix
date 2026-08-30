@@ -27,6 +27,17 @@ app.start({
   // res() MUST be called on every branch — a handler that throws before
   // resolving leaves the DBus caller (ags request / Hyprland bind) hanging,
   // which strands the overlay in whatever state the throw interrupted.
+  /**
+   * IPC bridge for the Hyprland alt-hold binds and every other verb the
+   * `ags request` client fires. See `hypr/binds.conf` for the emitting side.
+   *
+   * `res()` must be called on every branch — a handler that throws before
+   * resolving leaves the DBus caller hanging, which strands whichever
+   * overlay the throw interrupted.
+   *
+   * @param argv - Argv from `ags request`; `argv[0]` is the verb name.
+   * @param res - Reply callback, called exactly once per invocation.
+   */
   requestHandler(argv, res) {
     switch (argv[0]) {
       case "window-menu-open":
@@ -97,5 +108,6 @@ app.start({
         res(`unknown: ${argv.join(" ")}`);
     }
   },
+  /** GTK-app entry: mounts the always-on desktop surfaces. */
   main: () => <Desktop />,
 });

@@ -24,6 +24,14 @@ const MAX_RESULTS = 10;
 // inside a reactive computed instead of async plumbing.
 const apps = new AstalApps.Apps();
 
+/**
+ * The runner surface's content: a text entry above a fuzzy-matched app
+ * list, dmenu-style. Enter launches the highlighted app (or the raw text
+ * when nothing matches); Up/Down navigate; Escape dismisses.
+ *
+ * Takes no props — the layer-shell surface in `desktop/Desktop.tsx` owns
+ * presence gating and keymode.
+ */
 export default function Runner() {
   let entry: Gtk.Entry | null = null;
   const [query, setQuery] = createState("");
@@ -42,6 +50,14 @@ export default function Runner() {
     return { rs, sel: rs.length === 0 ? 0 : Math.min(sel, rs.length - 1) };
   });
 
+  /**
+   * Launch the highlighted app (or the raw query as a shell command when
+   * nothing matches) and close the runner.
+   *
+   * Dispatches via Hyprland's `exec` — a plain `AstalApps.launch()` would
+   * inherit ags's systemd cgroup and get SIGKILL'd on `systemctl restart
+   * ags`, which is a common workflow here.
+   */
   function submit() {
     const rs = results();
     const sel = selected();
@@ -59,6 +75,15 @@ export default function Runner() {
     }
   }
 
+  /**
+   * Bind the entry: latch a reference, wire `activate`/`changed`, and
+   * install a key controller so arrow keys move the row selection instead
+   * of moving the caret.
+   *
+   * Called from the entry's `$` ref callback.
+   *
+   * @param self - The `Gtk.Entry` being wired up.
+   */
   function wire(self: Gtk.Entry) {
     entry = self;
     self.connect("activate", submit);

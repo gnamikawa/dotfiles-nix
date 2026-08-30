@@ -14,6 +14,14 @@
 
 import { Gdk } from "ags/gtk4";
 
+/**
+ * Snapshot the display's live monitor inventory as a plain Set.
+ *
+ * Wraps GDK's ListModel in a Set so callers can do set intersection against
+ * their own per-monitor bookkeeping without dealing with the model iterator.
+ *
+ * @returns Every monitor GDK currently reports; empty on no default display.
+ */
 export function currentMonitors(): Set<Gdk.Monitor> {
   const model = Gdk.Display.get_default()?.get_monitors();
   const monitors = new Set<Gdk.Monitor>();
@@ -25,8 +33,18 @@ export function currentMonitors(): Set<Gdk.Monitor> {
   return monitors;
 }
 
-// Restrict the candidate set with `among` when the caller is managing its own
-// per-monitor surfaces; omit it to pick from GDK's live inventory directly.
+/**
+ * Pick the primary monitor by geometry — the one pinned at compositor
+ * origin (0, 0) by system-nix's `hardware.primaryMonitor` setting.
+ *
+ * Falls back to the first candidate when nothing sits at the origin, which
+ * happens on VMs and early boot before Hyprland has applied the layout.
+ *
+ * @param among - When supplied, restrict candidates to monitors the caller
+ *   already tracks (used by the session lock, which manages one surface per
+ *   monitor and needs to intersect with GDK's live inventory).
+ * @returns The primary monitor, or `undefined` when no candidates remain.
+ */
 export function findPrimaryMonitor(
   among?: Iterable<Gdk.Monitor>,
 ): Gdk.Monitor | undefined {

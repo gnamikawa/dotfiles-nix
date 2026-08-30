@@ -34,21 +34,38 @@ const ICON_BASE = `${SRC}/../components/auth/icons`;
 // Height of the bottom band the rail and the verbs sit in, mirrored at the top.
 const BAND = 200;
 
-// Two states. The fast-drop-then-crawl shape lives entirely in the easing
-// curve (see style.css) rather than in an intermediate state, so there is no
-// knee to land on and nothing to time here.
-//
-// This still is not just a boolean: the name slot needs to keep its text while
-// it fades out, so "which button" and "is it showing" have to be separate.
+/**
+ * Two-state "ghost / lit" phase used by the rail and the verbs to fade
+ * together when a pointer approaches.
+ *
+ * The fast-drop-then-crawl shape lives entirely in the easing curve
+ * (`style.css`) rather than in an intermediate state, so there is no knee
+ * to land on and nothing to time here.
+ *
+ * @returns The phase accessor plus setter helpers.
+ */
 function createPhase() {
   const [phase, setPhase] = createState("ghost");
   return {
     phase,
+    /** Transition to `"lit"`. */
     on: () => setPhase("lit"),
+    /** Transition back to `"ghost"`. */
     off: () => setPhase("ghost"),
   };
 }
 
+/**
+ * The auth-panel content shared by the greeter and the session lock.
+ *
+ * Screen layout is a centred clock with a bottom band that carries a
+ * status rail (left) and two power verbs (right); the whole band lifts
+ * from `"ghost"` to `"lit"` as the pointer approaches. Authentication
+ * and window mechanics are delegated to `controller`, so the same panel
+ * runs against greetd, PAM, layer-shell, and `Gtk4SessionLock`.
+ *
+ * @param props.controller - Controller carrying the auth machine.
+ */
 export default function Auth({ controller }: { controller: Controller }) {
   const time = createPoll("", 1000, () =>
     new Date().toLocaleTimeString("en-GB", {
@@ -70,11 +87,22 @@ export default function Auth({ controller }: { controller: Controller }) {
   // The verbs are reachable from the keyboard as well as the pointer: the
   // ghost/lit language is proximity-driven, and a surface that needs a mouse to
   // power the machine off would be a defect (CONTEXT.md, Keyboard-first).
+  /**
+   * Root-level key handler: F11 fires the hibernate verb, F12 fires the
+   * power-off verb. Both must be reachable without a pointer.
+   *
+   * @param _e - Controller (unused).
+   * @param keyval - Gdk key value from the key-pressed signal.
+   */
   function onKey(_e: Gtk.EventControllerKey, keyval: number) {
     if (keyval === Gdk.KEY_F11) return run(VERBS[0].command);
     if (keyval === Gdk.KEY_F12) return run(VERBS[1].command);
   }
 
+  /**
+   * The hidden password entry. Grabs focus on map (not on ref) — an
+   * unrooted grab returns false and leaves the surface focusless.
+   */
   const PasswordEntry = () => (
     <entry
       $={controller.register}
@@ -93,6 +121,12 @@ export default function Auth({ controller }: { controller: Controller }) {
     />
   );
 
+  /**
+   * The eight password dots. Fill left-to-right with the password length,
+   * flip to the shake class on fault (alternating `no0`/`no1` so the CSS
+   * animation retriggers on back-to-back failures), and switch to the
+   * `"authenticating"` variant while an attempt is in flight.
+   */
   const Dots = () => (
     <box
       class={createComputed(() =>
@@ -116,6 +150,11 @@ export default function Auth({ controller }: { controller: Controller }) {
     </box>
   );
 
+  /**
+   * The centre column: date, time, dots, an always-present fault slot,
+   * and the hidden password entry — one stack whose height does not
+   * change when a fault is revealed.
+   */
   const Core = () => (
     <box
       class="core"
@@ -155,6 +194,11 @@ export default function Auth({ controller }: { controller: Controller }) {
   if (hasBattery)
     rows.push(["battery", createComputed(() => `${batt()?.pct ?? 0}%`)]);
 
+  /**
+   * The bottom-left status rail: host / system / kernel / generation /
+   * uptime (plus battery when the machine has one). Ghosts by default,
+   * lifts to `"lit"` on pointer proximity.
+   */
   const Rail = () => {
     const near = createPhase();
     return (
@@ -180,6 +224,12 @@ export default function Auth({ controller }: { controller: Controller }) {
   // One name slot, to the left of a tight icon pair. The icons carry no text,
   // so they can sit next to each other; the slot is a fixed width, so naming
   // the hovered button moves nothing.
+  /**
+   * The bottom-right power verbs: a fixed-width name slot next to a tight
+   * icon pair. Hovering an icon writes its label into the slot; the label
+   * is left in place on leave and fades out, so the trail is of a name
+   * rather than of an empty label.
+   */
   const Verbs = () => {
     const near = createPhase();
     const slot = createPhase();

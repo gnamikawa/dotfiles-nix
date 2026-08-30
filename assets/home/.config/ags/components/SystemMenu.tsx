@@ -15,6 +15,14 @@
 import { Gtk } from "ags/gtk4";
 import { VERBS } from "../common/system-menu";
 
+/**
+ * The system-menu overlay's content: a scrimmed card listing each
+ * uncommon action with its Alt+Shift+<key> chord. The card is a legend;
+ * the Hyprland binds in `hypr/binds.lua` fire the actions themselves.
+ *
+ * Takes no props — the layer-shell surface in `desktop/Desktop.tsx` owns
+ * presence gating.
+ */
 export default function SystemMenu() {
   return (
     <box

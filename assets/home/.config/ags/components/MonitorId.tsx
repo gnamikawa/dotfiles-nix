@@ -40,6 +40,15 @@ interface View {
   rows: (Cell | null)[][];
 }
 
+/**
+ * Pick the grid dimensions for a plate given a workspace count.
+ *
+ * Maps 1 → 1×1, 2 → 1×2, 3–4 → 2×2, 5–9 → 3×3 per ADR-0011. `sizeClass`
+ * feeds the CSS grid-scale variant.
+ *
+ * @param count - Workspaces pinned to this monitor, already capped at 9.
+ * @returns Grid geometry and the size-class token for CSS.
+ */
 function gridShape(count: number): {
   rows: number;
   cols: number;
@@ -55,6 +64,14 @@ interface Props {
   connector: string;
 }
 
+/**
+ * The per-screen key card: an adaptive 1×1 / 1×2 / 2×2 / 3×3 grid of the
+ * workspaces pinned to a monitor, with the active one lit and its peers
+ * dim, plus the connector name printed below.
+ *
+ * Mounted one per output by `desktop/Desktop.tsx`. Takes only its
+ * connector name; every other input is derived reactively.
+ */
 export default function MonitorId({ connector }: Props) {
   const view = createComputed<View | null>(() => {
     focusedWorkspaceBinding();

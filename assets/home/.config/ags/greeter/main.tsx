@@ -21,6 +21,11 @@ import css from "../components/auth/style.css";
 app.start({
   instanceName: "greeter",
   css,
+  /**
+   * GTK-app entry: mount the greeter's warm-wash surface on the primary
+   * output and hand the shared `Auth` panel a greetd-flavoured
+   * controller.
+   */
   main() {
     // The warm wash is a radial centred on the screen, so repeating it across
     // a multi-head desktop would read as several lamps rather than one. The

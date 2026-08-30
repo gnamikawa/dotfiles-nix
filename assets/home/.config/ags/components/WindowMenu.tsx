@@ -21,12 +21,30 @@ const hyprland = AstalHyprland.get_default();
 const focusedClient = createBinding(hyprland, "focusedClient");
 const clients = createBinding(hyprland, "clients");
 
+/**
+ * Wire a single-click gesture on a widget that fires `cb` on release.
+ *
+ * Gtk4 doesn't have an `onClicked` prop for plain boxes — the gesture
+ * controller is the correct primitive.
+ *
+ * @param self - Widget the gesture is attached to.
+ * @param cb - Callback fired on the pointer release.
+ */
 function attachClick(self: Gtk.Widget, cb: () => void) {
   const gesture = new Gtk.GestureClick();
   gesture.connect("released", () => cb());
   self.add_controller(gesture);
 }
 
+/**
+ * The window-menu overlay's content: a vertical list of the focused
+ * workspace's clients (index, icon, class, title) with the focused one
+ * highlit. Click a row to focus its client.
+ *
+ * Takes no props — the layer-shell surface in `desktop/Desktop.tsx` owns
+ * presence gating; the sort helper in `common/window-menu.ts` keeps this
+ * list in lockstep with Alt+Tab cycling.
+ */
 export default function WindowMenu() {
   // A single computed carries everything the view needs — the current
   // workspace's clients, its name, and which one is focused — so the row

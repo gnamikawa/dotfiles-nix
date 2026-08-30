@@ -26,14 +26,33 @@ export const setWindowMenuOpen = set;
 
 const hyprland = AstalHyprland.get_default();
 
-// Hyprland's `address` property comes back without the 0x prefix on some
-// builds and with it on others; `focuswindow` wants the 0x form, so normalise
-// before dispatching.
+/**
+ * Normalise a Hyprland client address to the `0x…` form.
+ *
+ * Hyprland's `address` property comes back without the 0x prefix on some
+ * builds and with it on others; `focuswindow` wants the 0x form, so callers
+ * dispatch through this rather than reading `client.address` directly.
+ *
+ * @param client - Any AstalHyprland client with an address.
+ * @returns Address with a guaranteed `0x` prefix.
+ */
 export function addressOf(client: AstalHyprland.Client): string {
   const address = client.address ?? "";
   return address.startsWith("0x") ? address : `0x${address}`;
 }
 
+/**
+ * List every client on a workspace in the peek's display order.
+ *
+ * Sorted top-to-bottom, then left-to-right, tie-broken by address so the
+ * order is stable frame-to-frame — necessary because the visible list and
+ * the Tab/Shift-Tab cycling both consume this ordering.
+ *
+ * @param wsId - Hyprland workspace id, as reported by
+ *   `client.workspace?.id`.
+ * @returns Clients on the workspace, sorted spatially with a stable
+ *   tiebreak.
+ */
 export function sortedClientsOnWorkspace(
   wsId: number,
 ): AstalHyprland.Client[] {
@@ -47,6 +66,15 @@ export function sortedClientsOnWorkspace(
     });
 }
 
+/**
+ * Advance the focused client by one step through the peek's visible order.
+ *
+ * Shared by the overlay's own key handlers and Hyprland's Tab binds so the
+ * visible highlight and the compositor's focus can't drift apart.
+ *
+ * @param direction - `+1` walks down the list, `-1` walks up; wraps at
+ *   either end.
+ */
 export function cycleWindowMenu(direction: 1 | -1): void {
   const current = hyprland.get_focused_client();
   const wsId = current?.workspace?.id;

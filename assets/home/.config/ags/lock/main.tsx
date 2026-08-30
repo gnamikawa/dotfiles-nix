@@ -20,11 +20,16 @@ const surfaces = new Map<Gdk.Monitor, Surface>();
 const controller = createLockController(() => sessionLock.unlock());
 let held = false;
 
+/**
+ * Reconcile which lock surface is the interactive one after every
+ * monitor-inventory change.
+ *
+ * Gtk4SessionLock does not destroy an assigned window when its output
+ * disappears, so the lock surfaces are intersected with GDK's live
+ * inventory (via {@link findPrimaryMonitor}'s `among` filter) to keep a
+ * stale surface from retaining the interactive role.
+ */
 function renderSurfaces() {
-  // Gtk4SessionLock does not destroy an assigned window when its output
-  // disappears. Intersect the lock surfaces with GDK's live inventory (via
-  // findPrimaryMonitor's `among` filter) so a stale surface can never retain
-  // the interactive role.
   const primary = findPrimaryMonitor(surfaces.keys());
   for (const [monitor, surface] of surfaces) {
     const shouldBeInteractive = monitor === primary;
@@ -35,9 +40,14 @@ function renderSurfaces() {
   }
 }
 
+/**
+ * Release the application hold and quit.
+ *
+ * Acquisition failure can be reported both by the `failed` signal and by
+ * `lock()`'s return value, so this is idempotent on the hold — releasing
+ * a hold that isn't held would GLib-warn.
+ */
 function quit() {
-  // Acquisition failure can be reported both by the signal and by lock()'s
-  // return value. Releasing the application hold must still happen once.
   if (held) {
     app.release();
     held = false;
@@ -107,6 +117,11 @@ app.start({
   // fail acquisition cleanly instead of being routed to the first AGS process.
   instanceName: `genzo-session-lock-${Date.now()}`,
   css: `${authCss}\n${lockCss}`,
+  /**
+   * GTK-app entry: check `ext-session-lock-v1` support, wire the monitor
+   * inventory to {@link renderSurfaces}, hold the process, and call
+   * `sessionLock.lock()`.
+   */
   main() {
     if (!SessionLock.is_supported()) {
       console.error("compositor does not support ext-session-lock-v1");

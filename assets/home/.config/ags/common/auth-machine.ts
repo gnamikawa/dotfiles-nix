@@ -42,14 +42,45 @@ export const initialState: State = {
   attempt: 0,
 };
 
+/**
+ * Predicate: does the current state accept password keystrokes?
+ *
+ * Locked is the only phase in which the entry is unlocked for input; every
+ * other phase either has no entry yet (idle, acquiring) or has an attempt
+ * in flight and would clobber it (authenticating, unlocking, unlocked,
+ * failed).
+ *
+ * @param state - Current machine state.
+ * @returns True while the entry accepts input.
+ */
 export function acceptsPasswordInput(state: State): boolean {
   return state.phase === "locked";
 }
 
+/**
+ * Predicate: is an authentication attempt currently in flight?
+ *
+ * The view uses this to switch the entry into its "checking…" affordance
+ * and to gate the shake animation until the failure phase lands.
+ *
+ * @param phase - Current phase.
+ * @returns True while an attempt is being verified.
+ */
 export function showsAuthenticationActivity(phase: Phase): boolean {
   return phase === "authenticating";
 }
 
+/**
+ * Pure state-machine step: fold an event into the next state.
+ *
+ * Events that don't apply to the current phase are ignored (the same state
+ * is returned) — this is how a late `authenticationFailed` from a
+ * superseded attempt gets discarded when the user has already retried.
+ *
+ * @param state - Current machine state.
+ * @param event - Event dispatched by the controller.
+ * @returns The next state; the same reference when the event was ignored.
+ */
 export function reduce(state: State, event: Event): State {
   switch (event.type) {
     case "acquire":

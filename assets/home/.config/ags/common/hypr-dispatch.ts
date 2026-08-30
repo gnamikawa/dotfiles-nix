@@ -13,6 +13,14 @@
 
 import Gio from "gi://Gio?version=2.0";
 
+/**
+ * Send a raw Lua expression to Hyprland's dispatch socket.
+ *
+ * Argv-form Gio.Subprocess so the shell never re-parses the Lua — no
+ * escaping is needed for embedded quotes.
+ *
+ * @param luaCall - A Lua expression the compositor's `hl` table exposes.
+ */
 function send(luaCall: string): void {
   Gio.Subprocess.new(
     ["hyprctl", "dispatch", luaCall],
@@ -20,14 +28,25 @@ function send(luaCall: string): void {
   );
 }
 
-// Focus a specific client by Hyprland address (with the 0x prefix).
+/**
+ * Focus a specific client by Hyprland address (with the 0x prefix).
+ *
+ * @param address - Client address in `0x…` form, as reported by
+ *   {@link addressOf}.
+ */
 export function focusWindow(address: string): void {
   send(`hl.dsp.focus({ window = "address:${address}" })`);
 }
 
-// Fire a shell command through the compositor. `[[…]]` is a Lua raw string,
-// so nothing inside gets escape-processed — safe for arbitrary launcher lines
-// as long as they don't contain a literal `]]` (never in practice).
+/**
+ * Fire a shell command through the compositor.
+ *
+ * `[[…]]` is a Lua raw string, so nothing inside gets escape-processed —
+ * safe for arbitrary launcher lines as long as they don't contain a literal
+ * `]]` (never in practice).
+ *
+ * @param cmd - Shell command line to hand to the compositor's `exec_cmd`.
+ */
 export function execCmd(cmd: string): void {
   send(`hl.dsp.exec_cmd([[${cmd}]])`);
 }

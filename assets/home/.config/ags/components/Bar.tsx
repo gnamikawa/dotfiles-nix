@@ -33,9 +33,25 @@ const LUCIDE_DIR = GLib.build_filenamev([
   "icons",
   "lucide",
 ]);
+/**
+ * Build a file-backed `Gio.Icon` for a Lucide glyph.
+ *
+ * @param name - Basename of the SVG (without the `.svg` extension).
+ * @returns A file icon that bypasses GTK's theme lookup entirely.
+ */
 const lucideIcon = (name: string): Gio.Icon =>
   Gio.FileIcon.new(Gio.File.new_for_path(`${LUCIDE_DIR}/${name}.svg`));
 
+/**
+ * Wire a Lucide-icon binding into a `Gtk.Image`.
+ *
+ * ags gtk4's declarative `iconName={binding}` was proven inert against
+ * `Gtk.Image`, so the icon is imperatively re-set on every binding change.
+ *
+ * @param image - The image widget to keep in sync.
+ * @param name - Accessor over the Lucide glyph basename.
+ * @returns An unsubscribe function suitable for cleanup.
+ */
 function bindLucideIcon(image: Gtk.Image, name: Accessor<string>): () => void {
   image.set_from_gicon(lucideIcon(name.get()));
   return name.subscribe(() => image.set_from_gicon(lucideIcon(name.get())));
@@ -67,6 +83,12 @@ function bindLucideIcon(image: Gtk.Image, name: Accessor<string>): () => void {
 // of the caching bugs, and no crashes on association.
 const nmClient = NM.Client.new(null);
 
+/**
+ * Find the first NetworkManager Wi-Fi device, or `null` when the machine
+ * has none.
+ *
+ * @returns The Wi-Fi device wrapper, or `null` on a hard-wired-only box.
+ */
 function getWifiDevice(): NM.DeviceWifi | null {
   for (const d of nmClient.get_devices()) {
     if (d.get_device_type() === NM.DeviceType.WIFI) {
@@ -76,6 +98,14 @@ function getWifiDevice(): NM.DeviceWifi | null {
   return null;
 }
 
+/**
+ * Derive the Lucide glyph that best represents the current Wi-Fi state.
+ *
+ * Falls back to `wifi-off` when the radio is disabled, disconnected, or
+ * absent. When connected, buckets the AP strength into four ramp steps.
+ *
+ * @returns Lucide icon basename for {@link lucideIcon}.
+ */
 function computeWifiIcon(): string {
   const wifi = getWifiDevice();
   if (!wifi || !nmClient.wireless_enabled) return "wifi-off";
@@ -93,6 +123,13 @@ function computeWifiIcon(): string {
   return "wifi-zero";
 }
 
+/**
+ * Derive a human-readable Wi-Fi tooltip: connection name plus signal, or a
+ * status word ("Not connected", "Connecting…", etc.) when there is no
+ * active connection to name.
+ *
+ * @returns Tooltip text for the bar's Wi-Fi glyph.
+ */
 function computeWifiTooltip(): string {
   const wifi = getWifiDevice();
   if (!wifi) return "No Wi-Fi adapter";
@@ -129,13 +166,22 @@ const btTooltip = createComputed(() => {
   return "Bluetooth on";
 });
 
+/**
+ * The bar surface's content: a left-hand drag-down handle stub and a
+ * right-hand ambient triad (Bluetooth, Wi-Fi, clock).
+ *
+ * Takes no props — the layer-shell surface in `desktop/Desktop.tsx` owns
+ * output selection.
+ */
 export default function Bar() {
+  /** Format the current time as `"h:mm AM/PM"` for the clock label. */
   const fmtTime = () =>
     new Date().toLocaleTimeString("en-US", {
       hour: "numeric",
       minute: "2-digit",
       hour12: true,
     });
+  /** Format today's date as `"Weekday, Month Day, Year"` for the tooltip. */
   const fmtDate = () =>
     new Date().toLocaleDateString("en-US", {
       weekday: "long",

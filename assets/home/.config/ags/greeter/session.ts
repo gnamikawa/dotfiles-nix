@@ -15,9 +15,16 @@ const SESSION = "hyprland-uwsm.desktop";
 
 const SESSIONS_DIR = "/run/current-system/sw/share/wayland-sessions";
 
-// The entry's own Exec line rather than a command spelled here: it carries the
-// uwsm store path, which changes with every uwsm update, and reading it keeps
-// the greeter correct across those updates with no rebuild of its own.
+/**
+ * Read the desktop entry's own `Exec` line to get the session's launch
+ * command.
+ *
+ * Reading the entry rather than spelling a command here keeps the
+ * greeter correct across `uwsm` updates (its store path is baked into
+ * the Exec line and changes on every update) with no rebuild of its own.
+ *
+ * @returns The `Exec` line from the session's `.desktop` file.
+ */
 export function sessionCommand(): string {
   const keyfile = new GLib.KeyFile();
   keyfile.load_from_file(`${SESSIONS_DIR}/${SESSION}`, GLib.KeyFileFlags.NONE);
@@ -35,6 +42,18 @@ export function sessionCommand(): string {
 //
 // So the response has to be inspected, which means driving the three requests
 // here rather than through the shorthand.
+/**
+ * Send one greetd request and resolve with the parsed response.
+ *
+ * The higher-level `AstalGreet.login()` shorthand is deliberately not
+ * used — it swallows a wrong password as a normal return, and the
+ * screen would then quit and drop the seat to black. Driving the
+ * requests here lets the response type be inspected.
+ *
+ * @param request - The greetd request to send.
+ * @returns Promise that resolves with greetd's response, or rejects on
+ *   a socket/JSON failure.
+ */
 function send(request: Greet.Request): Promise<Greet.Response> {
   return new Promise((resolve, reject) => {
     request.send((_, res) => {
@@ -47,14 +66,26 @@ function send(request: Greet.Request): Promise<Greet.Response> {
   });
 }
 
-// Thrown for anything that ends the attempt, carrying the one line the fault
-// line shows; the detail greetd gave goes to the journal separately.
+/**
+ * Thrown for anything that ends the attempt.
+ *
+ * The message is the single line the fault slot displays; greetd's own
+ * detail goes to the journal separately.
+ */
 class Fault extends Error {}
 
-// greetd's protocol is a PAM conversation: create_session opens it and every
-// reply is either a prompt to answer, a success, or an error. NixOS's stack
-// asks one secret question, but answering whatever it asks costs three lines
-// and means an added pam module cannot silently wedge the screen.
+/**
+ * Drive greetd's PAM conversation for one attempt.
+ *
+ * Opens a session, answers a single `SECRET` prompt with the password,
+ * and refuses anything else (a second question, a non-secret prompt, or
+ * a `Greet.Error`) with a `Fault`. NixOS's default PAM stack asks only
+ * one SECRET, but a fingerprint reader or OTP module added later must
+ * not silently wedge the screen — hence the positive gate.
+ *
+ * @param password - The password to answer greetd's SECRET prompt with.
+ * @throws {Fault} On refusal or on any unexpected prompt shape.
+ */
 async function converse(password: string): Promise<void> {
   let answered = false;
   let res = await send(Greet.CreateSession.new(USER));
@@ -112,15 +143,18 @@ async function converse(password: string): Promise<void> {
   }
 }
 
-// Resolves on a started session — at which point this process must exit for
-// greetd to hand the seat over — and rejects with the one line to show on the
-// fault line.
-//
-// A rejected login mostly says "authentication failed" and nothing more,
-// because from the screen's side a wrong password is the only case worth
-// distinguishing; greetd's own message goes to the journal instead. Failing to
-// read the session entry is different in kind — nothing was typed wrong and no
-// password will fix it — so that one says what actually broke.
+/**
+ * Attempt one login against greetd and start the session on success.
+ *
+ * Resolves once `StartSession` has returned — at which point this
+ * process must exit for greetd to hand the seat over. Rejects with the
+ * one line to show on the fault slot; greetd's own detail goes to the
+ * journal separately. Cancels any half-open session on failure so a
+ * wrong password does not wedge every later attempt.
+ *
+ * @param password - The password to hand to greetd.
+ * @throws {string} A short human-readable fault message.
+ */
 export async function login(password: string): Promise<void> {
   let argv: string[];
   try {

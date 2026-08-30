@@ -49,6 +49,14 @@ import { workspaceVizOpen } from "../common/workspace-viz";
 const hyprland = AstalHyprland.get_default();
 const focusedWorkspace = createBinding(hyprland, "focusedWorkspace");
 
+/**
+ * Layer-shell surface that hosts the top bar on a single output.
+ *
+ * Anchored TOP|LEFT|RIGHT so the surface spans the full width, and
+ * `EXCLUSIVE` so client windows reserve space beneath.
+ *
+ * @param props.gdkmonitor - The output to mount this bar on.
+ */
 function BarSurface({ gdkmonitor }: { gdkmonitor: Gdk.Monitor }) {
   let window: Astal.Window;
   const connector = gdkmonitor.connector;
@@ -79,12 +87,17 @@ function BarSurface({ gdkmonitor }: { gdkmonitor: Gdk.Monitor }) {
   );
 }
 
-// Exclusivity.IGNORE: the surface is a summoned interruption, not persistent
-// chrome. marginTop clears the bar so the two don't overlap on Alt-hold.
-//
-// Visible only when windowMenuOpen is set AND the focused workspace lives on
-// this output — that is what makes the peek follow focus rather than always
-// showing on the pinned primary.
+/**
+ * Layer-shell surface that hosts the Alt-hold window-menu peek.
+ *
+ * `Exclusivity.IGNORE` because the surface is a summoned interruption,
+ * not persistent chrome; `marginTop` clears the bar so the two do not
+ * overlap on Alt-hold. Visible only when the peek is open AND the focused
+ * workspace lives on this output, so the peek follows focus rather than
+ * always showing on the pinned primary.
+ *
+ * @param props.gdkmonitor - The output this surface is mounted on.
+ */
 function WindowMenuSurface({ gdkmonitor }: { gdkmonitor: Gdk.Monitor }) {
   let window: Astal.Window;
   const connector = gdkmonitor.connector;
@@ -116,16 +129,20 @@ function WindowMenuSurface({ gdkmonitor }: { gdkmonitor: Gdk.Monitor }) {
   );
 }
 
-// A per-window contextual card. Anchors TOP|LEFT and slides the surface
-// into place by margin — right of the focused client if the outer gap
-// fits, else left, else overlaid at the client's top-left corner.
-// Placement is a computed off liveGeom, which polls `hyprctl -j
-// activewindow` every 32ms while the peek is open (Hyprland's socket2
-// doesn't emit movewindow events for interactive drags, so the poll is the
-// only way to keep the card glued during a drag). Peek shape: rides on
-// Alt-hold with the WindowMenu (see app.tsx). Layer.OVERLAY floats it
-// above fullscreen clients. Visibility is gated on the focused client
-// having audio — the card is a router, not a system tray.
+/**
+ * Layer-shell surface that hosts the per-window audio-output router.
+ *
+ * Anchors TOP|LEFT and slides into place by margin — right of the focused
+ * client if the outer gap fits, else left, else overlaid at the client's
+ * top-left corner. Placement is a computed off `liveGeom`, which polls
+ * `hyprctl -j activewindow` every 32ms while the peek is open (Hyprland's
+ * socket2 doesn't emit movewindow events for interactive drags, so the
+ * poll is the only way to keep the card glued during a drag). `Layer.OVERLAY`
+ * floats it above fullscreen clients; visibility is gated on the focused
+ * client living on this output.
+ *
+ * @param props.gdkmonitor - The output this surface is mounted on.
+ */
 function WindowContextSurface({ gdkmonitor }: { gdkmonitor: Gdk.Monitor }) {
   let window: Astal.Window;
   const connector = gdkmonitor.connector;
@@ -170,10 +187,16 @@ function WindowContextSurface({ gdkmonitor }: { gdkmonitor: Gdk.Monitor }) {
   );
 }
 
-// Same follow-focus rule as WindowMenuSurface, but keymode EXCLUSIVE — the entry
-// must receive keystrokes until the user submits or Escapes. The Runner
-// component owns its own submit/dismiss wiring; this surface only decides
-// where and when the layer-shell window shows up.
+/**
+ * Layer-shell surface that hosts the Alt+F3 runner.
+ *
+ * Same follow-focus rule as {@link WindowMenuSurface}, but keymode
+ * `EXCLUSIVE` so the entry receives keystrokes until the user submits or
+ * Escapes. Submit / dismiss wiring lives inside the `Runner` component;
+ * this surface just decides where and when the layer-shell window shows.
+ *
+ * @param props.gdkmonitor - The output this surface is mounted on.
+ */
 function RunnerSurface({ gdkmonitor }: { gdkmonitor: Gdk.Monitor }) {
   let window: Astal.Window;
   const connector = gdkmonitor.connector;
@@ -206,14 +229,17 @@ function RunnerSurface({ gdkmonitor }: { gdkmonitor: Gdk.Monitor }) {
   );
 }
 
-// The uncommon-actions menu: Alt+Shift-hold shades the whole screen and
-// shows a legend of session verbs each row keyed by an Alt+Shift+<key>
-// chord. Anchored to all four edges so the layer-shell surface fills the
-// output — the wrap inside paints the scrim. Layer.OVERLAY so the scrim
-// covers maximized clients (the default TOP layer sits under fullscreen
-// windows). Exclusivity.IGNORE so the tiles beneath stay put; no keymode
-// because the chords are ordinary Hyprland binds (see hypr/binds.lua),
-// not entries this window intercepts.
+/**
+ * Layer-shell surface that hosts the Alt+Shift system-menu shade.
+ *
+ * Anchored to all four edges so the surface fills the output — the wrap
+ * inside paints the scrim. `Layer.OVERLAY` so the scrim covers maximized
+ * clients; `Exclusivity.IGNORE` so the tiles beneath stay put. No
+ * keymode: the chords are ordinary Hyprland binds (see
+ * `hypr/binds.lua`), not entries this window intercepts.
+ *
+ * @param props.gdkmonitor - The output this surface is mounted on.
+ */
 function SystemMenuSurface({ gdkmonitor }: { gdkmonitor: Gdk.Monitor }) {
   let window: Astal.Window;
   const connector = gdkmonitor.connector;
@@ -245,12 +271,17 @@ function SystemMenuSurface({ gdkmonitor }: { gdkmonitor: Gdk.Monitor }) {
   );
 }
 
-// The per-screen key card: connector name + active workspace, anchored
-// bottom-left of every output at once. Shares workspaceVizOpen as its open
-// signal, so during Alt-hold and on every workspace change each screen
-// blinks up its own plate. Margins are deliberately offset from the tile
-// gap (gaps_out=20) so the HUD's corner doesn't sit on the same pixel line
-// as the adjacent window's corner.
+/**
+ * Layer-shell surface that hosts the per-screen key card.
+ *
+ * Anchored bottom-left of every output at once. Shares `workspaceVizOpen`
+ * as its open signal, so during Alt-hold and on every workspace change
+ * each screen blinks up its own plate. Margins are deliberately offset
+ * from the tile gap so the HUD's corner does not sit on the same pixel
+ * line as the adjacent window's corner.
+ *
+ * @param props.gdkmonitor - The output this surface is mounted on.
+ */
 function MonitorIdSurface({ gdkmonitor }: { gdkmonitor: Gdk.Monitor }) {
   let window: Astal.Window;
   const connector = gdkmonitor.connector;
@@ -279,6 +310,14 @@ function MonitorIdSurface({ gdkmonitor }: { gdkmonitor: Gdk.Monitor }) {
   );
 }
 
+/**
+ * The always-on desktop screen: the bar on the primary output, and one
+ * of every summoned surface per output.
+ *
+ * The bar iterates a single-item slice (primary only); every other
+ * surface iterates the full monitor set and decides per-monitor
+ * visibility internally.
+ */
 export default function Desktop() {
   const monitors = createBinding(app, "monitors");
   // Wrap the primary monitor (or nothing, when none is live) as a single-item

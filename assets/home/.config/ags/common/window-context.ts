@@ -35,6 +35,14 @@ export const setWindowContextOpen = set;
 const [cursor, setCursor] = createState(0);
 export const cursorIndex = cursor;
 export const setCursorIndex = setCursor;
+/**
+ * Move the cursor by `delta` without clamping.
+ *
+ * The cursor is unbounded on purpose — {@link wrapCursor} is applied at read
+ * time, so callers can just increment and let the wrap fall out later.
+ *
+ * @param delta - Signed step to add to the raw cursor value.
+ */
 export const nudgeCursor = (delta: number) => setCursor((v) => v + delta);
 
 const hyprland = AstalHyprland.get_default();
@@ -51,6 +59,7 @@ export const audio = AstalWp.get_default().audio;
 // churn the router.
 export const focusPulse = createExternal(0, (set) => {
   let tick = 0;
+  /** Emit the next subscription tick, forcing a re-read by consumers. */
   const bump = () => set(++tick);
   const idFc = hyprland.connect("notify::focused-client", bump);
   const idEv = hyprland.connect("event", (_h, name: string) => {
@@ -82,9 +91,16 @@ export const focusPulse = createExternal(0, (set) => {
 // render happened to see.
 export const streamPulse = createExternal(0, (set) => {
   let tick = 0;
+  /** Emit the next subscription tick, forcing a re-read by consumers. */
   const bump = () => set(++tick);
   const perStream = new Map<AstalWp.Stream, number[]>();
 
+  /**
+   * Wire a single stream's state and target-endpoint notifiers into
+   * {@link bump}. Idempotent — a stream already tracked is left alone.
+   *
+   * @param stream - AstalWp stream to observe.
+   */
   function subscribe(stream: AstalWp.Stream) {
     if (perStream.has(stream)) return;
     perStream.set(stream, [
@@ -92,12 +108,25 @@ export const streamPulse = createExternal(0, (set) => {
       stream.connect("notify::target-endpoint", bump),
     ]);
   }
+  /**
+   * Detach every notifier previously attached by {@link subscribe} and drop
+   * the stream from the tracked set.
+   *
+   * @param stream - The stream whose notifiers should be released.
+   */
   function unsubscribe(stream: AstalWp.Stream) {
     const ids = perStream.get(stream);
     if (!ids) return;
     for (const id of ids) stream.disconnect(id);
     perStream.delete(stream);
   }
+  /**
+   * Bring the per-stream subscriptions in line with the live stream set.
+   *
+   * Drops subscriptions to streams that have gone away and adds them for
+   * new ones, then emits one tick so views repaint even when no
+   * per-stream signal fires in the same beat.
+   */
   function reconcile() {
     const live = new Set(audio.streams ?? []);
     for (const s of perStream.keys()) if (!live.has(s)) unsubscribe(s);
@@ -138,6 +167,13 @@ export const liveGeom = createExternal<Geom | null>(null, (mut) => {
   let disposed = false;
   let inFlight = false;
 
+  /**
+   * Kick off one asynchronous `hyprctl -j activewindow` read and mutate
+   * the external with the parsed geometry when it lands.
+   *
+   * Guards against overlap (`inFlight`) and disposal so a stale reply
+   * arriving after teardown does not resurrect a null-checked closure.
+   */
   function fetchOnce() {
     if (disposed || inFlight) return;
     inFlight = true;
@@ -189,6 +225,14 @@ export const liveGeom = createExternal<Geom | null>(null, (mut) => {
     });
   }
 
+  /**
+   * Reconcile the 32ms poll timer with the peek's open state.
+   *
+   * Starts the timer (and does one immediate {@link fetchOnce}) when the
+   * peek opens; tears it down and clears the last-known geometry when the
+   * peek closes. Called on subscribe and again whenever
+   * `windowContextOpen` changes.
+   */
   function ensure() {
     const shouldRun = !disposed && windowContextOpen.peek();
     if (shouldRun && source == null) {
@@ -232,10 +276,19 @@ export type WindowContextPlacement = {
   marginTop: number;
 };
 
-// Right of window if it fits; else left of window if that fits; else
-// overlaid at the window's top-left corner. Coordinates are converted from
-// Hyprland's compositor-global frame to the target monitor's local frame
-// because layer-shell margins are output-relative.
+/**
+ * Pick where the router card lands relative to the focused window.
+ *
+ * Right of window if it fits; else left of window if that fits; else
+ * overlaid at the window's top-left corner. Coordinates are converted from
+ * Hyprland's compositor-global frame to the target monitor's local frame
+ * because layer-shell margins are output-relative.
+ *
+ * @param g - Live focused-window geometry from {@link liveGeom}, or `null`
+ *   when no window is focused.
+ * @returns Layer-shell placement for the router surface, with a `null`
+ *   connector when there is nothing to place against.
+ */
 export function computePlacement(g: Geom | null): WindowContextPlacement {
   if (!g) return { connector: null, marginLeft: 0, marginTop: 0 };
   const localX = g.x - g.monX;
@@ -257,14 +310,22 @@ export function computePlacement(g: Geom | null): WindowContextPlacement {
   return { connector: g.connector, marginLeft, marginTop };
 }
 
-// Compute the set of streams to route for whatever the user is looking at.
-// Two-step scoping — see components/WindowContext.tsx header for the full
-// rationale; kept in common/ because the Alt+Return activator needs the
-// same logic without going through the component's reactive view.
-//
-// No state filter beyond ERROR: pre-routing an IDLE stream is the whole
-// point — the user needs to steer where the audio will land before they
-// hit play, or their unmuted default speakers announce it to the room.
+/**
+ * Compute the set of streams the router should retarget for whatever the
+ * user is looking at.
+ *
+ * Two-step scoping — pid first, then title-substring inside that pid.
+ * See `components/WindowContext.tsx`'s header for the full rationale;
+ * kept in `common/` because the Alt+Return activator needs the same
+ * logic without going through the component's reactive view.
+ *
+ * No state filter beyond ERROR: pre-routing an IDLE stream is the whole
+ * point — the user needs to steer where the audio will land before they
+ * hit play, or their unmuted default speakers announce it to the room.
+ *
+ * @returns Streams whose target-endpoint the router should switch, or an
+ *   empty array when nothing safely matches.
+ */
 export function focusedMatchingStreams(): AstalWp.Stream[] {
   const focused = hyprland.get_focused_client();
   const pid = focused?.pid ?? 0;
@@ -286,18 +347,30 @@ export function focusedMatchingStreams(): AstalWp.Stream[] {
   return [];
 }
 
-// Wrap a raw cursor index into a valid row index. The cursor state is
-// unbounded (nudgeCursor just adds ±1 forever) so both this and the row
-// rendering wrap the same way for cycling; keeping the wrap here means
-// the render effect and Alt+Return agree on which row is "current".
+/**
+ * Wrap a raw (possibly negative or over-length) cursor index into a valid
+ * row index in `[0, length)`, or `-1` when there are no rows.
+ *
+ * The cursor state is unbounded on purpose ({@link nudgeCursor} just adds
+ * ±1 forever), so both row rendering and Alt+Return call this to agree on
+ * which row is "current".
+ *
+ * @param raw - The unbounded cursor value.
+ * @param length - Current row count.
+ * @returns A valid row index, or `-1` when `length` is zero.
+ */
 export function wrapCursor(raw: number, length: number): number {
   if (length <= 0) return -1;
   return ((raw % length) + length) % length;
 }
 
-// Activate the cursored speaker: route every matching stream to it and
-// close the peek. Called from the Alt+Return IPC handler in app.tsx and
-// mirrors what clicking the same row would do.
+/**
+ * Activate the cursored speaker.
+ *
+ * Routes every matching stream from {@link focusedMatchingStreams} to the
+ * cursored row and closes the peek. Called from the Alt+Return IPC
+ * handler in `app.tsx` and mirrors what clicking the same row does.
+ */
 export function activateCursor(): void {
   const speakerList = audio.speakers ?? [];
   const sp = speakerList[wrapCursor(cursor.peek(), speakerList.length)];
@@ -319,6 +392,13 @@ export const audioStreamIndex = createExternal(
   new Map<number, StreamInfo>(),
   (mut) => {
     let disposed = false;
+    /**
+     * Kick off one asynchronous `pw-dump -N` read and rebuild the stream
+     * index from the parsed JSON.
+     *
+     * Silent on parse failure — a bad snapshot leaves the previous map
+     * in place, which is safer than mutating to an empty view mid-play.
+     */
     function refresh() {
       const proc = Gio.Subprocess.new(
         ["pw-dump", "-N"],

@@ -37,12 +37,31 @@ import {
 
 const hyprland = AstalHyprland.get_default();
 
+/**
+ * Wire a single-click gesture on a widget that fires `cb` on release.
+ *
+ * Gtk4 doesn't have an `onClicked` prop for plain boxes — the gesture
+ * controller is the correct primitive. Extracted so every row here uses
+ * the same click semantics.
+ *
+ * @param self - Widget the gesture is attached to.
+ * @param cb - Callback fired on the pointer release.
+ */
 function attachClick(self: Gtk.Widget, cb: () => void) {
   const gesture = new Gtk.GestureClick();
   gesture.connect("released", () => cb());
   self.add_controller(gesture);
 }
 
+/**
+ * The per-window audio-output router: rows for each sink, click or
+ * Alt+Return to reroute only the streams that belong to the focused
+ * window's tab (matched by pid + media.name / title substring).
+ *
+ * Takes no props — the layer-shell surface in `desktop/Desktop.tsx` owns
+ * placement and presence gating; input scoping lives in
+ * `common/window-context.ts`.
+ */
 export default function WindowContext() {
   const speakers = createBinding(audio, "speakers");
   const streams = createBinding(audio, "streams");

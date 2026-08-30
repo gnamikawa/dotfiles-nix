@@ -13,6 +13,15 @@ export const VERBS = [
   { icon: "power", label: "Power off", command: `${SYSTEMCTL} poweroff` },
 ] as const;
 
+/**
+ * Fire-and-forget a shell command, logging any spawn error to the console.
+ *
+ * Used by the greeter and lock's power buttons; failures are visible in the
+ * surface's stderr but do not surface to the user, since a failed shutdown
+ * verb has no meaningful UI recovery.
+ *
+ * @param command - Absolute-path command line handed straight to GLib.
+ */
 export function run(command: string) {
   try {
     GLib.spawn_command_line_async(command);
