@@ -25,6 +25,31 @@ import GLib from "gi://GLib?version=2.0";
 import AstalHyprland from "gi://AstalHyprland";
 import AstalWp from "gi://AstalWp";
 
+import {
+  createEventCoordinator,
+  subscribeWindowEvents,
+} from "./event-coordinator";
+
+const TITLE_SETTLE_MS = 150;
+
+/** Schedule one GLib callback and remove its source after it fires. */
+function scheduleOnce(delayMs: number, callback: () => void): number {
+  return GLib.timeout_add(GLib.PRIORITY_DEFAULT, delayMs, () => {
+    callback();
+    return GLib.SOURCE_REMOVE;
+  });
+}
+
+/** Coordinate immediate window events and title changes on GLib's main loop. */
+function createWindowEventCoordinator(run: () => void | Promise<void>) {
+  return createEventCoordinator({
+    delayMs: TITLE_SETTLE_MS,
+    run,
+    schedule: scheduleOnce,
+    cancel: (id) => GLib.source_remove(id),
+  });
+}
+
 const [state, set] = createState(false);
 export const windowContextOpen = state;
 export const setWindowContextOpen = set;
@@ -47,38 +72,35 @@ export const nudgeCursor = (delta: number) => setCursor((v) => v + delta);
 
 const hyprland = AstalHyprland.get_default();
 export const audio = AstalWp.get_default().audio;
+const windowEvents = {
+  /** Subscribe to focused-client changes and return their cleanup callback. */
+  subscribeFocusedClient: (callback: () => void) => {
+    const id = hyprland.connect("notify::focused-client", callback);
+    return () => hyprland.disconnect(id);
+  },
+  /** Subscribe to named Hyprland events and return their cleanup callback. */
+  subscribeEvent: (callback: (name: string) => void) => {
+    const id = hyprland.connect("event", (_h, name: string) => callback(name));
+    return () => hyprland.disconnect(id);
+  },
+};
 
-// A pulse driven by focused-client swaps AND Hyprland's `activewindow`
-// event, which Hyprland re-emits when a window's title changes — that's
-// how Firefox tab switches reach us (same client, same PID, different
-// title, and our title-substring routing needs the new title). We do NOT
-// depend on liveGeom (the 32ms poll) because content must not re-render
-// during a drag: doing so disposes row widgets between mousedown and
-// mouseup and swallows the click. `event` fires on many things; we filter
-// to activewindow/activewindowv2 so unrelated Hyprland traffic doesn't
-// churn the router.
+// A pulse driven immediately by focused-client swaps and, after a short
+// quiet period, by Hyprland title changes. Settled Hyprland title changes
+// carry Firefox tab switches to the router (same client, same PID, different
+// title), but terminal spinners can rewrite their title ten times per second.
+// We do NOT depend on liveGeom (the 32ms poll) because content must not
+// re-render during a drag: doing so disposes row widgets between mousedown
+// and mouseup and swallows the click.
 export const focusPulse = createExternal(0, (set) => {
   let tick = 0;
   /** Emit the next subscription tick, forcing a re-read by consumers. */
   const bump = () => set(++tick);
-  const idFc = hyprland.connect("notify::focused-client", bump);
-  const idEv = hyprland.connect("event", (_h, name: string) => {
-    // activewindow / v2 fire on focus swaps; windowtitle / v2 fire when a
-    // window's own title changes (Firefox tab switch inside the same
-    // window). Hyprland does NOT re-emit activewindow on title change, so
-    // we must listen to both families for the router to react to a tab
-    // swap without waiting for the user to alt-tab away and back.
-    if (
-      name === "activewindow" ||
-      name === "activewindowv2" ||
-      name === "windowtitle" ||
-      name === "windowtitlev2"
-    )
-      bump();
-  });
+  const pulses = createWindowEventCoordinator(bump);
+  const disconnectWindowEvents = subscribeWindowEvents(windowEvents, pulses);
   return () => {
-    hyprland.disconnect(idFc);
-    hyprland.disconnect(idEv);
+    disconnectWindowEvents();
+    pulses.dispose();
   };
 });
 
@@ -384,8 +406,8 @@ export function activateCursor(): void {
 // pipewire stream id → { pid, mediaName }. AstalWp exposes neither
 // `application.process.id` (which we need for per-window scoping) nor
 // `media.name` (which we need to disambiguate one Firefox tab from
-// another), so we shell out to `pw-dump` to enrich each stream. Refresh
-// fires whenever the audio stream set changes, plus once on subscribe.
+// another), so we shell out to `pw-dump` to enrich each stream. Refreshes
+// run on subscribe, stream changes, focus changes, and settled title changes.
 // Anything reading the map recomputes when set() lands the new value.
 export type StreamInfo = { pid: number; mediaName: string };
 export const audioStreamIndex = createExternal(
@@ -399,67 +421,75 @@ export const audioStreamIndex = createExternal(
      * Silent on parse failure — a bad snapshot leaves the previous map
      * in place, which is safer than mutating to an empty view mid-play.
      */
-    function refresh() {
-      const proc = Gio.Subprocess.new(
-        ["pw-dump", "-N"],
-        Gio.SubprocessFlags.STDOUT_PIPE,
-      );
-      proc.communicate_utf8_async(null, null, (subproc, res) => {
-        if (disposed) return;
-        let stdout: string | null = "";
+    function refresh(): Promise<void> {
+      return new Promise((resolve) => {
+        let proc: Gio.Subprocess;
         try {
-          const finished = subproc!.communicate_utf8_finish(res);
-          stdout = finished[1];
+          proc = Gio.Subprocess.new(
+            ["pw-dump", "-N"],
+            Gio.SubprocessFlags.STDOUT_PIPE |
+              Gio.SubprocessFlags.STDERR_SILENCE,
+          );
         } catch {
+          resolve();
           return;
         }
-        let list: unknown;
-        try {
-          list = JSON.parse(stdout ?? "[]");
-        } catch {
-          return;
-        }
-        if (!Array.isArray(list)) return;
-        const map = new Map<number, StreamInfo>();
-        for (const obj of list) {
-          const props = (obj as { info?: { props?: Record<string, unknown> } })
-            ?.info?.props;
-          if (!props) continue;
-          if (props["media.class"] !== "Stream/Output/Audio") continue;
-          const pid = Number(props["application.process.id"]);
-          if (!Number.isFinite(pid) || pid <= 0) continue;
-          const streamId = Number((obj as { id?: unknown }).id);
-          if (!Number.isFinite(streamId)) continue;
-          const mediaName = String(props["media.name"] ?? "");
-          map.set(streamId, { pid, mediaName });
-        }
-        mut(map);
+        proc.communicate_utf8_async(null, null, (subproc, res) => {
+          try {
+            if (disposed) return;
+            const stdout = subproc!.communicate_utf8_finish(res)[1];
+            const list: unknown = JSON.parse(stdout ?? "[]");
+            if (!Array.isArray(list)) return;
+            const map = new Map<number, StreamInfo>();
+            for (const obj of list) {
+              const props = (
+                obj as { info?: { props?: Record<string, unknown> } }
+              )?.info?.props;
+              if (!props) continue;
+              if (props["media.class"] !== "Stream/Output/Audio") continue;
+              const pid = Number(props["application.process.id"]);
+              if (!Number.isFinite(pid) || pid <= 0) continue;
+              const streamId = Number((obj as { id?: unknown }).id);
+              if (!Number.isFinite(streamId)) continue;
+              const mediaName = String(props["media.name"] ?? "");
+              map.set(streamId, { pid, mediaName });
+            }
+            mut(map);
+          } catch {
+            return;
+          } finally {
+            resolve();
+          }
+        });
       });
     }
-    refresh();
-    const h1 = audio.connect("stream-added", refresh);
-    const h2 = audio.connect("stream-removed", refresh);
+    const refreshes = createWindowEventCoordinator(refresh);
+    refreshes.requestImmediate();
+    const streamAddedId = audio.connect("stream-added", () =>
+      refreshes.requestImmediate(),
+    );
+    const streamRemovedId = audio.connect("stream-removed", () =>
+      refreshes.requestImmediate(),
+    );
     // Firefox updates a stream's media.name in place when the tab title
     // changes (YouTube's notification counter, for one, rewrites the tab
     // title every few minutes). AstalWp exposes no notify::media-name to
     // hang off, so we piggyback on Hyprland's windowtitle events — they
     // fire in the same beat as the browser's rename, keeping the cached
     // mediaName in sync with the window title we substring-match against.
-    // activewindow is included so focus-swap always gets a fresh read.
-    const h3 = hyprland.connect("event", (_h, name: string) => {
-      if (
-        name === "windowtitle" ||
-        name === "windowtitlev2" ||
-        name === "activewindow" ||
-        name === "activewindowv2"
-      )
-        refresh();
-    });
+    // Focus swaps get an immediate refresh from focused-client notify. Title
+    // updates use only the v2 event and wait for a quiet period so animated
+    // terminal titles do not continuously snapshot the full PipeWire graph.
+    const disconnectWindowEvents = subscribeWindowEvents(
+      windowEvents,
+      refreshes,
+    );
     return () => {
       disposed = true;
-      audio.disconnect(h1);
-      audio.disconnect(h2);
-      hyprland.disconnect(h3);
+      audio.disconnect(streamAddedId);
+      audio.disconnect(streamRemovedId);
+      disconnectWindowEvents();
+      refreshes.dispose();
     };
   },
 );
