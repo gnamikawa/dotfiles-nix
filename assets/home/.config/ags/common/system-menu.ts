@@ -33,7 +33,7 @@ export const VERBS: Verb[] = [
   {
     chord: "Alt+Shift+R",
     label: "Reload UI",
-    description: "Restart the AGS session shell",
+    description: "Restart AGS + Wayland",
   },
   {
     chord: "Alt+Shift+E",
