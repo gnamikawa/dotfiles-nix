@@ -59,7 +59,7 @@ hl.bind(
 -- Verbs listed in the menu. Kept in the same order as common/system-menu.ts
 -- VERBS so the labels and chords stay in lockstep.
 hl.bind(mod .. " + SHIFT + R", hl.dsp.exec_cmd("systemctl restart --user ags.service"))
-hl.bind(mod .. " + SHIFT + E", hl.dsp.exec_cmd("hyprctl dispatch exit"))
+hl.bind(mod .. " + SHIFT + E", hl.dsp.exit())
 hl.bind(mod .. " + SHIFT + W", hl.dsp.exec_cmd("loginctl lock-session"))
 hl.bind(mod .. " + SHIFT + F1", hl.dsp.exec_cmd("bash -lc 'nmcli radio wifi off && sleep 0.5 && nmcli radio wifi on'"))
 hl.bind(
