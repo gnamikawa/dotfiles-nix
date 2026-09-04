@@ -1,0 +1,17 @@
+{
+  "$schema": "https://raw.githubusercontent.com/LuaLS/vscode-lua/master/setting/schema.json",
+  "runtime.version": "Lua 5.4",
+  "workspace.library": [
+    "/etc/profiles/per-user/genzo/share/hypr/stubs",
+    "/home/genzo/.config/generated/hypr"
+  ],
+  "workspace.checkThirdParty": false,
+  "diagnostics.globals": [
+    "hl",
+    "borderActive",
+    "borderDefault",
+    "slurpBackground",
+    "slurpBorder",
+    "slurpSelection"
+  ]
+}
