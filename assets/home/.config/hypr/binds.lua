@@ -91,7 +91,19 @@ hl.bind("XF86AudioLowerVolume", hl.dsp.exec_cmd("pactl set-sink-volume @DEFAULT_
 hl.bind("XF86AudioMute", hl.dsp.exec_cmd("pactl set-sink-mute @DEFAULT_SINK@ toggle"))
 
 -- ── Workspace layout ─────────────────────────────────────────────────
-hl.bind(mod .. " + GRAVE", hl.dsp.exec_cmd(os.getenv("HOME") .. "/.config/hypr/scripts/toggle-workspace-layout.sh"))
+-- Per-workspace dwindle↔monocle toggle. The Lua parser rejects
+-- `hyprctl keyword`, and HL.Workspace exposes id/name but not the current
+-- tiledLayout, so we track state locally — this bind is the only mutator.
+local workspaceLayouts = {}
+--- Toggle the active workspace between dwindle and monocle layouts.
+local function toggleWorkspaceLayout()
+	local ws = hl.get_active_workspace()
+	local id = ws.id
+	local next = workspaceLayouts[id] == "monocle" and "dwindle" or "monocle"
+	workspaceLayouts[id] = next
+	hl.workspace_rule({ workspace = tostring(id), layout = next })
+end
+hl.bind(mod .. " + GRAVE", toggleWorkspaceLayout)
 
 -- ── Workspace focus ──────────────────────────────────────────────────────
 for i = 1, 9 do
