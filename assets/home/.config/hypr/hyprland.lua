@@ -42,7 +42,7 @@ hl.config({
             inactive_border = borderDefault,
         },
 
-        layout = "monocle",
+        layout = "dwindle",
     },
 
     -- ── Input ────────────────────────────────────────────────────────────

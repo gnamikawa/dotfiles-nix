@@ -24,6 +24,7 @@
 import { createBinding, createComputed, createEffect, With } from "ags";
 import { Gtk } from "ags/gtk4";
 import AstalHyprland from "gi://AstalHyprland";
+import { layoutTick } from "../common/workspace-viz";
 
 const hyprland = AstalHyprland.get_default();
 const monitorsBinding = createBinding(hyprland, "monitors");
@@ -38,6 +39,24 @@ interface Cell {
 interface View {
   sizeClass: 1 | 2 | 4 | 9;
   rows: (Cell | null)[][];
+  layout: string;
+}
+
+/**
+ * Look up the tiled layout ("dwindle" / "monocle") for a workspace id via
+ * Hyprland's JSON `workspaces` IPC. AstalHyprland's Workspace wrapper
+ * doesn't expose `tiledLayout` as a property, so we parse it out here. Any
+ * IPC/parse failure yields an empty string so the caption just omits it.
+ */
+function readWorkspaceLayout(wsId: number | null): string {
+  if (wsId == null) return "";
+  try {
+    const raw = hyprland.message("j/workspaces");
+    const list = JSON.parse(raw) as Array<{ id: number; tiledLayout?: string }>;
+    return String(list.find((w) => w.id === wsId)?.tiledLayout ?? "");
+  } catch {
+    return "";
+  }
 }
 
 /**
@@ -75,6 +94,7 @@ interface Props {
 export default function MonitorId({ connector }: Props) {
   const view = createComputed<View | null>(() => {
     focusedWorkspaceBinding();
+    layoutTick();
     const list = workspacesBinding()
       .filter((w) => w.monitor?.name === connector)
       .slice()
@@ -93,15 +113,17 @@ export default function MonitorId({ connector }: Props) {
     const flat: (Cell | null)[] = [];
     for (let i = 0; i < total; i++) {
       const ws = capped[i];
-      flat.push(
-        ws ? { id: ws.id, current: ws.id === activeId } : null,
-      );
+      flat.push(ws ? { id: ws.id, current: ws.id === activeId } : null);
     }
     const rows: (Cell | null)[][] = [];
     for (let r = 0; r < shape.rows; r++) {
       rows.push(flat.slice(r * shape.cols, (r + 1) * shape.cols));
     }
-    return { sizeClass: shape.sizeClass, rows };
+    return {
+      sizeClass: shape.sizeClass,
+      rows,
+      layout: readWorkspaceLayout(activeId),
+    };
   });
 
   let plate: Gtk.Box | null = null;
@@ -114,64 +136,103 @@ export default function MonitorId({ connector }: Props) {
     plate?.queue_draw();
   });
 
+  // Hold the last non-default layout name so the tag can fade out with its
+  // real text still showing, instead of flashing "dwindle" for one frame
+  // when the layout returns to the default.
+  let lastShownLayout = "";
+  const displayedLayout = createComputed(() => {
+    const layout = view()?.layout;
+    if (layout && layout !== "dwindle") lastShownLayout = layout;
+    return lastShownLayout;
+  });
+
   return (
     <box
-      $={(self) => (plate = self)}
-      class="monitor-plate"
       orientation={Gtk.Orientation.VERTICAL}
       halign={Gtk.Align.CENTER}
-      valign={Gtk.Align.CENTER}
+      valign={Gtk.Align.END}
+      spacing={0}
     >
-      {/* Persistent vexpand slot: With rebuilds the grid subtree on every
-       * workspace switch, so wrap it in a stable vexpand box. Otherwise the
-       * connector label below briefly loses its "pushed to bottom" anchor
-       * and pops to the top during rebuild. */}
-      <box hexpand vexpand>
-        <With value={view}>
-          {(v) => {
-            if (v === null) return <box hexpand vexpand />;
-            return (
-              <box
-                class={`plate-grid plate-grid-${v.sizeClass}`}
-                orientation={Gtk.Orientation.VERTICAL}
-                homogeneous
-                hexpand
-                vexpand
-              >
-                {v.rows.map((row) => (
-                  <box
-                    orientation={Gtk.Orientation.HORIZONTAL}
-                    homogeneous
-                    hexpand
-                    vexpand
-                  >
-                    {row.map((cell) =>
-                      cell === null ? (
-                        <box class="plate-cell empty" hexpand vexpand />
-                      ) : (
-                        <label
-                          class={`plate-cell ${cell.current ? "current" : "peer"}`}
-                          label={String(cell.id)}
-                          hexpand
-                          vexpand
-                          halign={Gtk.Align.FILL}
-                          valign={Gtk.Align.FILL}
-                        />
-                      ),
-                    )}
-                  </box>
-                ))}
-              </box>
-            );
-          }}
-        </With>
-      </box>
-      <label
-        class="monitor-plate-connector"
-        label={connector}
-        halign={Gtk.Align.CENTER}
+      {/* Fixed-height slot for the tag. The tag slides via margin-bottom;
+       * keeping the slot's own height constant means the outer column never
+       * renegotiates size and the plate below can't absorb the animation. */}
+      <box
+        class="monitor-plate-layout-slot"
+        orientation={Gtk.Orientation.VERTICAL}
+        halign={Gtk.Align.END}
         valign={Gtk.Align.END}
-      />
+        vexpand={false}
+      >
+        <label
+          class={createComputed(() => {
+            const layout = view()?.layout;
+            const shown = layout && layout !== "dwindle";
+            return `monitor-plate-layout-tag ${shown ? "shown" : "hidden"}`;
+          })}
+          label={displayedLayout}
+          halign={Gtk.Align.END}
+          valign={Gtk.Align.END}
+          vexpand
+        />
+      </box>
+      <box
+        $={(self) => (plate = self)}
+        class="monitor-plate"
+        orientation={Gtk.Orientation.VERTICAL}
+        halign={Gtk.Align.CENTER}
+        valign={Gtk.Align.CENTER}
+      >
+        {/* Persistent vexpand slot: With rebuilds the grid subtree on every
+         * workspace switch, so wrap it in a stable vexpand box. Otherwise the
+         * connector label below briefly loses its "pushed to bottom" anchor
+         * and pops to the top during rebuild. */}
+        <box hexpand vexpand>
+          <With value={view}>
+            {(v) => {
+              if (v === null) return <box hexpand vexpand />;
+              return (
+                <box
+                  class={`plate-grid plate-grid-${v.sizeClass}`}
+                  orientation={Gtk.Orientation.VERTICAL}
+                  homogeneous
+                  hexpand
+                  vexpand
+                >
+                  {v.rows.map((row) => (
+                    <box
+                      orientation={Gtk.Orientation.HORIZONTAL}
+                      homogeneous
+                      hexpand
+                      vexpand
+                    >
+                      {row.map((cell) =>
+                        cell === null ? (
+                          <box class="plate-cell empty" hexpand vexpand />
+                        ) : (
+                          <label
+                            class={`plate-cell ${cell.current ? "current" : "peer"}`}
+                            label={String(cell.id)}
+                            hexpand
+                            vexpand
+                            halign={Gtk.Align.FILL}
+                            valign={Gtk.Align.FILL}
+                          />
+                        ),
+                      )}
+                    </box>
+                  ))}
+                </box>
+              );
+            }}
+          </With>
+        </box>
+        <label
+          class="monitor-plate-connector"
+          label={connector}
+          halign={Gtk.Align.CENTER}
+          valign={Gtk.Align.END}
+        />
+      </box>
     </box>
   );
 }

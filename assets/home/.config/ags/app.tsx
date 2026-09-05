@@ -16,6 +16,7 @@ import {
 } from "./common/window-context";
 import { setRunnerOpen } from "./common/runner";
 import { setSystemMenuOpen } from "./common/system-menu";
+import { bumpLayoutTick } from "./common/workspace-viz";
 
 app.start({
   css: `${SRC}/style.css`,
@@ -103,6 +104,13 @@ app.start({
       case "system-menu-close":
         setSystemMenuOpen(false);
         res("close");
+        return;
+      case "workspace-layout-changed":
+        // Hyprland emits no event for workspace-rule mutations, so the
+        // dwindle↔monocle toggle in hypr/binds.lua pokes us after firing
+        // `hl.workspace_rule` — bump the tick so MonitorId re-reads.
+        bumpLayoutTick();
+        res("ok");
         return;
       default:
         res(`unknown: ${argv.join(" ")}`);

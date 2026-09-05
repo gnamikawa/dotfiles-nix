@@ -38,3 +38,14 @@ hyprland.connect("notify::focused-workspace", () => {
 export const workspaceVizOpen = createComputed(
   () => transient() || windowMenuOpen(),
 );
+
+// Bumped by the `workspace-layout-changed` IPC request (see app.tsx).
+// Hyprland has no event for workspace-rule mutations, so the dwindle↔monocle
+// toggle in hypr/binds.lua pokes ags here after firing `hl.workspace_rule`.
+// Anything that wants to re-read `tiledLayout` reads this as a change trigger.
+const [layoutTick, setLayoutTick] = createState(0);
+export { layoutTick };
+/** Bump {@link layoutTick} to force downstream layout re-reads. */
+export function bumpLayoutTick(): void {
+  setLayoutTick(layoutTick() + 1);
+}

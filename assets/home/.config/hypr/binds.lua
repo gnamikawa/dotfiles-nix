@@ -96,12 +96,15 @@ hl.bind("XF86AudioMute", hl.dsp.exec_cmd("pactl set-sink-mute @DEFAULT_SINK@ tog
 -- tiledLayout, so we track state locally — this bind is the only mutator.
 local workspaceLayouts = {}
 --- Toggle the active workspace between dwindle and monocle layouts.
+-- After mutating the rule, poke ags — Hyprland emits no event for workspace-
+-- rule changes, so the MonitorId plate would otherwise show a stale label.
 local function toggleWorkspaceLayout()
 	local ws = hl.get_active_workspace()
 	local id = ws.id
 	local next = workspaceLayouts[id] == "monocle" and "dwindle" or "monocle"
 	workspaceLayouts[id] = next
 	hl.workspace_rule({ workspace = tostring(id), layout = next })
+	hl.exec_cmd("ags request workspace-layout-changed")
 end
 hl.bind(mod .. " + GRAVE", toggleWorkspaceLayout)
 
