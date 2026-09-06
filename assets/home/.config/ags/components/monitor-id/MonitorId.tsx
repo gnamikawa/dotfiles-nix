@@ -24,7 +24,7 @@
 import { createBinding, createComputed, createEffect, With } from "ags";
 import { Gtk } from "ags/gtk4";
 import AstalHyprland from "gi://AstalHyprland";
-import { layoutTick } from "../common/workspace-viz";
+import { layoutTick } from "../../common/workspace-viz";
 
 const hyprland = AstalHyprland.get_default();
 const monitorsBinding = createBinding(hyprland, "monitors");

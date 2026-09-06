@@ -29,12 +29,12 @@ import app from "ags/gtk4/app";
 import Astal from "gi://Astal?version=4.0";
 import Gdk from "gi://Gdk?version=4.0";
 import AstalHyprland from "gi://AstalHyprland";
-import Bar from "../components/Bar";
-import WindowMenu from "../components/WindowMenu";
-import WindowContext from "../components/WindowContext";
-import Runner from "../components/Runner";
-import SystemMenu from "../components/SystemMenu";
-import MonitorId from "../components/MonitorId";
+import Bar from "../components/bar/Bar";
+import WindowMenu from "../components/window-menu/WindowMenu";
+import WindowContext from "../components/window-context/WindowContext";
+import Runner from "../components/runner/Runner";
+import SystemMenu from "../components/system-menu/SystemMenu";
+import MonitorId from "../components/monitor-id/MonitorId";
 import { findPrimaryMonitor } from "../common/monitors";
 import { windowMenuOpen } from "../common/window-menu";
 import {

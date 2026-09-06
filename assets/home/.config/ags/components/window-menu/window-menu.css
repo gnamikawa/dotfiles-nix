@@ -1,0 +1,50 @@
+/* Window-menu peek — a card floating below the bar while Alt is held.
+ * Exclusivity.IGNORE (see Desktop.tsx) means it overlays whatever's
+ * beneath without reserving space. */
+window.window-menu-window {
+  background: transparent;
+  color: var(--ds-text-primary-gray);
+}
+
+.window-menu {
+  min-width: 340px;
+  padding: 8px 12px;
+  background-color: var(--ds-background-default);
+  border: 1px solid var(--ds-border-default-gray);
+  border-radius: var(--ds-radius-base);
+}
+
+.window-menu-header {
+  padding: 0 4px 6px 4px;
+  border-bottom: 1px solid var(--ds-border-default-gray);
+  margin-bottom: 4px;
+}
+
+.window-menu-header-label,
+.window-menu-header-count {
+  color: var(--ds-text-secondary-gray);
+}
+
+.window-menu-row {
+  padding: 6px 4px;
+  border-radius: var(--ds-radius-base);
+}
+
+.window-menu-row:hover {
+  background-color: var(--ds-component-background-hover-gray);
+}
+
+.window-menu-row.current {
+  background-color: var(--ds-component-background-active-blue);
+  color: var(--ds-text-primary-blue);
+}
+
+.window-menu-index {
+  min-width: 18px;
+  color: var(--ds-text-secondary-gray);
+}
+
+.window-menu-title {
+  color: var(--ds-text-secondary-gray);
+  font-size: 12px;
+}

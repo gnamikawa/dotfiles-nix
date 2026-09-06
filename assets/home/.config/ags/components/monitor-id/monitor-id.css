@@ -1,0 +1,95 @@
+/* Monitor plate — per-screen key card, bottom-left of each output. An
+ * adaptive workspace grid up top (ADR-0011: 1 / 1×2 / 2×2 / 3×3, chosen
+ * by peer count), current cell bright and peers dim, with a small
+ * connector caption below. The plate is a documented ADR-0009
+ * exception: at this size, physical-object metaphors for the peer
+ * strip failed to hold identity, so density wins. Fixed footprint so
+ * every screen's plate has the same silhouette; the internal grid
+ * does the shape work. */
+window.monitor-id-window {
+  background: transparent;
+  color: var(--ds-text-primary-gray);
+}
+
+.monitor-plate {
+  min-width: 120px;
+  min-height: 132px;
+  padding: 10px 12px;
+  background-color: var(--ds-background-default);
+  border: 1px solid var(--ds-border-default-gray);
+  border-radius: var(--ds-radius-base);
+  box-shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.45);
+}
+
+/* Grid area — font size scales down as the grid packs more cells in.
+ * Cells are plain <label>s; the current cell brightens, peer cells stay
+ * dim, empty cells hold layout space to keep the grid symmetric. */
+/* Every level of the plate hierarchy has an opaque background so any dirty
+ * pixel from a prior render gets overpainted this frame — With disposes and
+ * rebuilds the grid subtree on switch and GTK's dirty-region tracking can
+ * miss the old widget's full allocation. */
+.plate-grid {
+  min-width: 96px;
+  min-height: 96px;
+  background-color: var(--ds-background-default);
+}
+
+.plate-cell {
+  background-color: var(--ds-background-default);
+  font-weight: 600;
+  color: var(--ds-text-secondary-gray);
+}
+
+.plate-cell.current {
+  color: var(--ds-text-primary-gray);
+}
+
+.plate-grid-1 .plate-cell {
+  font-size: 48px;
+}
+.plate-grid-2 .plate-cell {
+  font-size: 36px;
+}
+.plate-grid-4 .plate-cell {
+  font-size: 26px;
+}
+.plate-grid-9 .plate-cell {
+  font-size: 18px;
+}
+
+.monitor-plate-connector {
+  font-family: monospace;
+  font-size: 12px;
+  color: var(--ds-text-secondary-gray);
+}
+
+.monitor-plate-layout-slot {
+  min-height: 24px;
+}
+
+.monitor-plate-layout-tag {
+  font-family: monospace;
+  font-size: 10px;
+  color: var(--ds-text-secondary-amber);
+  background-color: var(--ds-component-background-default-amber);
+  border-top: 1px solid var(--ds-border-default-amber);
+  border-left: 1px solid var(--ds-border-default-amber);
+  border-right: 1px solid var(--ds-border-default-amber);
+  padding: 2px 4px 6px 4px;
+  margin-right: 8px;
+  border-top-right-radius: 6px;
+  border-top-left-radius: 6px;
+  transition:
+    opacity 180ms ease-out,
+    margin-bottom 220ms cubic-bezier(0.2, 0.9, 0.3, 1.3);
+}
+
+.monitor-plate-layout-tag.shown {
+  opacity: 1;
+  margin-bottom: -4px;
+}
+
+.monitor-plate-layout-tag.hidden {
+  opacity: 0;
+  margin-bottom: -18px;
+}

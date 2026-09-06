@@ -33,7 +33,7 @@ import {
   setWindowContextOpen,
   streamPulse,
   wrapCursor,
-} from "../common/window-context";
+} from "../../common/window-context";
 
 const hyprland = AstalHyprland.get_default();
 

@@ -13,7 +13,7 @@
 // interactive picker.
 
 import { Gtk } from "ags/gtk4";
-import { VERBS } from "../common/system-menu";
+import { VERBS } from "../../common/system-menu";
 
 /**
  * The system-menu overlay's content: a scrimmed card listing each

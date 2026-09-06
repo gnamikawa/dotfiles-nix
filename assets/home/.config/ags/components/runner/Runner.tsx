@@ -12,8 +12,8 @@ import { createComputed, createEffect, createState, With } from "ags";
 import { Gtk } from "ags/gtk4";
 import Gdk from "gi://Gdk?version=4.0";
 import AstalApps from "gi://AstalApps";
-import { runnerOpen, setRunnerOpen } from "../common/runner";
-import { execCmd } from "../common/hypr-dispatch";
+import { runnerOpen, setRunnerOpen } from "../../common/runner";
+import { execCmd } from "../../common/hypr-dispatch";
 
 // Cap the visible list so a broad query (or an empty one) doesn't unfold into
 // a screen-tall menu — dmenu's terse ceiling, not wofi's scroller.

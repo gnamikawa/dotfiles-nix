@@ -1,0 +1,35 @@
+/* Bar — the always-on strip anchored to the top of the primary output.
+ * Component: components/Bar.tsx. Surface: desktop/Desktop.tsx
+ * BarSurface. Contents: drag-down handle stub (left) and the ambient
+ * triad — Bluetooth, Wi-Fi, clock — on the right. */
+window.bar {
+  background: transparent;
+  color: var(--ds-text-primary-gray);
+}
+
+/* Anchored TOP + LEFT + RIGHT (see Desktop.tsx BarSurface), so the bar spans
+ * the whole top edge — the drag-down surface will attach a swipe on the left
+ * zone once it lands. No radius; a thin bottom border seams it to the desktop. */
+.bar-content {
+  min-height: 32px;
+  padding: 4px 12px;
+  background-color: var(--ds-background-default);
+  border-bottom: 1px solid var(--ds-border-default-gray);
+}
+
+.bar-left {
+  /* Reserved for the drag-down Control-Center summon. Empty on purpose. */
+  min-width: 40px;
+}
+
+.bar-right {
+  color: var(--ds-text-secondary-gray);
+}
+
+.bar-icon {
+  color: var(--ds-text-primary-gray);
+}
+
+.bar-clock {
+  color: var(--ds-text-primary-gray);
+}

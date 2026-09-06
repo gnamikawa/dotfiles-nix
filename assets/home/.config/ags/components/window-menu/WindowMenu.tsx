@@ -13,8 +13,8 @@
 import { createBinding, createComputed, With } from "ags";
 import { Gtk } from "ags/gtk4";
 import AstalHyprland from "gi://AstalHyprland";
-import { addressOf, sortedClientsOnWorkspace } from "../common/window-menu";
-import { focusWindow } from "../common/hypr-dispatch";
+import { addressOf, sortedClientsOnWorkspace } from "../../common/window-menu";
+import { focusWindow } from "../../common/hypr-dispatch";
 
 const hyprland = AstalHyprland.get_default();
 
