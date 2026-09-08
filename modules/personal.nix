@@ -10,6 +10,6 @@
 { ... }:
 {
   imports = [
-    ./blockattack.nix
+    ./panelattack.nix
   ];
 }
