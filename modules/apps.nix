@@ -18,7 +18,6 @@
     ./fcitx5.nix
     ./theme.nix
     ./obsidian.nix
-    ./blockattack.nix
     # ./flatpak.nix
     ./packages/nvidia.nix
     ./packages/user-applications.nix

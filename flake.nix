@@ -111,6 +111,15 @@
             inherit sessionLock;
           };
         };
+
+      # Module set for the full desktop, factored out so genzo-personal can
+      # layer on top without restating it.
+      desktopModules = [
+        ./modules
+        ./modules/ags.nix
+        ./modules/ags-session-lock.nix
+        nixGLModule
+      ];
     in
     {
       # The repository's first package output. It exists because the greeter is
@@ -157,20 +166,19 @@
         # The full desktop, belonging to no host. Seeded with AGS rather than
         # waybar: nothing depends on this profile yet, so there is no reason to
         # start it on a surface being deleted.
-        "genzo-desktop" = standalone [
-          ./modules
-          ./modules/ags.nix
-          ./modules/ags-session-lock.nix
-          nixGLModule
-        ];
+        "genzo-desktop" = standalone desktopModules;
+
+        # Personal profile — genzo-desktop plus games and other things that
+        # only belong on a personal account.
+        "genzo-personal" = standalone (desktopModules ++ [ ./modules/personal.nix ]);
 
         "genzo-terminal" = standalone [ ./modules/terminal.nix ];
 
         # Default alias: `home-manager switch --flake .` on the `genzo`
         # account falls through to homeConfigurations.<user>, which resolves
-        # here. Desktop is the loudest of the three; the two safer profiles
-        # remain reachable via their explicit attribute names.
-        "genzo" = self.homeConfigurations."genzo-desktop";
+        # here. Personal is the daily driver; the smaller desktop/apps/terminal
+        # profiles opt in by explicit name.
+        "genzo" = self.homeConfigurations."genzo-personal";
       };
 
       # Development environments (see CONTEXT.md): self-sufficient devShells
@@ -211,6 +219,7 @@
       checks.${system} = {
         home-apps = self.homeConfigurations."genzo-apps".activationPackage;
         home-desktop = self.homeConfigurations."genzo-desktop".activationPackage;
+        home-personal = self.homeConfigurations."genzo-personal".activationPackage;
         home-terminal = self.homeConfigurations."genzo-terminal".activationPackage;
         # Catches a greeter that will not bundle — a .tsx typo, a bad import —
         # before it reaches a machine. Runtime throws are caught instead by
