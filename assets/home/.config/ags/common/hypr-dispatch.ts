@@ -154,6 +154,29 @@ export function buildResizeWindow(
 }
 
 /**
+ * Build the Lua expression that overrides a per-window property.
+ *
+ * Property names are Hyprland's snake_case set (e.g. `opacity`,
+ * `no_focus`); see `Configuring/Using-hyprctl/#setprop` for the full
+ * list. Values are stringified verbatim — Hyprland parses them per
+ * property type.
+ *
+ * There is no `hyprctl setprop` in this repo's Lua-only compositor
+ * setup, so the Lua binding is the only entrypoint.
+ *
+ * @param address - Client address in `0x…` form.
+ * @param prop - Property name (snake_case, per Hyprland).
+ * @param value - Stringified value.
+ */
+export function buildSetProp(
+  address: string,
+  prop: string,
+  value: string,
+): string {
+  return `hl.dsp.window.set_prop({ window = ${windowSelector(address)}, prop = "${prop}", value = "${value}" })`;
+}
+
+/**
  * Build the Lua expression that moves a client to another workspace
  * without shifting the user's focus.
  *

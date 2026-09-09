@@ -18,6 +18,10 @@ import { setRunnerOpen } from "./common/runner";
 import { setSystemMenuOpen } from "./common/system-menu";
 import { bumpLayoutTick } from "./common/workspace-viz";
 import { startWindowOrchestrator } from "./services/window-orchestrator";
+import {
+  disableFloatingDimmer,
+  enableFloatingDimmer,
+} from "./services/floating-dimmer";
 
 startWindowOrchestrator();
 
@@ -51,15 +55,18 @@ app.start({
         // system menu closes, this rehydrates the window-menu underneath.
         // The window-context router rides on the same Alt-hold — the two
         // peeks are siblings (top-of-screen list + per-window audio card),
-        // not competitors, so they open and close together.
+        // not competitors, so they open and close together. The floating
+        // dimmer rides on the same Alt-hold too — see services/floating-dimmer.
         setSystemMenuOpen(false);
         setWindowMenuOpen(true);
         setWindowContextOpen(true);
+        enableFloatingDimmer();
         res("open");
         return;
       case "window-menu-close":
         setWindowMenuOpen(false);
         setWindowContextOpen(false);
+        disableFloatingDimmer();
         res("close");
         return;
       case "window-menu-next":
@@ -85,9 +92,11 @@ app.start({
       case "runner-open":
         // The runner outlives Alt-hold: force the peek off so the two visibility
         // states don't stack, then flip the runner on. The bindrt Alt release
-        // fires window-menu-close afterwards and finds nothing to close.
+        // fires window-menu-close afterwards and finds nothing to close. The
+        // dim rides with the peek and dies with it.
         setWindowMenuOpen(false);
         setWindowContextOpen(false);
+        disableFloatingDimmer();
         setRunnerOpen(true);
         res("open");
         return;
@@ -98,9 +107,12 @@ app.start({
       case "system-menu-open":
         // The two peeks are mutually exclusive — the shaded system menu
         // supersedes the window-menu card, so drop the window-menu overlay
-        // before showing the menu.
+        // and its floating dim before showing the menu. If the user then
+        // releases Shift while still holding Alt, `window-menu-open` fires
+        // again and rehydrates both.
         setWindowMenuOpen(false);
         setWindowContextOpen(false);
+        disableFloatingDimmer();
         setSystemMenuOpen(true);
         res("open");
         return;
