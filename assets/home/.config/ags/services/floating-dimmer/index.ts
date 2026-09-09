@@ -26,6 +26,16 @@
 // the ipc socket directly, this can move off the Lua binding without
 // changing the outward semantics.
 //
+// After each setprop batch, we warp the cursor to its own current
+// position via `hl.dsp.cursor.move`. Hyprland's `setprop` doesn't
+// invalidate the already-latched pointer-focused surface, so a click
+// or drag started BEFORE the peek can still land on the (now
+// `no_focus`) floating window even though a fresh hit-test would skip
+// it. `cursor.move` internally calls `simulateMouseMovement`, which
+// re-runs the hit-test and slides pointer focus onto whatever is now
+// legally underneath the cursor. Warping to the current position keeps
+// the visible cursor still.
+//
 // `enable()` / `disable()` are the whole surface. `app.tsx` calls them
 // from the same IPC handlers that open and close the window-menu, so
 // the dim rides alongside the overlay for the exact lifetime of the
@@ -40,7 +50,11 @@
 // seconds.
 
 import AstalHyprland from "gi://AstalHyprland";
-import { buildSetProp, sendBatch } from "../../common/hypr-dispatch";
+import {
+  buildMoveCursor,
+  buildSetProp,
+  sendBatch,
+} from "../../common/hypr-dispatch";
 
 const DIMMED_OPACITY = "0.15";
 const FULL_OPACITY = "1.0";
@@ -108,7 +122,23 @@ function applyPassthroughFlags(): void {
       buildSetProp(address, "no_focus", isFocused ? "false" : "true"),
     );
   }
+  appendPointerRefresh(batch);
   sendBatch(batch);
+}
+
+/**
+ * Append a same-position cursor warp so the pointer-focused surface is
+ * re-evaluated against the just-changed `no_focus` set.
+ *
+ * The batch is a no-op if nothing else has been queued (nothing to
+ * refresh against) or if Astal can't currently report the cursor
+ * position — the visible cursor never jumps.
+ */
+function appendPointerRefresh(batch: string[]): void {
+  if (batch.length === 0) return;
+  const pos = hyprland.cursorPosition;
+  if (!pos) return;
+  batch.push(buildMoveCursor(pos.x, pos.y));
 }
 
 /**
@@ -126,6 +156,7 @@ function revertAll(): void {
     batch.push(buildSetProp(address, "opacity_inactive", FULL_OPACITY));
     batch.push(buildSetProp(address, "no_focus", "false"));
   }
+  appendPointerRefresh(batch);
   sendBatch(batch);
   touchedAddresses.clear();
 }

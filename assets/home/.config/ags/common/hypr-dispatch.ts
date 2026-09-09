@@ -154,6 +154,25 @@ export function buildResizeWindow(
 }
 
 /**
+ * Build the Lua expression that warps the cursor to an absolute
+ * position.
+ *
+ * `hl.dsp.cursor.move` warps to the given pixel then internally fires
+ * `simulateMouseMovement` — so passing the current cursor position is
+ * a zero-visible-motion "poke" that forces Hyprland to re-run its
+ * pointer hit-test. Callers use that side effect after a `no_focus`
+ * flip to make the pointer-focused surface catch up with the new
+ * routing (`no_focus` alone only changes future hit-tests, not the
+ * already-latched pointer target).
+ *
+ * @param x - Global pixel column.
+ * @param y - Global pixel row.
+ */
+export function buildMoveCursor(x: number, y: number): string {
+  return `hl.dsp.cursor.move({ x = ${x}, y = ${y} })`;
+}
+
+/**
  * Build the Lua expression that overrides a per-window property.
  *
  * Property names are Hyprland's snake_case set (e.g. `opacity`,
