@@ -1,17 +1,22 @@
 // Firefox Picture-in-Picture placement policy.
 //
 // Every Firefox PiP window has the same class ("firefox") and title
-// ("Picture-in-Picture"). The policy routes them by count-so-far:
-//   PiP #1               → primary monitor, floating + pinned in the
-//                          top-right corner. This is the stream you
-//                          actually watch.
-//   PiP #2..#N (satellite present) → satellite monitor, tiled. Hyprland's
-//                          layout engine splits the whole monitor between
-//                          however many overflow PiPs are open, which is
-//                          what you want when glancing between four
-//                          co-streams.
-//   PiP #2..#N (no satellite)      → primary monitor, cascading floating
-//                          windows offset from the corner. Laptop fallback.
+// ("Picture-in-Picture"). The policy routes by "does the primary already
+// hold a PiP?" — not by arrival count — so the invariant holds even when
+// the user drags a PiP off the primary or closes the corner PiP first:
+//   Primary has no PiP           → primary monitor, floating + pinned in
+//                                  the top-right corner. This is the
+//                                  stream you actually watch.
+//   Primary already holds a PiP,
+//   satellite present            → satellite monitor, tiled. Hyprland's
+//                                  layout engine splits the whole monitor
+//                                  between however many overflow PiPs are
+//                                  open, which is what you want when
+//                                  glancing between four co-streams.
+//   Primary already holds a PiP,
+//   no satellite                 → primary monitor, cascading floating
+//                                  windows offset from the corner. Laptop
+//                                  fallback.
 
 import AstalHyprland from "gi://AstalHyprland";
 import {
@@ -92,17 +97,30 @@ function findSatelliteMonitor(): AstalHyprland.Monitor | undefined {
 }
 
 /**
- * Count Firefox PiPs currently open, excluding the given address.
+ * Count Firefox PiPs currently on the primary monitor, excluding the
+ * given address.
  *
  * The excluded address is the client we're about to place — passing it
- * in lets the caller compute the index of the *new* PiP without racing
- * against whether Astal's client list already includes it.
+ * in lets the caller ask "does the primary already hold a PiP other
+ * than this new one?" without racing against whether Astal's client
+ * list already includes the newcomer.
+ *
+ * Placement keys on this count (not the total across all monitors) so
+ * the corner-PiP invariant survives the user dragging a PiP off the
+ * primary onto the satellite by hand.
  *
  * @param excludeAddress - Address to leave out of the count.
+ * @param primary - The primary monitor to filter clients against.
  */
-function otherPipCount(excludeAddress: string): number {
+function otherPipsOnPrimary(
+  excludeAddress: string,
+  primary: AstalHyprland.Monitor,
+): number {
   return hyprland.clients.filter(
-    (c) => isPipClient(c) && c.address !== excludeAddress,
+    (c) =>
+      isPipClient(c) &&
+      c.address !== excludeAddress &&
+      c.monitor?.id === primary.id,
   ).length;
 }
 
@@ -121,8 +139,8 @@ interface TiledPlacement {
 type Placement = FloatingPlacement | TiledPlacement;
 
 /**
- * Compute the target monitor and placement mode for a PiP given how
- * many PiPs already exist.
+ * Compute the target monitor and placement mode for a PiP given the
+ * primary monitor and how many PiPs it already holds.
  *
  * Placement modes:
  *   floating — corner PiP on the primary; the app you actually watch,
@@ -131,16 +149,17 @@ type Placement = FloatingPlacement | TiledPlacement;
  *     splits the monitor between them so several stream perspectives fit
  *     without hand-placement.
  *
- * Returns `undefined` when no primary monitor is discoverable.
- *
- * @param index - Zero-based rank of the new PiP among all open PiPs.
+ * @param primary - The primary monitor.
+ * @param pipsOnPrimary - Number of PiPs already on the primary (excluding
+ *   the client we're about to place).
  */
-function placementFor(index: number): Placement | undefined {
-  const primary = findPrimaryMonitor();
-  if (!primary) return undefined;
+function placementFor(
+  primary: AstalHyprland.Monitor,
+  pipsOnPrimary: number,
+): Placement {
   const satellite = findSatelliteMonitor();
 
-  if (index === 0) {
+  if (pipsOnPrimary === 0) {
     return {
       kind: "floating",
       monitor: primary,
@@ -156,8 +175,8 @@ function placementFor(index: number): Placement | undefined {
   return {
     kind: "floating",
     monitor: primary,
-    x: primary.width - PIP_WIDTH - INSET - index * CASCADE_STEP,
-    y: BAR_HEIGHT + INSET + index * CASCADE_STEP,
+    x: primary.width - PIP_WIDTH - INSET - pipsOnPrimary * CASCADE_STEP,
+    y: BAR_HEIGHT + INSET + pipsOnPrimary * CASCADE_STEP,
   };
 }
 
@@ -178,12 +197,16 @@ function placementFor(index: number): Placement | undefined {
 export function handle(client: AstalHyprland.Client): void {
   if (!isPipClient(client)) return;
 
-  const index = otherPipCount(client.address);
-  const placement = placementFor(index);
-  if (!placement) {
+  const primary = findPrimaryMonitor();
+  if (!primary) {
     console.error("window-orchestrator: no primary monitor for PiP");
     return;
   }
+
+  const placement = placementFor(
+    primary,
+    otherPipsOnPrimary(client.address, primary),
+  );
 
   const targetWorkspace = placement.monitor.activeWorkspace;
   const batch: string[] = [];
