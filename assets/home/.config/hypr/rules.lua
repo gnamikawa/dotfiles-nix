@@ -12,6 +12,13 @@ hl.window_rule({ match = { class = ".blueman-manager-wrapped"   }, float = true 
 hl.window_rule({ match = { class = "org.pulseaudio.pavucontrol" }, float = true })
 hl.window_rule({ match = { class = "Thunar", title = "^rename.*" }, float = true })
 
+-- Discord Flatpak briefly opens a "Discord Updater" splash window before
+-- the main app materializes; hide it on a silent special workspace so it
+-- never flashes on screen. Belt-and-suspenders: float + 1x1 offscreen +
+-- no_anim + no_initial_focus so even one frame before workspace assignment
+-- is invisible. The main window (title starts with "Discord") is unaffected.
+hl.window_rule({ match = { class = "^com\\.discordapp\\.Discord$", title = "^Discord Updater$" }, workspace         = "special:_hidden silent" })
+
 -- Firefox Picture-in-Picture: parked top-right of the primary output,
 -- visible on every workspace (sway: sticky enable).
 hl.window_rule({ match = { class = "firefox", title = "Picture-in-Picture" }, float = true                  })
