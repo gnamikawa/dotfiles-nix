@@ -133,8 +133,15 @@ hl.bind(mod .. " + SHIFT + TAB", hl.dsp.exec_cmd("ags request window-menu-prev")
 -- release bind needs the ALT modifier in the pattern (bare-modifier
 -- release-only binds don't fire in this Hyprland build). Both Alt_L and
 -- Alt_R are covered so either physical Alt key closes it.
-hl.bind("Alt_L", hl.dsp.exec_cmd("ags request window-menu-open"))
-hl.bind("Alt_R", hl.dsp.exec_cmd("ags request window-menu-open"))
+--
+-- `non_consuming = true` on the press bind lets the Alt keydown reach the
+-- keyboard-focused client alongside firing the peek. Without it Hyprland
+-- swallows the key event, and clients that track modifier state from raw
+-- key events (kitty in particular — its Alt+left drag stays inert if it
+-- never sees the Alt keydown despite the .modifiers update arriving) fail
+-- to notice Alt is held, so Alt+drag selection silently does nothing.
+hl.bind("Alt_L", hl.dsp.exec_cmd("ags request window-menu-open"), { non_consuming = true })
+hl.bind("Alt_R", hl.dsp.exec_cmd("ags request window-menu-open"), { non_consuming = true })
 hl.bind(mod .. " + Alt_L", hl.dsp.exec_cmd("ags request window-menu-close"), { release = true, transparent = true })
 hl.bind(mod .. " + Alt_R", hl.dsp.exec_cmd("ags request window-menu-close"), { release = true, transparent = true })
 
