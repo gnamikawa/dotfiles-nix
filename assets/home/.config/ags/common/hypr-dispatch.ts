@@ -29,6 +29,26 @@ function send(luaCall: string): void {
 }
 
 /**
+ * Send several Lua dispatches as one ordered batch.
+ *
+ * Each individual `send()` spawns its own subprocess; those subprocesses
+ * run concurrently, so a caller that fires resize + move + pin in code
+ * order has no guarantee Hyprland executes them in that order. `hyprctl
+ * --batch` accepts a `;`-joined list and runs them serially inside the
+ * one compositor call, restoring the ordering the caller wrote.
+ *
+ * @param luaCalls - Lua expressions to dispatch, in intended order.
+ */
+export function sendBatch(luaCalls: string[]): void {
+  if (luaCalls.length === 0) return;
+  const joined = luaCalls.map((c) => `dispatch ${c}`).join(" ; ");
+  Gio.Subprocess.new(
+    ["hyprctl", "--batch", joined],
+    Gio.SubprocessFlags.NONE,
+  );
+}
+
+/**
  * Focus a specific client by Hyprland address (with the 0x prefix).
  *
  * @param address - Client address in `0x…` form, as reported by
@@ -49,4 +69,104 @@ export function focusWindow(address: string): void {
  */
 export function execCmd(cmd: string): void {
   send(`hl.dsp.exec_cmd([[${cmd}]])`);
+}
+
+/**
+ * Format an address argument for the compositor's window-selector strings.
+ *
+ * Every window-scoped dispatcher takes the address in the same `address:0x…`
+ * shape. Astal's `Client.address` occasionally omits the `0x` prefix and
+ * Hyprland silently rejects the resulting selector (dispatch returns `ok`
+ * with no effect), so the prefix is added defensively here rather than
+ * relying on every caller to normalise first.
+ *
+ * @param address - Client address in either `0x…` or bare-hex form.
+ */
+function windowSelector(address: string): string {
+  const normalised = address.startsWith("0x") ? address : `0x${address}`;
+  return `"address:${normalised}"`;
+}
+
+/**
+ * Build the Lua expression that toggles a client's floating state.
+ *
+ * Hyprland exposes no idempotent "set floating"; callers must gate on
+ * `client.floating` before scheduling this call.
+ *
+ * @param address - Client address in `0x…` form.
+ */
+export function buildToggleFloating(address: string): string {
+  return `hl.dsp.window.float({ window = ${windowSelector(address)} })`;
+}
+
+/**
+ * Build the Lua expression that toggles a client's pinned state.
+ *
+ * Same toggle-only semantics as {@link buildToggleFloating}: gate on
+ * `client.pinned` before scheduling.
+ *
+ * @param address - Client address in `0x…` form.
+ */
+export function buildTogglePinned(address: string): string {
+  return `hl.dsp.window.pin({ window = ${windowSelector(address)} })`;
+}
+
+/**
+ * Build the Lua expression that moves a client to an absolute pixel
+ * position in global compositor coordinates.
+ *
+ * The window must already be floating — tiled windows ignore absolute
+ * placement. `x` and `y` are GLOBAL coordinates: to place on a specific
+ * monitor at monitor-relative (mx, my), pass (monitor.x + mx,
+ * monitor.y + my). `relative = false` is explicit so a stray Hyprland
+ * default flip doesn't silently invert the meaning.
+ *
+ * @param address - Client address in `0x…` form.
+ * @param x - Global pixel column of the window's top-left.
+ * @param y - Global pixel row of the window's top-left.
+ */
+export function buildMoveWindowExact(
+  address: string,
+  x: number,
+  y: number,
+): string {
+  return `hl.dsp.window.move({ window = ${windowSelector(address)}, x = ${x}, y = ${y}, relative = false })`;
+}
+
+/**
+ * Build the Lua expression that resizes a client to an absolute pixel
+ * size.
+ *
+ * The `x` and `y` names in the dispatch payload are Hyprland's own for
+ * width and height respectively — misleading, but that is the argument
+ * shape `hl.window.resize` accepts.
+ *
+ * @param address - Client address in `0x…` form.
+ * @param width - Target pixel width.
+ * @param height - Target pixel height.
+ */
+export function buildResizeWindow(
+  address: string,
+  width: number,
+  height: number,
+): string {
+  return `hl.dsp.window.resize({ window = ${windowSelector(address)}, x = ${width}, y = ${height} })`;
+}
+
+/**
+ * Build the Lua expression that moves a client to another workspace
+ * without shifting the user's focus.
+ *
+ * Used to relocate a window across monitors: pass the target monitor's
+ * `active_workspace` id and the compositor sends the window there while
+ * the user's active workspace stays where it was.
+ *
+ * @param address - Client address in `0x…` form.
+ * @param workspaceId - Numeric workspace id from Astal's `Workspace.id`.
+ */
+export function buildMoveWindowToWorkspaceSilent(
+  address: string,
+  workspaceId: number,
+): string {
+  return `hl.dsp.window.move({ window = ${windowSelector(address)}, workspace = ${workspaceId}, silent = true })`;
 }

@@ -1,7 +1,9 @@
 -- rules.lua — window rules and per-surface layer rules.
 --
--- Window rules: apps that must float. Firefox PiP is pinned across
--- workspaces and parked top-right of the primary output.
+-- Window rules: apps that must float. Firefox Picture-in-Picture placement
+-- is owned end-to-end by the AGS window-orchestrator service — there is
+-- deliberately no static rule here for it, so a single authority decides
+-- monitor, position, size, float, and pin.
 --
 -- Layer rules: per-namespace animation for AGS layer-shell surfaces —
 -- this is the moment the whole config moved to Lua, since Hyprland 0.55
@@ -14,17 +16,9 @@ hl.window_rule({ match = { class = "Thunar", title = "^rename.*" }, float = true
 
 -- Discord Flatpak briefly opens a "Discord Updater" splash window before
 -- the main app materializes; hide it on a silent special workspace so it
--- never flashes on screen. Belt-and-suspenders: float + 1x1 offscreen +
--- no_anim + no_initial_focus so even one frame before workspace assignment
--- is invisible. The main window (title starts with "Discord") is unaffected.
-hl.window_rule({ match = { class = "^com\\.discordapp\\.Discord$", title = "^Discord Updater$" }, workspace         = "special:_hidden silent" })
-
--- Firefox Picture-in-Picture: parked top-right of the primary output,
--- visible on every workspace (sway: sticky enable).
-hl.window_rule({ match = { class = "firefox", title = "Picture-in-Picture" }, float = true                  })
-hl.window_rule({ match = { class = "firefox", title = "Picture-in-Picture" }, size  = "426 240"             })
-hl.window_rule({ match = { class = "firefox", title = "Picture-in-Picture" }, move  = "1462 0"              })
-hl.window_rule({ match = { class = "firefox", title = "Picture-in-Picture" }, pin   = true                  })
+-- never flashes on screen. The main window (title starts with "Discord")
+-- is unaffected.
+hl.window_rule({ match = { class = "^com\\.discordapp\\.Discord$", title = "^Discord Updater$" }, workspace = "special:_hidden silent" })
 
 -- ── AGS surfaces — physical motion per panel ─────────────────────────────
 -- Two motion families:

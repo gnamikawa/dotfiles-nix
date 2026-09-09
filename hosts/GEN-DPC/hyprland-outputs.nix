@@ -48,6 +48,17 @@ in
     hl.device({ name = "wacom-cintiq-pro-22-finger", output = "${cintiqConnector}" })
   '';
 
+  # AGS window-orchestrator config. Names monitors by verbatim `hyprctl
+  # monitors` description so the service can look them up at runtime; the
+  # primary is discovered by geometry (origin 0,0) and does not need a
+  # description here. Laptop hosts omit this file — the service treats an
+  # absent config as "no satellite, cascade on primary".
+  xdg.configFile."generated/ags/window-orchestrator.json".text = builtins.toJSON {
+    monitors = {
+      satellite = ioDataDesc;
+    };
+  };
+
   # The usual Hyprland-on-NVIDIA setup (ADR-0007 accepted this work).
   xdg.configFile."generated/hypr/env.lua".text = ''
     hl.env("LIBVA_DRIVER_NAME",         "nvidia")

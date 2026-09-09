@@ -17,6 +17,9 @@ import {
 import { setRunnerOpen } from "./common/runner";
 import { setSystemMenuOpen } from "./common/system-menu";
 import { bumpLayoutTick } from "./common/workspace-viz";
+import { startWindowOrchestrator } from "./services/window-orchestrator";
+
+startWindowOrchestrator();
 
 app.start({
   css: `${SRC}/style.css`,
