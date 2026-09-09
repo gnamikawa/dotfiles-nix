@@ -1,12 +1,20 @@
 // Alt-hold floating-window dimmer.
 //
 // While the Alt-hold window-menu overlay is up, every floating window
-// currently visible on some monitor fades to a barely-visible opacity so
-// the tiled window beneath it is legible. The one exception is the
-// focused window: if focus lands on a floating one it stays at full
-// opacity so the user can still see what they're operating on. Tiled
+// currently visible on some monitor fades to a barely-visible opacity
+// AND turns pointer-transparent, so clicks fall through to the tiled
+// window beneath. The one exception is the focused window: if focus
+// lands on a floating one it stays at full opacity and stays clickable,
+// so the user always has a legible escape hatch to click on. Tiled
 // windows are never touched — the dimmer only reaches into floating
 // clients.
+//
+// The pointer-transparency piece rides on Hyprland's `no_focus` prop:
+// v0.55.4's `vectorToWindowUnified` (Compositor.cpp) filters out any
+// window with `no_focus` set, so pointer events skip past it to the
+// window underneath. When a later Hyprland version wires setprop into
+// the ipc socket directly, this can move off the Lua binding without
+// changing the outward semantics.
 //
 // `enable()` / `disable()` are the whole surface. `app.tsx` calls them
 // from the same IPC handlers that open and close the window-menu, so
@@ -17,8 +25,9 @@
 // `enable()` is remembered so `disable()` can restore each one, but if
 // AGS restarts mid-hold or a window closes while dimmed there is
 // currently no self-heal — the affected window keeps the low opacity
-// until the user re-fires and releases the Alt-hold once more. Live
-// with it; the interaction is measured in seconds.
+// and stays click-through until the user re-fires and releases the
+// Alt-hold once more. Live with it; the interaction is measured in
+// seconds.
 
 import AstalHyprland from "gi://AstalHyprland";
 import { buildSetProp, sendBatch } from "../../common/hypr-dispatch";
@@ -65,11 +74,12 @@ function visibleFloatingAddresses(): string[] {
 }
 
 /**
- * Apply the dim to every currently-visible floating client, sparing the
- * one that currently holds focus.
+ * Apply the dim + pointer-passthrough to every visible floating client,
+ * sparing the one that currently holds focus.
  *
  * Called on `enable()` and again whenever focus moves so the "focused
- * floating stays at full opacity" invariant follows the user around.
+ * floating stays legible and clickable" invariant follows the user
+ * around.
  */
 function applyDim(): void {
   const focused = hyprland.focusedClient;
@@ -79,15 +89,24 @@ function applyDim(): void {
   const batch: string[] = [];
   for (const address of addresses) {
     touchedAddresses.add(address);
-    const opacity = address === focusedAddress ? FULL_OPACITY : DIMMED_OPACITY;
-    batch.push(buildSetProp(address, "opacity", opacity));
+    const isFocused = address === focusedAddress;
+    batch.push(
+      buildSetProp(
+        address,
+        "opacity",
+        isFocused ? FULL_OPACITY : DIMMED_OPACITY,
+      ),
+    );
+    batch.push(
+      buildSetProp(address, "no_focus", isFocused ? "false" : "true"),
+    );
   }
   sendBatch(batch);
 }
 
 /**
  * Restore every client the dimmer touched during this Alt-hold back to
- * full opacity.
+ * full opacity and normal pointer input.
  *
  * Uses `touchedAddresses` rather than re-scanning the current visible
  * set, so a window that moved off-screen between enable and disable is
@@ -98,17 +117,19 @@ function revertAll(): void {
   const batch: string[] = [];
   for (const address of touchedAddresses) {
     batch.push(buildSetProp(address, "opacity", FULL_OPACITY));
+    batch.push(buildSetProp(address, "no_focus", "false"));
   }
   sendBatch(batch);
   touchedAddresses.clear();
 }
 
 /**
- * Start dimming visible floating windows.
+ * Start dimming visible floating windows and routing pointer events
+ * past them to the tiled window underneath.
  *
  * Idempotent: repeat calls short-circuit. Subscribes to focus changes
  * so the focused floating window (if any) always stays at full opacity
- * as focus moves.
+ * and stays clickable as focus moves.
  */
 export function enableFloatingDimmer(): void {
   if (active) return;
@@ -127,7 +148,8 @@ export function enableFloatingDimmer(): void {
 }
 
 /**
- * Stop dimming and restore every touched window to full opacity.
+ * Stop dimming, restore every touched window to full opacity, and
+ * clear the pointer-passthrough flag on each.
  *
  * Idempotent: safe to call when the dimmer wasn't active. Disconnects
  * the focus subscription installed by {@link enableFloatingDimmer}.
