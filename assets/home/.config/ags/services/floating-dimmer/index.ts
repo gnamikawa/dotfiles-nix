@@ -9,6 +9,16 @@
 // windows are never touched — the dimmer only reaches into floating
 // clients.
 //
+// The dim rides on Hyprland's per-window `opacity_inactive` prop, NOT
+// `opacity`. Hyprland's presentation code (Window.cpp: `applyAlpha`)
+// consults `alpha` when the window is focused and `alphaInactive` when
+// it isn't — and this dimmer explicitly wants "focused stays bright,
+// everyone else fades" — so overriding `opacity_inactive` on every
+// visible floating window lets Hyprland's own focus routing do the
+// switch. No opacity re-apply on focus changes is needed as a result;
+// the currently-focused floating renders through `alpha` (untouched
+// default 1.0) and every unfocused one renders through the 0.15 we set.
+//
 // The pointer-transparency piece rides on Hyprland's `no_focus` prop:
 // v0.55.4's `vectorToWindowUnified` (Compositor.cpp) filters out any
 // window with `no_focus` set, so pointer events skip past it to the
@@ -75,13 +85,16 @@ function visibleFloatingAddresses(): string[] {
 
 /**
  * Apply the dim + pointer-passthrough to every visible floating client,
- * sparing the one that currently holds focus.
+ * sparing the one that currently holds focus from the passthrough.
  *
- * Called on `enable()` and again whenever focus moves so the "focused
- * floating stays legible and clickable" invariant follows the user
- * around.
+ * The opacity dim uses `opacity_inactive`, so Hyprland automatically
+ * renders the focused floating (if any) at its normal alpha without any
+ * per-focus re-apply from us — see the file header for why. The
+ * `no_focus` flag, on the other hand, must track focus: the focused
+ * floating window stays clickable so the user has a legible surface to
+ * operate on.
  */
-function applyDim(): void {
+function applyPassthroughFlags(): void {
   const focused = hyprland.focusedClient;
   const focusedAddress = focused?.address;
   const addresses = visibleFloatingAddresses();
@@ -89,14 +102,8 @@ function applyDim(): void {
   const batch: string[] = [];
   for (const address of addresses) {
     touchedAddresses.add(address);
+    batch.push(buildSetProp(address, "opacity_inactive", DIMMED_OPACITY));
     const isFocused = address === focusedAddress;
-    batch.push(
-      buildSetProp(
-        address,
-        "opacity",
-        isFocused ? FULL_OPACITY : DIMMED_OPACITY,
-      ),
-    );
     batch.push(
       buildSetProp(address, "no_focus", isFocused ? "false" : "true"),
     );
@@ -116,7 +123,7 @@ function revertAll(): void {
   if (touchedAddresses.size === 0) return;
   const batch: string[] = [];
   for (const address of touchedAddresses) {
-    batch.push(buildSetProp(address, "opacity", FULL_OPACITY));
+    batch.push(buildSetProp(address, "opacity_inactive", FULL_OPACITY));
     batch.push(buildSetProp(address, "no_focus", "false"));
   }
   sendBatch(batch);
@@ -135,7 +142,7 @@ export function enableFloatingDimmer(): void {
   if (active) return;
   active = true;
 
-  applyDim();
+  applyPassthroughFlags();
 
   focusSubscriptionId = hyprland.connect("notify::focused-client", () => {
     if (!active) return;
@@ -143,7 +150,7 @@ export function enableFloatingDimmer(): void {
     // per workspace, and correctly handles both "focus moved onto a
     // floating window" and "focus moved off one" without tracking
     // per-address previous state.
-    applyDim();
+    applyPassthroughFlags();
   });
 }
 
