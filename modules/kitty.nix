@@ -16,6 +16,14 @@
     };
 
     extraConfig = ''
+      # Let Alt+left drag select text the same way plain left does.
+      # Kitty's upstream defaults only bind Ctrl+Alt+left (rectangle) and
+      # Alt+left triplepress (line-from-begin) — plain alt+left press
+      # matches nothing, so any drag-select while the AGS Alt-hold peek is
+      # held would silently do nothing. This restores the normal gesture
+      # without touching the more specific double/triple-press mappings.
+      mouse_map alt+left press ungrabbed mouse_selection normal
+
       background   ${constants.terminal.dark.normal.background}
       foreground   ${constants.terminal.dark.normal.text}
       cursor       ${constants.terminal.dark.normal.text}
