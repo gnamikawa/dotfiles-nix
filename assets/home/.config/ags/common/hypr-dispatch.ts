@@ -51,11 +51,23 @@ export function sendBatch(luaCalls: string[]): void {
 /**
  * Focus a specific client by Hyprland address (with the 0x prefix).
  *
+ * Clears the target's `no_focus` prop in the same batch before the
+ * focus dispatch: Hyprland's `FocusState` refuses to focus any window
+ * with `no_focus` set ("Ignoring focus to nofocus window!"), which
+ * silently swallowed keyboard-driven focus (Alt+Tab, click-to-focus
+ * on a peek row) whenever the target was a floating window the
+ * Alt-hold dimmer had just turned pointer-transparent. The clear is
+ * idempotent — untouched windows already read `no_focus = false`, so
+ * the extra dispatch is a no-op there.
+ *
  * @param address - Client address in `0x…` form, as reported by
  *   {@link addressOf}.
  */
 export function focusWindow(address: string): void {
-  send(`hl.dsp.focus({ window = "address:${address}" })`);
+  sendBatch([
+    buildSetProp(address, "no_focus", "false"),
+    `hl.dsp.focus({ window = "address:${address}" })`,
+  ]);
 }
 
 /**
