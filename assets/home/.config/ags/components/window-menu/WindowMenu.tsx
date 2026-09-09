@@ -13,12 +13,13 @@
 import { createBinding, createComputed, With } from "ags";
 import { Gtk } from "ags/gtk4";
 import AstalHyprland from "gi://AstalHyprland";
-import { addressOf, sortedClientsOnWorkspace } from "../../common/window-menu";
+import { addressOf, peekClients } from "../../common/window-menu";
 import { focusWindow } from "../../common/hypr-dispatch";
 
 const hyprland = AstalHyprland.get_default();
 
 const focusedClient = createBinding(hyprland, "focusedClient");
+const focusedWorkspace = createBinding(hyprland, "focusedWorkspace");
 const clients = createBinding(hyprland, "clients");
 
 /**
@@ -46,24 +47,28 @@ function attachClick(self: Gtk.Widget, cb: () => void) {
  * list in lockstep with Alt+Tab cycling.
  */
 export default function WindowMenu() {
-  // A single computed carries everything the view needs — the current
-  // workspace's clients, its name, and which one is focused — so the row
-  // list rebuilds atomically when the workspace changes rather than in two
-  // out-of-order steps. `clients` is read only as a change trigger; the
-  // sorted list itself comes from the shared helper the Tab binds also use,
-  // so what the user sees and what Tab advances through stay in lockstep.
+  // A single computed carries everything the view needs — the peek's
+  // clients, the peek's workspace name, and which client currently holds
+  // focus — so the row list rebuilds atomically when any of the three
+  // change rather than in out-of-order steps. `focusedWorkspace` is read
+  // as the workspace-switch trigger (Astal's `clients` binding does not
+  // fire when an existing client's `workspace` field changes, which is
+  // exactly what happens to a pinned window on Alt+N), and `clients` is
+  // still read so the list refreshes on window map/unmap. The sorted list
+  // itself comes from the shared helper the Tab binds also use, so what
+  // the user sees and what Tab advances through stay in lockstep.
   const view = createComputed(() => {
     const current = focusedClient();
+    const ws = focusedWorkspace();
     const all = clients();
     if (!all || all.length === 0) return null;
-    const wsId = current?.workspace?.id;
-    if (wsId == null) return null;
-    const wsClients = sortedClientsOnWorkspace(wsId);
+    if (!ws) return null;
+    const wsClients = peekClients();
     if (wsClients.length === 0) return null;
     return {
       wsClients,
       currentAddress: current?.address ?? null,
-      wsName: current?.workspace?.name ?? String(wsId),
+      wsName: ws.name ?? String(ws.id),
     };
   });
 
