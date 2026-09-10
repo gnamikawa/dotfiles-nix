@@ -238,6 +238,11 @@ export function handle(client: AstalHyprland.Client): void {
  *   resize + move exact to the final geometry.
  *   pin last, and rounding last — both are per-window props that
  *     survive workspace moves, so applying them at the end is fine.
+ *
+ * Rounding is stamped in BOTH branches: the floating branch wants the
+ * large radius; the tiled branch wants 0 back because the satellite
+ * split reads better with square edges (matches the tiler's own idea of
+ * where the window edges are).
  */
 function buildPlacementBatch(
   client: AstalHyprland.Client,
