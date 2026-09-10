@@ -13,19 +13,16 @@ import {
   buildResizeWindow,
   buildSetFloating,
   buildSetPinned,
-  buildSetProp,
 } from "../../../common/hypr-dispatch-builders";
 
 export const PIP_WIDTH = 426;
 export const PIP_HEIGHT = 240;
 
-// Corner radius stamped on floating PiP windows via `setprop rounding`.
-// The compositor default is 0 (see hypr/hyprland.lua — decoration is
-// left at Hyprland's defaults), so per-window rounding is the only knob
-// that will visibly round just the PiP without touching every other
-// window. The value persists across drags/monitor moves for the life of
-// the window, so applying it once at placement is enough.
-export const PIP_ROUNDING = 20;
+// Rounding is a Hyprland dynamic-effect window rule scoped to
+// `float = true` (see hypr/rules.lua) — the compositor re-evaluates it
+// every time a PiP's `float` flips, so a manual `win+F` toggle or a
+// tiler-driven re-tile lands on the right radius without ags needing to
+// observe the change. Nothing to stamp from here.
 
 // Symmetric outer inset: the primary PiP sits INSET px from the right edge
 // and INSET px below the ags-bar (which happens to be BAR_HEIGHT tall,
@@ -145,13 +142,12 @@ export function placementFor(
  *   workspace move next, so the placement dispatches below apply on the
  *     target workspace.
  *   resize + move exact to the final geometry.
- *   pin last, and rounding last — both are per-window props that
- *     survive workspace moves, so applying them at the end is fine.
+ *   pin last — a per-window prop that survives workspace moves, so
+ *     applying it at the end is fine.
  *
- * Rounding is stamped in BOTH branches: the floating branch wants the
- * large radius; the tiled branch wants 0 back because the satellite
- * split reads better with square edges (matches the tiler's own idea of
- * where the window edges are).
+ * Rounding is not touched here: the compositor rule in hypr/rules.lua
+ * covers both branches reactively via a dynamic-effect match on
+ * `float = true`.
  *
  * @param client - Snapshot of the PiP to move.
  * @param placement - Target monitor + placement mode.
@@ -181,13 +177,10 @@ export function buildPlacementBatch(
     batch.push(buildResizeWindow(client.address, PIP_WIDTH, PIP_HEIGHT));
     batch.push(buildMoveWindowExact(client.address, globalX, globalY));
     batch.push(buildSetPinned(client.address, true));
-    batch.push(buildSetProp(client.address, "rounding", String(PIP_ROUNDING)));
   } else {
     // Tiled: let Hyprland's tiler split the satellite between however many
-    // overflow PiPs are open, undo any residual pin, and clear rounding so
-    // the tile edges read square.
+    // overflow PiPs are open, and undo any residual pin.
     batch.push(buildSetPinned(client.address, false));
-    batch.push(buildSetProp(client.address, "rounding", "0"));
   }
 
   return batch;
@@ -269,9 +262,9 @@ export function selectPromotionCandidate(
  * completes a frame later. Both halves reuse
  * {@link buildPlacementBatch}, so the "float before workspace-move"
  * ordering that fixed the "recall stayed tiled" race applies to both
- * sides of the swap. The tiled branch clearing `rounding = 0` on the
- * demoted window is why the "corners stay rounded after demotion" bug
- * disappears — with the swap in place, demotion always runs that branch.
+ * sides of the swap. The compositor rule in hypr/rules.lua handles
+ * rounding on both sides — floating gets the large radius, tiled snaps
+ * to 0 — so demotion doesn't need to touch rounding here.
  *
  * The demoted PiP is routed through {@link placementFor} with
  * `pipsOnPrimary = 1` (the just-promoted candidate), matching exactly

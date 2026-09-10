@@ -5,7 +5,6 @@ import {
   INSET,
   type MonitorSnapshot,
   PIP_HEIGHT,
-  PIP_ROUNDING,
   PIP_WIDTH,
   type PipSnapshot,
   buildResetBatch,
@@ -57,7 +56,8 @@ describe("buildResetBatch", () => {
     expect(batch.every((line) => line.includes(candidate.address))).toBe(true);
 
     // Floating stays on, workspace is already the target so no move,
-    // resize + move-exact + pin + rounding land in order.
+    // resize + move-exact + pin land in order. Rounding is owned by the
+    // compositor rule in hypr/rules.lua, so no setprop shows up here.
     const expectedX = PRIMARY.x + PRIMARY.width - PIP_WIDTH - INSET;
     const expectedY = PRIMARY.y + BAR_HEIGHT + INSET;
     expect(batch).toEqual([
@@ -69,10 +69,10 @@ describe("buildResetBatch", () => {
         `hl.dsp.window.move({ window = "address:0xa", x = ${expectedX}, y = ${expectedY}, relative = false })`,
       ),
       expect.stringContaining(`hl.dsp.window.pin`),
-      expect.stringContaining(
-        `prop = "rounding", value = "${PIP_ROUNDING}"`,
-      ),
     ]);
+    expect(batch.some((line) => line.includes(`prop = "rounding"`))).toBe(
+      false,
+    );
   });
 
   test("candidate on different workspace than target → workspace-move dispatch is inserted", () => {
@@ -127,7 +127,8 @@ describe("buildResetBatch", () => {
     expect(batch[0]).toContain(`action = "on"`);
 
     // Demotion floats-off (tiled satellite), moves to satellite workspace,
-    // unpins, and clears rounding to square.
+    // and unpins. Rounding rides on the compositor rule keyed on `float`
+    // so no `setprop rounding` shows up in either half of the batch.
     const demotedLines = batch.filter((l) => l.includes(demoted.address));
     expect(demotedLines[0]).toContain(`hl.dsp.window.float`);
     expect(demotedLines[0]).toContain(`action = "off"`);
@@ -137,15 +138,7 @@ describe("buildResetBatch", () => {
     expect(demotedLines.some((l) =>
       l.includes(`hl.dsp.window.pin`) && l.includes(`action = "off"`),
     )).toBe(true);
-    expect(demotedLines[demotedLines.length - 1]).toContain(
-      `prop = "rounding", value = "0"`,
-    );
-
-    // The promoted window gets the rounded stamp.
-    const promotedLines = batch.filter((l) => l.includes(promoted.address));
-    expect(promotedLines[promotedLines.length - 1]).toContain(
-      `prop = "rounding", value = "${PIP_ROUNDING}"`,
-    );
+    expect(batch.some((l) => l.includes(`prop = "rounding"`))).toBe(false);
   });
 
   test("no satellite → demoted PiP falls back to cascade-floating on primary", () => {
@@ -168,12 +161,11 @@ describe("buildResetBatch", () => {
 
     const demotedLines = batch.filter((l) => l.includes(demoted.address));
 
-    // Cascade fallback keeps the demoted window floating with rounded corners.
+    // Cascade fallback keeps the demoted window floating; the compositor
+    // rule keeps the rounded radius via the `float = true` match.
     expect(demotedLines[0]).toContain(`action = "on"`);
     // Cascade lands offset from the corner (pipsOnPrimary = 1 → one step in).
     expect(demotedLines.some((l) => l.includes(`hl.dsp.window.move`))).toBe(true);
-    expect(demotedLines[demotedLines.length - 1]).toContain(
-      `prop = "rounding", value = "${PIP_ROUNDING}"`,
-    );
+    expect(batch.some((l) => l.includes(`prop = "rounding"`))).toBe(false);
   });
 });
