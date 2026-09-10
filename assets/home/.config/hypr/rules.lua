@@ -23,6 +23,22 @@ hl.window_rule({
 	rounding = 20,
 })
 
+-- Firefox's PiP surface issues `xdg_toplevel::set_fullscreen(true)` on its
+-- own — most reliably when a video in its source tab ends and YouTube
+-- autoplays the next one. Nothing you did asked for maximize; Firefox
+-- did. Suppress that request at the compositor so the PiP stays PiP-
+-- shaped through video transitions. Verified against Hyprland 0.55.4:
+-- SUPPRESS_FULLSCREEN gates both the map-time and runtime client
+-- fullscreen paths (Window.cpp:1220, 2216). Accepted event tokens are
+-- fullscreen | fullscreenoutput | maximize | activate | activatefocus;
+hl.window_rule({
+	match = {
+		class = "^firefox$",
+		title = "^Picture-in-Picture$",
+	},
+	suppress_event = "maximize",
+})
+
 -- Tiled windows opt out of the drop shadow — shadows are the visual
 -- signal that a window is elevated above the tile plane, so keeping
 -- them on tiled windows undoes the affordance. Dynamic effect, so the
