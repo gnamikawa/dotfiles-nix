@@ -17,13 +17,25 @@ import {
 import { setRunnerOpen } from "./common/runner";
 import { setSystemMenuOpen } from "./common/system-menu";
 import { bumpLayoutTick } from "./common/workspace-viz";
-import { startWindowOrchestrator } from "./services/window-orchestrator";
+import {
+  resetPrimaryPip,
+  startWindowOrchestrator,
+} from "./services/window-orchestrator";
 import {
   disableFloatingDimmer,
   enableFloatingDimmer,
 } from "./services/floating-dimmer";
 
 startWindowOrchestrator();
+
+// Quick Alt double-press (press → release → press within this window)
+// triggers `resetPrimaryPip` instead of re-opening the peek. Sized to be
+// comfortably longer than a fast human double-tap (~200ms round-trip)
+// but shorter than the "I meant to open the menu twice" beat, so a
+// deliberate single-tap → wait → single-tap still opens the peek both
+// times.
+const ALT_DOUBLE_PRESS_MS = 350;
+let lastAltPressAt = 0;
 
 app.start({
   css: `${SRC}/style.css`,
@@ -48,7 +60,26 @@ app.start({
    */
   requestHandler(argv, res) {
     switch (argv[0]) {
-      case "window-menu-open":
+      case "window-menu-open": {
+        // Quick Alt double-press (second press lands within
+        // ALT_DOUBLE_PRESS_MS of the previous one) is repurposed as
+        // "reset the primary PiP to its top-right corner" — the peek
+        // stays down and the reset fires instead. Clearing the
+        // timestamp afterwards means a third quick press starts a
+        // fresh double-press window, not another reset immediately.
+        const now = Date.now();
+        if (now - lastAltPressAt < ALT_DOUBLE_PRESS_MS) {
+          lastAltPressAt = 0;
+          setSystemMenuOpen(false);
+          setWindowMenuOpen(false);
+          setWindowContextOpen(false);
+          disableFloatingDimmer();
+          resetPrimaryPip();
+          res("reset");
+          return;
+        }
+        lastAltPressAt = now;
+
         // Symmetric with system-menu-open: the two peeks are mutually
         // exclusive, so opening this one drops the shaded menu. Also serves
         // as the "Shift released while Alt held" restore path — after the
@@ -63,6 +94,7 @@ app.start({
         enableFloatingDimmer();
         res("open");
         return;
+      }
       case "window-menu-close":
         setWindowMenuOpen(false);
         setWindowContextOpen(false);
