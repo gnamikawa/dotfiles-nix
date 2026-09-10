@@ -57,6 +57,21 @@ hl.config({
         force_default_wallpaper = 0,
     },
 
+    -- ── Decoration ───────────────────────────────────────────────────────
+    -- Drop shadows signal elevation for floating windows only — tiled
+    -- windows opt out via a `no_shadow` window rule in rules.lua that
+    -- matches `float = false` (dynamic, so a `win+F` toggle flips the
+    -- shadow on and off with the window). The default `range = 4` is too
+    -- small to read as depth; 24 is visible without dominating.
+    decoration = {
+        shadow = {
+            enabled       = true,
+            range         = 24,
+            render_power  = 3,
+            offset        = {0, 4},
+        },
+    },
+
     -- ── Animations ───────────────────────────────────────────────────────
     -- Contextual motion for focus changes. The directions are chosen so the
     -- transition itself carries the story: sliding workspaces tell you which

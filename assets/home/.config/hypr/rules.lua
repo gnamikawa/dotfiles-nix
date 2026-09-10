@@ -23,6 +23,12 @@ hl.window_rule({
 	rounding = 20,
 })
 
+-- Tiled windows opt out of the drop shadow — shadows are the visual
+-- signal that a window is elevated above the tile plane, so keeping
+-- them on tiled windows undoes the affordance. Dynamic effect, so the
+-- shadow appears/disappears the moment `float` flips.
+hl.window_rule({ match = { float = false }, no_shadow = true })
+
 -- Discord Flatpak briefly opens a "Discord Updater" splash window before
 -- the main app materializes; hide it on a silent special workspace so it
 -- never flashes on screen. The main window (title starts with "Discord")
