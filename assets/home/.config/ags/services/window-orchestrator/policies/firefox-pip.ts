@@ -217,8 +217,37 @@ export function handle(client: AstalHyprland.Client): void {
     otherPipsOnPrimary(client.address, primary),
   );
 
-  const targetWorkspace = placement.monitor.activeWorkspace;
+  sendBatch(buildPlacementBatch(client, placement));
+}
+
+/**
+ * Build the ordered `hyprctl --batch` dispatches that move a PiP client
+ * into the given placement.
+ *
+ * Ordering rationale — the compositor evaluates each step against the
+ * window's live state after the previous one, so the steps must chain
+ * cleanly rather than race:
+ *   float toggle FIRST, on the current workspace, so the window is
+ *     floating before it moves — moving a tiled window into another
+ *     workspace inserts it into that workspace's tile tree, and toggling
+ *     float after the insert leaves Hyprland's internal tile state
+ *     inconsistent enough that the toggle can be silently dropped
+ *     (this is what left "recall" tiled on primary).
+ *   workspace move next, so the placement dispatches below apply on the
+ *     target workspace.
+ *   resize + move exact to the final geometry.
+ *   pin last, and rounding last — both are per-window props that
+ *     survive workspace moves, so applying them at the end is fine.
+ */
+function buildPlacementBatch(
+  client: AstalHyprland.Client,
+  placement: Placement,
+): string[] {
   const batch: string[] = [];
+  const targetWorkspace = placement.monitor.activeWorkspace;
+  const targetsFloating = placement.kind === "floating";
+
+  batch.push(buildSetFloating(client.address, targetsFloating));
 
   if (client.workspace?.id !== targetWorkspace.id) {
     batch.push(
@@ -227,26 +256,22 @@ export function handle(client: AstalHyprland.Client): void {
   }
 
   if (placement.kind === "floating") {
-    // Order: float first so the size/move dispatches apply to a floating
-    // window; global coords because the move dispatcher speaks in
-    // compositor-global space, not monitor-relative.
+    // Global coords because the move dispatcher speaks in compositor-global
+    // space, not monitor-relative.
     const globalX = placement.monitor.x + placement.x;
     const globalY = placement.monitor.y + placement.y;
 
-    batch.push(buildSetFloating(client.address, true));
     batch.push(buildResizeWindow(client.address, PIP_WIDTH, PIP_HEIGHT));
     batch.push(buildMoveWindowExact(client.address, globalX, globalY));
     batch.push(buildSetPinned(client.address, true));
     batch.push(buildSetProp(client.address, "rounding", String(PIP_ROUNDING)));
   } else {
-    // Tiled: undo any float/pin Firefox or a residual rule may have left
-    // on the window, then let Hyprland's tiler split the satellite monitor
-    // between however many overflow PiPs are open. Clear rounding so the
-    // tile edges read square, matching the tiler's own edge geometry.
-    batch.push(buildSetFloating(client.address, false));
+    // Tiled: let Hyprland's tiler split the satellite between however many
+    // overflow PiPs are open, undo any residual pin, and clear rounding so
+    // the tile edges read square.
     batch.push(buildSetPinned(client.address, false));
     batch.push(buildSetProp(client.address, "rounding", "0"));
   }
 
-  sendBatch(batch);
+  return batch;
 }
