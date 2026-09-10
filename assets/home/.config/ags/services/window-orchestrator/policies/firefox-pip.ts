@@ -275,3 +275,41 @@ function buildPlacementBatch(
 
   return batch;
 }
+
+/**
+ * Snap the primary Picture-in-Picture window back to the top-right of
+ * the primary monitor.
+ *
+ * "Primary PiP" is the one the placement policy pinned to the corner —
+ * uniquely identified by being both floating AND pinned. If the user
+ * has broken that invariant (e.g. unpinned by hand, or the PiP is
+ * tiled on the satellite), any PiP is treated as the candidate so the
+ * reset still gives them something to grab. A no-op when no PiP
+ * exists.
+ *
+ * Delegates to {@link buildPlacementBatch} so the recall path applies
+ * the exact same ordering as first-placement — that's the fix for
+ * "recall from satellite stayed tiled": the shared batch floats before
+ * moving workspace, instead of moving-then-floating which raced.
+ *
+ * Called from `app.tsx` on a quick Alt double-press. Idempotent, so
+ * spamming the reset costs nothing.
+ */
+export function resetPrimaryPip(): void {
+  const primary = findPrimaryMonitor();
+  if (!primary) return;
+
+  const pips = hyprland.clients.filter(isPipClient);
+  if (pips.length === 0) return;
+
+  const primaryPip = pips.find((c) => c.floating && c.pinned) ?? pips[0];
+
+  const placement: Placement = {
+    kind: "floating",
+    monitor: primary,
+    x: primary.width - PIP_WIDTH - INSET,
+    y: BAR_HEIGHT + INSET,
+  };
+
+  sendBatch(buildPlacementBatch(primaryPip, placement));
+}

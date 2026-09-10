@@ -7,7 +7,12 @@
 // one-liner in the `POLICIES` array below plus one file in `policies/`.
 
 import AstalHyprland from "gi://AstalHyprland";
-import { handle as handleFirefoxPip } from "./policies/firefox-pip";
+import {
+  handle as handleFirefoxPip,
+  resetPrimaryPip,
+} from "./policies/firefox-pip";
+
+export { resetPrimaryPip };
 
 /**
  * A window-placement policy: a pure handler over one Hyprland client that
