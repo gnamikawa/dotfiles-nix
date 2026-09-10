@@ -1,4 +1,4 @@
-// Firefox Picture-in-Picture placement policy.
+// Firefox Picture-in-Picture placement policy — AstalHyprland adapter.
 //
 // Every Firefox PiP window has the same class ("firefox") and title
 // ("Picture-in-Picture"). The policy routes by "does the primary already
@@ -17,46 +17,25 @@
 //   no satellite                 → primary monitor, cascading floating
 //                                  windows offset from the corner. Laptop
 //                                  fallback.
+//
+// All geometry and batch-shape decisions live in
+// `firefox-pip-placement.ts` (pure, unit-testable). This module is the
+// thin adapter that snapshots live AstalHyprland state into that pure
+// module's inputs and dispatches the returned batch.
 
 import AstalHyprland from "gi://AstalHyprland";
-import {
-  buildMoveWindowExact,
-  buildMoveWindowToWorkspaceSilent,
-  buildResizeWindow,
-  buildSetFloating,
-  buildSetPinned,
-  buildSetProp,
-  sendBatch,
-} from "../../../common/hypr-dispatch";
+import { sendBatch } from "../../../common/hypr-dispatch";
 import { loadConfig } from "../config";
-
-const PIP_WIDTH = 426;
-const PIP_HEIGHT = 240;
-
-// Corner radius stamped on floating PiP windows via `setprop rounding`.
-// The compositor default is 0 (see hypr/hyprland.lua — decoration is
-// left at Hyprland's defaults), so per-window rounding is the only knob
-// that will visibly round just the PiP without touching every other
-// window. The value persists across drags/monitor moves for the life of
-// the window, so applying it once at placement is enough.
-const PIP_ROUNDING = 20;
-
-// Symmetric outer inset: the primary PiP sits INSET px from the right edge
-// and INSET px below the ags-bar (which happens to be BAR_HEIGHT tall,
-// same value on purpose so the corner reads square).
-//
-// Reading `monitor.reservedTop` looked correct on paper but returns 0 on
-// AGS startup — the layer-shell surface hasn't reserved its exclusive
-// zone yet at that point, and by the time our policy runs, Astal's
-// cached snapshot is stale. Hardcoding the bar height (which is also
-// the ags-bar's declared exclusive height) keeps the corner stable
-// across restarts and re-mappings.
-const BAR_HEIGHT = 41;
-const INSET = 41;
-
-// Step by which each overflow PiP cascades down-and-left from the primary
-// corner when no satellite exists. Matches the laptop fallback path.
-const CASCADE_STEP = 40;
+import {
+  BAR_HEIGHT,
+  INSET,
+  PIP_WIDTH,
+  buildPlacementBatch,
+  placementFor,
+  type MonitorSnapshot,
+  type PipSnapshot,
+  type Placement,
+} from "./firefox-pip-placement";
 
 const CLASS_MATCH = "firefox";
 const TITLE_MATCH = "Picture-in-Picture";
@@ -106,6 +85,36 @@ function findSatelliteMonitor(): AstalHyprland.Monitor | undefined {
 }
 
 /**
+ * Snapshot an Astal client into the pure placement module's shape.
+ *
+ * Strips the live-binding surface down to the exact fields the pure
+ * module consumes, so behaviour under test matches behaviour at runtime.
+ *
+ * @param client - Live Astal client.
+ */
+function snapshotClient(client: AstalHyprland.Client): PipSnapshot {
+  return {
+    address: client.address,
+    workspaceId: client.workspace?.id ?? null,
+  };
+}
+
+/**
+ * Snapshot an Astal monitor into the pure placement module's shape.
+ *
+ * @param monitor - Live Astal monitor.
+ */
+function snapshotMonitor(monitor: AstalHyprland.Monitor): MonitorSnapshot {
+  return {
+    id: monitor.id,
+    x: monitor.x,
+    y: monitor.y,
+    width: monitor.width,
+    activeWorkspaceId: monitor.activeWorkspace.id,
+  };
+}
+
+/**
  * Count Firefox PiPs currently on the primary monitor, excluding the
  * given address.
  *
@@ -119,74 +128,18 @@ function findSatelliteMonitor(): AstalHyprland.Monitor | undefined {
  * primary onto the satellite by hand.
  *
  * @param excludeAddress - Address to leave out of the count.
- * @param primary - The primary monitor to filter clients against.
+ * @param primaryId - The primary monitor id to filter clients against.
  */
 function otherPipsOnPrimary(
   excludeAddress: string,
-  primary: AstalHyprland.Monitor,
+  primaryId: number,
 ): number {
   return hyprland.clients.filter(
     (c) =>
       isPipClient(c) &&
       c.address !== excludeAddress &&
-      c.monitor?.id === primary.id,
+      c.monitor?.id === primaryId,
   ).length;
-}
-
-interface FloatingPlacement {
-  kind: "floating";
-  monitor: AstalHyprland.Monitor;
-  x: number;
-  y: number;
-}
-
-interface TiledPlacement {
-  kind: "tiled";
-  monitor: AstalHyprland.Monitor;
-}
-
-type Placement = FloatingPlacement | TiledPlacement;
-
-/**
- * Compute the target monitor and placement mode for a PiP given the
- * primary monitor and how many PiPs it already holds.
- *
- * Placement modes:
- *   floating — corner PiP on the primary; the app you actually watch,
- *     pinned so it stays visible across workspaces.
- *   tiled    — overflow PiPs on the satellite; Hyprland's layout engine
- *     splits the monitor between them so several stream perspectives fit
- *     without hand-placement.
- *
- * @param primary - The primary monitor.
- * @param pipsOnPrimary - Number of PiPs already on the primary (excluding
- *   the client we're about to place).
- */
-function placementFor(
-  primary: AstalHyprland.Monitor,
-  pipsOnPrimary: number,
-): Placement {
-  const satellite = findSatelliteMonitor();
-
-  if (pipsOnPrimary === 0) {
-    return {
-      kind: "floating",
-      monitor: primary,
-      x: primary.width - PIP_WIDTH - INSET,
-      y: BAR_HEIGHT + INSET,
-    };
-  }
-
-  if (satellite) {
-    return { kind: "tiled", monitor: satellite };
-  }
-
-  return {
-    kind: "floating",
-    monitor: primary,
-    x: primary.width - PIP_WIDTH - INSET - pipsOnPrimary * CASCADE_STEP,
-    y: BAR_HEIGHT + INSET + pipsOnPrimary * CASCADE_STEP,
-  };
 }
 
 /**
@@ -212,73 +165,16 @@ export function handle(client: AstalHyprland.Client): void {
     return;
   }
 
+  const primarySnap = snapshotMonitor(primary);
+  const satellite = findSatelliteMonitor();
+  const satelliteSnap = satellite ? snapshotMonitor(satellite) : null;
   const placement = placementFor(
-    primary,
-    otherPipsOnPrimary(client.address, primary),
+    primarySnap,
+    otherPipsOnPrimary(client.address, primary.id),
+    satelliteSnap,
   );
 
-  sendBatch(buildPlacementBatch(client, placement));
-}
-
-/**
- * Build the ordered `hyprctl --batch` dispatches that move a PiP client
- * into the given placement.
- *
- * Ordering rationale — the compositor evaluates each step against the
- * window's live state after the previous one, so the steps must chain
- * cleanly rather than race:
- *   float toggle FIRST, on the current workspace, so the window is
- *     floating before it moves — moving a tiled window into another
- *     workspace inserts it into that workspace's tile tree, and toggling
- *     float after the insert leaves Hyprland's internal tile state
- *     inconsistent enough that the toggle can be silently dropped
- *     (this is what left "recall" tiled on primary).
- *   workspace move next, so the placement dispatches below apply on the
- *     target workspace.
- *   resize + move exact to the final geometry.
- *   pin last, and rounding last — both are per-window props that
- *     survive workspace moves, so applying them at the end is fine.
- *
- * Rounding is stamped in BOTH branches: the floating branch wants the
- * large radius; the tiled branch wants 0 back because the satellite
- * split reads better with square edges (matches the tiler's own idea of
- * where the window edges are).
- */
-function buildPlacementBatch(
-  client: AstalHyprland.Client,
-  placement: Placement,
-): string[] {
-  const batch: string[] = [];
-  const targetWorkspace = placement.monitor.activeWorkspace;
-  const targetsFloating = placement.kind === "floating";
-
-  batch.push(buildSetFloating(client.address, targetsFloating));
-
-  if (client.workspace?.id !== targetWorkspace.id) {
-    batch.push(
-      buildMoveWindowToWorkspaceSilent(client.address, targetWorkspace.id),
-    );
-  }
-
-  if (placement.kind === "floating") {
-    // Global coords because the move dispatcher speaks in compositor-global
-    // space, not monitor-relative.
-    const globalX = placement.monitor.x + placement.x;
-    const globalY = placement.monitor.y + placement.y;
-
-    batch.push(buildResizeWindow(client.address, PIP_WIDTH, PIP_HEIGHT));
-    batch.push(buildMoveWindowExact(client.address, globalX, globalY));
-    batch.push(buildSetPinned(client.address, true));
-    batch.push(buildSetProp(client.address, "rounding", String(PIP_ROUNDING)));
-  } else {
-    // Tiled: let Hyprland's tiler split the satellite between however many
-    // overflow PiPs are open, undo any residual pin, and clear rounding so
-    // the tile edges read square.
-    batch.push(buildSetPinned(client.address, false));
-    batch.push(buildSetProp(client.address, "rounding", "0"));
-  }
-
-  return batch;
+  sendBatch(buildPlacementBatch(snapshotClient(client), placement));
 }
 
 /**
@@ -309,12 +205,13 @@ export function resetPrimaryPip(): void {
 
   const primaryPip = pips.find((c) => c.floating && c.pinned) ?? pips[0];
 
+  const primarySnap = snapshotMonitor(primary);
   const placement: Placement = {
     kind: "floating",
-    monitor: primary,
-    x: primary.width - PIP_WIDTH - INSET,
+    monitor: primarySnap,
+    x: primarySnap.width - PIP_WIDTH - INSET,
     y: BAR_HEIGHT + INSET,
   };
 
-  sendBatch(buildPlacementBatch(primaryPip, placement));
+  sendBatch(buildPlacementBatch(snapshotClient(primaryPip), placement));
 }
