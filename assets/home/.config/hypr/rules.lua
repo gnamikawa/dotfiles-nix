@@ -1,9 +1,15 @@
 -- rules.lua — window rules and per-surface layer rules.
 --
--- Window rules: apps that must float. Firefox Picture-in-Picture placement
--- is owned end-to-end by the AGS window-orchestrator service — there is
--- deliberately no static rule here for it, so a single authority decides
--- monitor, position, size, float, and pin.
+-- Window rules: apps that must float. Firefox Picture-in-Picture
+-- placement (monitor, position, size, float, pin, and rounding) is
+-- owned end-to-end by the AGS window-orchestrator service — there is
+-- deliberately no static rule for it, so a single authority decides
+-- them all. A declarative `rounding` rule scoped to `float = true` was
+-- tried and rejected: Hyprland's rule engine only re-evaluates a rule
+-- when a property in the rule's own match set fires `propertiesChanged`,
+-- and no code path in Hyprland 0.55 emits `RULE_PROP_FLOATING`. Setting
+-- rounding from ags on both branches of the swap keeps it in sync with
+-- the visible state.
 --
 -- Layer rules: per-namespace animation for AGS layer-shell surfaces —
 -- this is the moment the whole config moved to Lua, since Hyprland 0.55
