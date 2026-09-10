@@ -27,14 +27,12 @@ import AstalHyprland from "gi://AstalHyprland";
 import { sendBatch } from "../../../common/hypr-dispatch";
 import { loadConfig } from "../config";
 import {
-  BAR_HEIGHT,
-  INSET,
-  PIP_WIDTH,
   buildPlacementBatch,
+  buildResetBatch,
   placementFor,
+  selectPromotionCandidate,
   type MonitorSnapshot,
   type PipSnapshot,
-  type Placement,
 } from "./firefox-pip-placement";
 
 const CLASS_MATCH = "firefox";
@@ -95,6 +93,8 @@ function findSatelliteMonitor(): AstalHyprland.Monitor | undefined {
 function snapshotClient(client: AstalHyprland.Client): PipSnapshot {
   return {
     address: client.address,
+    floating: client.floating,
+    monitorId: client.monitor?.id ?? -1,
     workspaceId: client.workspace?.id ?? null,
   };
 }
@@ -178,40 +178,28 @@ export function handle(client: AstalHyprland.Client): void {
 }
 
 /**
- * Snap the primary Picture-in-Picture window back to the top-right of
- * the primary monitor.
+ * Snap a PiP into the primary corner slot.
  *
- * "Primary PiP" is the one the placement policy pinned to the corner —
- * uniquely identified by being both floating AND pinned. If the user
- * has broken that invariant (e.g. unpinned by hand, or the PiP is
- * tiled on the satellite), any PiP is treated as the candidate so the
- * reset still gives them something to grab. A no-op when no PiP
- * exists.
- *
- * Delegates to {@link buildPlacementBatch} so the recall path applies
- * the exact same ordering as first-placement — that's the fix for
- * "recall from satellite stayed tiled": the shared batch floats before
- * moving workspace, instead of moving-then-floating which raced.
- *
- * Called from `app.tsx` on a quick Alt double-press. Idempotent, so
- * spamming the reset costs nothing.
+ * Called from `app.tsx` on a quick Alt double-press. Selects a candidate
+ * via {@link selectPromotionCandidate} (focused > already-floating >
+ * tiled-on-primary > tiled-on-satellite), and if that pick displaces an
+ * existing floating PiP, demotes it into overflow in the same batch. A
+ * no-op when no PiP exists. Idempotent when the current corner PiP is
+ * the selection, so spamming the reset costs nothing.
  */
 export function resetPrimaryPip(): void {
   const primary = findPrimaryMonitor();
   if (!primary) return;
 
-  const pips = hyprland.clients.filter(isPipClient);
-  if (pips.length === 0) return;
+  const focusedAddress = hyprland.get_focused_client()?.address ?? null;
+  const pips = hyprland.clients.filter(isPipClient).map(snapshotClient);
 
-  const primaryPip = pips.find((c) => c.floating && c.pinned) ?? pips[0];
+  const selection = selectPromotionCandidate(pips, focusedAddress, primary.id);
+  if (!selection) return;
 
   const primarySnap = snapshotMonitor(primary);
-  const placement: Placement = {
-    kind: "floating",
-    monitor: primarySnap,
-    x: primarySnap.width - PIP_WIDTH - INSET,
-    y: BAR_HEIGHT + INSET,
-  };
+  const satellite = findSatelliteMonitor();
+  const satelliteSnap = satellite ? snapshotMonitor(satellite) : null;
 
-  sendBatch(buildPlacementBatch(snapshotClient(primaryPip), placement));
+  sendBatch(buildResetBatch(selection, primarySnap, satelliteSnap));
 }

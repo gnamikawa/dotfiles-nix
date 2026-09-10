@@ -1,10 +1,11 @@
 // Pure placement engine for Firefox Picture-in-Picture windows.
 //
-// Owns geometry and dispatch-batch shape. No compositor bindings — the
-// adapter in `firefox-pip.ts` snapshots live AstalHyprland state into
-// the plain data structures below and hands them to these functions,
-// which return batched Lua dispatch strings. The split keeps every
-// decision unit-testable with plain-object inputs.
+// Owns geometry, promotion-candidate selection, and dispatch-batch shape.
+// No compositor bindings — the adapter in `firefox-pip.ts` snapshots
+// live AstalHyprland state into the plain data structures below and
+// hands them to these functions, which return batched Lua dispatch
+// strings. The split keeps every decision unit-testable with plain-
+// object inputs.
 
 import {
   buildMoveWindowExact,
@@ -47,11 +48,13 @@ export const CASCADE_STEP = 40;
  * The minimum client shape the placement engine consumes.
  *
  * Snapshotted from `AstalHyprland.Client` by the adapter so this module
- * never touches the live GI binding — makes batch shape fully
- * unit-testable.
+ * never touches the live GI binding — makes selection and batch shape
+ * fully unit-testable.
  */
 export interface PipSnapshot {
   address: string;
+  floating: boolean;
+  monitorId: number;
   workspaceId: number | null;
 }
 
@@ -185,6 +188,119 @@ export function buildPlacementBatch(
     // the tile edges read square.
     batch.push(buildSetPinned(client.address, false));
     batch.push(buildSetProp(client.address, "rounding", "0"));
+  }
+
+  return batch;
+}
+
+/**
+ * Selection result for a promotion request. `demote` is the PiP that
+ * was already floating and is about to lose its corner slot — null when
+ * no swap is needed (candidate was already floating, or there was no
+ * floating PiP to displace).
+ */
+export interface SelectionResult {
+  candidate: PipSnapshot;
+  demote: PipSnapshot | null;
+}
+
+/**
+ * Pick which PiP should be promoted into the primary corner slot.
+ *
+ * Priority (highest first):
+ *   1. Focused PiP on any monitor.
+ *   2. A PiP that is already floating.
+ *   3. A PiP tiled on the primary monitor.
+ *   4. A PiP tiled on the satellite (overflow) monitor.
+ *
+ * When the chosen candidate is not the currently-floating PiP, the
+ * currently-floating one is returned as `demote` so the caller can swap
+ * them in one batch. Returns null when there are no PiPs at all.
+ *
+ * Rationale for the priority: focus is the strongest user signal — if
+ * you tabbed to a PiP, that's the one you want up front. Absent a focus
+ * signal, a re-snap of the corner PiP is idempotent and cheap. The
+ * tiled tiers fall through in monitor-locality order because a primary
+ * tile is one hop away from becoming the corner PiP; a satellite tile
+ * is two.
+ *
+ * @param pips - Every PiP client currently mapped in the compositor.
+ * @param focusedAddress - Address of the compositor's focused client,
+ *   or null when nothing is focused. Non-PiP focus is treated the same
+ *   as no focus (the focus tier drops through).
+ * @param primaryId - Monitor id of the primary output.
+ */
+export function selectPromotionCandidate(
+  pips: PipSnapshot[],
+  focusedAddress: string | null,
+  primaryId: number,
+): SelectionResult | null {
+  if (pips.length === 0) return null;
+
+  const floating = pips.find((p) => p.floating) ?? null;
+  const focused =
+    focusedAddress != null
+      ? pips.find((p) => p.address === focusedAddress) ?? null
+      : null;
+  const tiledOnPrimary = pips.find(
+    (p) => !p.floating && p.monitorId === primaryId,
+  );
+  const tiledElsewhere = pips.find(
+    (p) => !p.floating && p.monitorId !== primaryId,
+  );
+
+  const candidate =
+    focused ?? floating ?? tiledOnPrimary ?? tiledElsewhere ?? pips[0];
+
+  const demote =
+    floating && floating.address !== candidate.address ? floating : null;
+
+  return { candidate, demote };
+}
+
+/**
+ * Build the batch that promotes `candidate` into the corner slot,
+ * demoting a currently-floating PiP into overflow tiling in the same
+ * batch when they are different windows.
+ *
+ * Ordering: the promotion batch runs before the demotion so the corner
+ * ends up owned by the newly-focused window at the moment the user
+ * looks at the screen; the demoted window's move into the satellite
+ * completes a frame later. Both halves reuse
+ * {@link buildPlacementBatch}, so the "float before workspace-move"
+ * ordering that fixed the "recall stayed tiled" race applies to both
+ * sides of the swap. The tiled branch clearing `rounding = 0` on the
+ * demoted window is why the "corners stay rounded after demotion" bug
+ * disappears — with the swap in place, demotion always runs that branch.
+ *
+ * The demoted PiP is routed through {@link placementFor} with
+ * `pipsOnPrimary = 1` (the just-promoted candidate), matching exactly
+ * what the initial-placement path picks for a second-arrival PiP: tiled
+ * on satellite when one exists, cascade-floating on the primary
+ * otherwise.
+ *
+ * @param selection - Candidate + optional demotion target from
+ *   {@link selectPromotionCandidate}.
+ * @param primary - Primary monitor snapshot.
+ * @param satellite - Satellite monitor snapshot, or null.
+ */
+export function buildResetBatch(
+  selection: SelectionResult,
+  primary: MonitorSnapshot,
+  satellite: MonitorSnapshot | null,
+): string[] {
+  const promote: FloatingPlacement = {
+    kind: "floating",
+    monitor: primary,
+    x: primary.width - PIP_WIDTH - INSET,
+    y: BAR_HEIGHT + INSET,
+  };
+
+  const batch = buildPlacementBatch(selection.candidate, promote);
+
+  if (selection.demote) {
+    const demotePlacement = placementFor(primary, 1, satellite);
+    batch.push(...buildPlacementBatch(selection.demote, demotePlacement));
   }
 
   return batch;
