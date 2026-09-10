@@ -23,8 +23,8 @@ import {
   buildMoveWindowExact,
   buildMoveWindowToWorkspaceSilent,
   buildResizeWindow,
-  buildToggleFloating,
-  buildTogglePinned,
+  buildSetFloating,
+  buildSetPinned,
   sendBatch,
 } from "../../../common/hypr-dispatch";
 import { loadConfig } from "../config";
@@ -224,16 +224,16 @@ export function handle(client: AstalHyprland.Client): void {
     const globalX = placement.monitor.x + placement.x;
     const globalY = placement.monitor.y + placement.y;
 
-    if (!client.floating) batch.push(buildToggleFloating(client.address));
+    batch.push(buildSetFloating(client.address, true));
     batch.push(buildResizeWindow(client.address, PIP_WIDTH, PIP_HEIGHT));
     batch.push(buildMoveWindowExact(client.address, globalX, globalY));
-    if (!client.pinned) batch.push(buildTogglePinned(client.address));
+    batch.push(buildSetPinned(client.address, true));
   } else {
     // Tiled: undo any float/pin Firefox or a residual rule may have left
     // on the window, then let Hyprland's tiler split the satellite monitor
     // between however many overflow PiPs are open.
-    if (client.floating) batch.push(buildToggleFloating(client.address));
-    if (client.pinned) batch.push(buildTogglePinned(client.address));
+    batch.push(buildSetFloating(client.address, false));
+    batch.push(buildSetPinned(client.address, false));
   }
 
   sendBatch(batch);

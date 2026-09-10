@@ -100,27 +100,38 @@ function windowSelector(address: string): string {
 }
 
 /**
- * Build the Lua expression that toggles a client's floating state.
+ * Build the Lua expression that sets a client's floating state to a
+ * specific value.
  *
- * Hyprland exposes no idempotent "set floating"; callers must gate on
- * `client.floating` before scheduling this call.
+ * `hl.dsp.window.float` accepts `action = "on" | "off" | "toggle"`;
+ * the explicit on/off forms are idempotent, so callers can dispatch
+ * the desired state without first reading `client.floating`. Astal's
+ * cached client state can lag behind the compositor after our own
+ * batches flip the state — reading `client.floating` and guarding a
+ * toggle against it silently drops the dispatch on the stale side,
+ * which is what left the PiP recall tiled on the first invocation.
  *
  * @param address - Client address in `0x…` form.
+ * @param floating - Desired floating state; `true` floats, `false` tiles.
  */
-export function buildToggleFloating(address: string): string {
-  return `hl.dsp.window.float({ window = ${windowSelector(address)} })`;
+export function buildSetFloating(address: string, floating: boolean): string {
+  const action = floating ? "on" : "off";
+  return `hl.dsp.window.float({ window = ${windowSelector(address)}, action = "${action}" })`;
 }
 
 /**
- * Build the Lua expression that toggles a client's pinned state.
+ * Build the Lua expression that sets a client's pinned state to a
+ * specific value.
  *
- * Same toggle-only semantics as {@link buildToggleFloating}: gate on
- * `client.pinned` before scheduling.
+ * Same idempotent on/off semantics as {@link buildSetFloating} — safe
+ * to dispatch without first reading `client.pinned`.
  *
  * @param address - Client address in `0x…` form.
+ * @param pinned - Desired pinned state; `true` pins, `false` unpins.
  */
-export function buildTogglePinned(address: string): string {
-  return `hl.dsp.window.pin({ window = ${windowSelector(address)} })`;
+export function buildSetPinned(address: string, pinned: boolean): string {
+  const action = pinned ? "on" : "off";
+  return `hl.dsp.window.pin({ window = ${windowSelector(address)}, action = "${action}" })`;
 }
 
 /**
