@@ -25,12 +25,21 @@ import {
   buildResizeWindow,
   buildSetFloating,
   buildSetPinned,
+  buildSetProp,
   sendBatch,
 } from "../../../common/hypr-dispatch";
 import { loadConfig } from "../config";
 
 const PIP_WIDTH = 426;
 const PIP_HEIGHT = 240;
+
+// Corner radius stamped on floating PiP windows via `setprop rounding`.
+// The compositor default is 0 (see hypr/hyprland.lua — decoration is
+// left at Hyprland's defaults), so per-window rounding is the only knob
+// that will visibly round just the PiP without touching every other
+// window. The value persists across drags/monitor moves for the life of
+// the window, so applying it once at placement is enough.
+const PIP_ROUNDING = 20;
 
 // Symmetric outer inset: the primary PiP sits INSET px from the right edge
 // and INSET px below the ags-bar (which happens to be BAR_HEIGHT tall,
@@ -228,12 +237,15 @@ export function handle(client: AstalHyprland.Client): void {
     batch.push(buildResizeWindow(client.address, PIP_WIDTH, PIP_HEIGHT));
     batch.push(buildMoveWindowExact(client.address, globalX, globalY));
     batch.push(buildSetPinned(client.address, true));
+    batch.push(buildSetProp(client.address, "rounding", String(PIP_ROUNDING)));
   } else {
     // Tiled: undo any float/pin Firefox or a residual rule may have left
     // on the window, then let Hyprland's tiler split the satellite monitor
-    // between however many overflow PiPs are open.
+    // between however many overflow PiPs are open. Clear rounding so the
+    // tile edges read square, matching the tiler's own edge geometry.
     batch.push(buildSetFloating(client.address, false));
     batch.push(buildSetPinned(client.address, false));
+    batch.push(buildSetProp(client.address, "rounding", "0"));
   }
 
   sendBatch(batch);
