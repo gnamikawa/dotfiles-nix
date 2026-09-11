@@ -13,7 +13,7 @@ prebuilt ports exist for nearly every terminal, GTK theme, and application,
 where Geist has none and every surface must be hand-rolled from the palette.
 It lost anyway: Geist's restrained, monochrome-leaning language matches the
 intended look of the desktop, and a design system is being adopted here as
-a *standard to enforce*, not a skin to install — hand-rolling from one
+a _standard to enforce_, not a skin to install — hand-rolling from one
 palette attrset is the mechanism that makes unity checkable.
 
 Consequence: prebuilt third-party themes are never adopted wholesale, even

@@ -30,7 +30,9 @@ const SATELLITE: MonitorSnapshot = {
  * Build a PipSnapshot with sensible defaults; only spell out the fields
  * that matter for the test at hand.
  */
-function pip(overrides: Partial<PipSnapshot> & { address: string }): PipSnapshot {
+function pip(
+  overrides: Partial<PipSnapshot> & { address: string },
+): PipSnapshot {
   return {
     floating: false,
     monitorId: PRIMARY.id,
@@ -117,7 +119,9 @@ describe("buildResetBatch", () => {
 
     // Promotion of the new window comes first; demotion of the old floater
     // appears after in the same batch so Hyprland runs them in order.
-    const firstPromotedIdx = batch.findIndex((l) => l.includes(promoted.address));
+    const firstPromotedIdx = batch.findIndex((l) =>
+      l.includes(promoted.address),
+    );
     const firstDemotedIdx = batch.findIndex((l) => l.includes(demoted.address));
     expect(firstPromotedIdx).toBeGreaterThanOrEqual(0);
     expect(firstDemotedIdx).toBeGreaterThan(firstPromotedIdx);
@@ -132,12 +136,16 @@ describe("buildResetBatch", () => {
     const demotedLines = batch.filter((l) => l.includes(demoted.address));
     expect(demotedLines[0]).toContain(`hl.dsp.window.float`);
     expect(demotedLines[0]).toContain(`action = "off"`);
-    expect(demotedLines.some((l) =>
-      l.includes(`workspace = ${SATELLITE.activeWorkspaceId}`),
-    )).toBe(true);
-    expect(demotedLines.some((l) =>
-      l.includes(`hl.dsp.window.pin`) && l.includes(`action = "off"`),
-    )).toBe(true);
+    expect(
+      demotedLines.some((l) =>
+        l.includes(`workspace = ${SATELLITE.activeWorkspaceId}`),
+      ),
+    ).toBe(true);
+    expect(
+      demotedLines.some(
+        (l) => l.includes(`hl.dsp.window.pin`) && l.includes(`action = "off"`),
+      ),
+    ).toBe(true);
     expect(batch.some((l) => l.includes(`prop = "rounding"`))).toBe(false);
   });
 
@@ -165,7 +173,9 @@ describe("buildResetBatch", () => {
     // rule keeps the rounded radius via the `float = true` match.
     expect(demotedLines[0]).toContain(`action = "on"`);
     // Cascade lands offset from the corner (pipsOnPrimary = 1 → one step in).
-    expect(demotedLines.some((l) => l.includes(`hl.dsp.window.move`))).toBe(true);
+    expect(demotedLines.some((l) => l.includes(`hl.dsp.window.move`))).toBe(
+      true,
+    );
     expect(batch.some((l) => l.includes(`prop = "rounding"`))).toBe(false);
   });
 });

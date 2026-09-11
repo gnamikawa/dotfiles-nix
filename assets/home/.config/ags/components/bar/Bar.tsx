@@ -150,8 +150,16 @@ function computeWifiTooltip(): string {
   return `${name} · ${strength}%`;
 }
 
-const wifiIconName = createPoll<string>(computeWifiIcon(), 3000, computeWifiIcon);
-const wifiTooltip = createPoll<string>(computeWifiTooltip(), 3000, computeWifiTooltip);
+const wifiIconName = createPoll<string>(
+  computeWifiIcon(),
+  3000,
+  computeWifiIcon,
+);
+const wifiTooltip = createPoll<string>(
+  computeWifiTooltip(),
+  3000,
+  computeWifiTooltip,
+);
 
 const isPowered = createBinding(bluetooth, "isPowered");
 const isConnected = createBinding(bluetooth, "isConnected");

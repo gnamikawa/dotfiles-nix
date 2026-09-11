@@ -58,10 +58,7 @@ function send(luaCall: string): void {
 export function sendBatch(luaCalls: string[]): void {
   if (luaCalls.length === 0) return;
   const joined = luaCalls.map((c) => `dispatch ${c}`).join(" ; ");
-  Gio.Subprocess.new(
-    ["hyprctl", "--batch", joined],
-    Gio.SubprocessFlags.NONE,
-  );
+  Gio.Subprocess.new(["hyprctl", "--batch", joined], Gio.SubprocessFlags.NONE);
 }
 
 /**

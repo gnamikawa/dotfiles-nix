@@ -12,7 +12,9 @@ const SAT_ID = 2;
  * Build a PipSnapshot with sensible defaults; only spell out the fields
  * that matter for the test at hand.
  */
-function pip(overrides: Partial<PipSnapshot> & { address: string }): PipSnapshot {
+function pip(
+  overrides: Partial<PipSnapshot> & { address: string },
+): PipSnapshot {
   return {
     floating: false,
     monitorId: PRIMARY_ID,
@@ -41,7 +43,11 @@ describe("selectPromotionCandidate", () => {
   test("floating + tiled satellite, no focus → floating wins as candidate, no self-swap", () => {
     const floating = pip({ address: "0xa", floating: true });
     const tiled = pip({ address: "0xb", monitorId: SAT_ID });
-    const result = selectPromotionCandidate([floating, tiled], null, PRIMARY_ID);
+    const result = selectPromotionCandidate(
+      [floating, tiled],
+      null,
+      PRIMARY_ID,
+    );
     expect(result).toEqual({ candidate: floating, demote: null });
   });
 
@@ -70,7 +76,11 @@ describe("selectPromotionCandidate", () => {
   test("tiled-on-primary beats tiled-on-satellite when neither focused nor floating", () => {
     const onPrimary = pip({ address: "0xa" });
     const onSat = pip({ address: "0xb", monitorId: SAT_ID });
-    const result = selectPromotionCandidate([onSat, onPrimary], null, PRIMARY_ID);
+    const result = selectPromotionCandidate(
+      [onSat, onPrimary],
+      null,
+      PRIMARY_ID,
+    );
     expect(result?.candidate).toBe(onPrimary);
     expect(result?.demote).toBeNull();
   });
@@ -78,7 +88,11 @@ describe("selectPromotionCandidate", () => {
   test("floating beats tiled-on-primary when nothing focused", () => {
     const floating = pip({ address: "0xa", floating: true });
     const onPrimary = pip({ address: "0xb" });
-    const result = selectPromotionCandidate([onPrimary, floating], null, PRIMARY_ID);
+    const result = selectPromotionCandidate(
+      [onPrimary, floating],
+      null,
+      PRIMARY_ID,
+    );
     expect(result?.candidate).toBe(floating);
     expect(result?.demote).toBeNull();
   });

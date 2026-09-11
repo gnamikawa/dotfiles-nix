@@ -37,11 +37,11 @@ environment is a named, activatable set of programming tools.
 
 ## Profiles
 
-| Profile | What it provides | Intended setting |
-| --- | --- | --- |
-| `genzo-terminal` | Bash, terminal applications, command-line tools, and the default development environment | A graphical terminal, Linux TTY, SSH session, or headless machine |
-| `genzo-apps` | Everything in `genzo-terminal`, plus graphical applications and preferences that do not own the session | A Linux distribution that already provides its own desktop |
-| `genzo-desktop` | Everything in `genzo-apps`, plus the graphical session itself | A complete Hyprland desktop supplied by this repository |
+| Profile          | What it provides                                                                                        | Intended setting                                                  |
+| ---------------- | ------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------- |
+| `genzo-terminal` | Bash, terminal applications, command-line tools, and the default development environment                | A graphical terminal, Linux TTY, SSH session, or headless machine |
+| `genzo-apps`     | Everything in `genzo-terminal`, plus graphical applications and preferences that do not own the session | A Linux distribution that already provides its own desktop        |
+| `genzo-desktop`  | Everything in `genzo-apps`, plus the graphical session itself                                           | A complete Hyprland desktop supplied by this repository           |
 
 The `apps` and `desktop` boundary is ownership of the graphical session, not
 whether software has a graphical interface. A browser belongs in `apps`; a

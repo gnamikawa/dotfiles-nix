@@ -152,8 +152,8 @@ hl.bind(mod .. " + Alt_R", hl.dsp.exec_cmd("ags request window-menu-close"), { r
 -- can multiplex via the IPC handler in app.tsx. Bare arrows/enter aren't
 -- consumed elsewhere while Alt is held, so this doesn't clash with any
 -- app's native shortcuts.
-hl.bind(mod .. " + UP",     hl.dsp.exec_cmd("ags request window-context-cursor-up"))
-hl.bind(mod .. " + DOWN",   hl.dsp.exec_cmd("ags request window-context-cursor-down"))
+hl.bind(mod .. " + UP", hl.dsp.exec_cmd("ags request window-context-cursor-up"))
+hl.bind(mod .. " + DOWN", hl.dsp.exec_cmd("ags request window-context-cursor-down"))
 hl.bind(mod .. " + RETURN", hl.dsp.exec_cmd("ags request window-context-activate"))
 
 -- ── Window move (vim) ────────────────────────────────────────────────────

@@ -103,9 +103,7 @@ export default function WindowMenu() {
                   }`}
                   spacing={10}
                   $={(self) =>
-                    attachClick(self, () =>
-                      focusWindow(addressOf(client)),
-                    )
+                    attachClick(self, () => focusWindow(addressOf(client)))
                   }
                 >
                   <label class="window-menu-index" label={`${index + 1}`} />

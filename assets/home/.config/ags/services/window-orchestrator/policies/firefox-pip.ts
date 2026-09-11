@@ -130,10 +130,7 @@ function snapshotMonitor(monitor: AstalHyprland.Monitor): MonitorSnapshot {
  * @param excludeAddress - Address to leave out of the count.
  * @param primaryId - The primary monitor id to filter clients against.
  */
-function otherPipsOnPrimary(
-  excludeAddress: string,
-  primaryId: number,
-): number {
+function otherPipsOnPrimary(excludeAddress: string, primaryId: number): number {
   return hyprland.clients.filter(
     (c) =>
       isPipClient(c) &&

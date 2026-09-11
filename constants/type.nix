@@ -41,7 +41,12 @@ let
   };
 
   textClass = family: weight: size: lineHeight: {
-    inherit family size lineHeight weight;
+    inherit
+      family
+      size
+      lineHeight
+      weight
+      ;
   };
 in
 {

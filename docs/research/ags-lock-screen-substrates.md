@@ -29,7 +29,7 @@ GObject-derived `GtkSessionLockInstance`. The installed namespace is
 `Gtk4SessionLock-1.0`, so the expected GJS import is:
 
 ```ts
-import Gtk4SessionLock from "gi://Gtk4SessionLock?version=1.0"
+import Gtk4SessionLock from "gi://Gtk4SessionLock?version=1.0";
 ```
 
 That is the same GI mechanism Gnim uses for GTK4. Gnim supplies JSX and
@@ -79,11 +79,11 @@ reused verbatim.
 
 ## Options
 
-| Option | What we own | Reuse / flexibility | Assessment |
-| --- | --- | --- | --- |
-| **AGS v3 + `Gtk4SessionLock` + Astal Auth** | Application state machine, PAM invocation, unlock policy, failure/recovery behavior, and security tests | GTK4, Gnim, Geist tokens, and greeter components | **Preferred for a prototype.** Technically coherent through GI, with no bespoke Wayland binding. |
-| **Custom GTK3 + `gtk-session-lock` + Astal Auth** | Essentially the same app-level responsibilities | Loses AGS v3/GTK4 component reuse | Viable, but no longer has a compensating advantage. [Upstream](https://github.com/Cu3PO42/gtk-session-lock). |
-| **`gtklock` as substrate** | Theme/config/modules and integration; gtklock owns PAM and locker lifecycle | GTK3 CSS and modules, with less direct Gnim reuse | Lowest amount of security-sensitive code and the conservative fallback. [Upstream](https://github.com/jovanlanik/gtklock). |
+| Option                                            | What we own                                                                                             | Reuse / flexibility                               | Assessment                                                                                                                 |
+| ------------------------------------------------- | ------------------------------------------------------------------------------------------------------- | ------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| **AGS v3 + `Gtk4SessionLock` + Astal Auth**       | Application state machine, PAM invocation, unlock policy, failure/recovery behavior, and security tests | GTK4, Gnim, Geist tokens, and greeter components  | **Preferred for a prototype.** Technically coherent through GI, with no bespoke Wayland binding.                           |
+| **Custom GTK3 + `gtk-session-lock` + Astal Auth** | Essentially the same app-level responsibilities                                                         | Loses AGS v3/GTK4 component reuse                 | Viable, but no longer has a compensating advantage. [Upstream](https://github.com/Cu3PO42/gtk-session-lock).               |
+| **`gtklock` as substrate**                        | Theme/config/modules and integration; gtklock owns PAM and locker lifecycle                             | GTK3 CSS and modules, with less direct Gnim reuse | Lowest amount of security-sensitive code and the conservative fallback. [Upstream](https://github.com/jovanlanik/gtklock). |
 
 ## Nix packaging
 

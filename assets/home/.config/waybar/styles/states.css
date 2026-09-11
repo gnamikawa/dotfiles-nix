@@ -6,9 +6,9 @@
 #mpris:hover,
 #pulseaudio:hover,
 #wireplumber:hover {
-	color: @hover-fg;
-	background-color: @hover-bg;
-  transition: background-color .2s;
+  color: @hover-fg;
+  background-color: @hover-bg;
+  transition: background-color 0.2s;
 }
 
 /* inactive state */
@@ -17,22 +17,22 @@
 #pulseaudio.output.muted,
 #pulseaudio.input.source-muted,
 #wireplumber.muted {
-	color: @hover-fg;
+  color: @hover-fg;
 }
 
 #memory.warning,
 #cpu.warning,
 #battery.warning {
-	color: @warning;
+  color: @warning;
 }
 
 #temperature.critical,
 #memory.critical,
 #cpu.critical,
 #battery.critical {
-	color: @critical;
+  color: @critical;
 }
 
 #battery.charging {
-	color: @charging;
+  color: @charging;
 }

@@ -9,8 +9,8 @@ Method: parallel AFK research agents for **Context** and **Content**
 (read-only investigation of `dotfiles-nix` and `system-nix`); a multi-turn
 HITL grilling session for **Users**, following `/grilling` +
 `/domain-modeling`. Establishes what is true across the three circles
-Rosenfeld / Morville / Arango name in *Information Architecture for the Web
-and Beyond*, 4th ed.; feeds every downstream ticket that must consult user,
+Rosenfeld / Morville / Arango name in _Information Architecture for the Web
+and Beyond_, 4th ed.; feeds every downstream ticket that must consult user,
 environment, or existing state.
 
 Deliberately changes nothing — this note is fact-gathering. Design work
@@ -36,8 +36,8 @@ re-litigated.
   0006 (Geist) and 0007 (Hyprland) and 0008 (AGS v3) are the personality,
   compositor, and shell commitments respectively.
 - **The user is ADHD-I with strong hyperfocus and real time-blindness.**
-  The IA earns its keep by *reducing friction for correct behavior rather
-  than forced rules to enforce correct behavior* (user's wording, pinned as
+  The IA earns its keep by _reducing friction for correct behavior rather
+  than forced rules to enforce correct behavior_ (user's wording, pinned as
   primary design principle).
 - **Anxiety is a first-class design axis alongside the framework's
   response-required rule.** Seven anxiety patterns catalogued
@@ -48,8 +48,8 @@ re-litigated.
   the design rejects mode-gating outright ([§3.9](#39-aspirational-modes--rejected)).
 - **The Cintiq Pro is not a drawing surface — it's a permanent ambient
   dashboard.** Two-surface split: **drawer** (universal, exists on both
-  hosts, holds *actions*) vs **Cintiq bento** (Cintiq-only, holds
-  *dashboards*). See [§3.10](#310-surface-home-decisions-made-during-grilling).
+  hosts, holds _actions_) vs **Cintiq bento** (Cintiq-only, holds
+  _dashboards_). See [§3.10](#310-surface-home-decisions-made-during-grilling).
 - **Outlook is canonical for calendar + todos**; sqlite is canonical for
   everything Outlook can't hold (habits, journal, yeet, capture history).
 - **Real gaps that need their own tickets:** LLM procedural coaching
@@ -114,11 +114,11 @@ lock differ; hypridle and mako are shared.
 
 **GEN-DPC** (`dotfiles-nix/hosts/GEN-DPC/hyprland-outputs.nix:25-46`):
 
-| Output | Description | Mode | Scale | Position |
-|---|---|---|---|---|
-| I-O Data 24" | `I-O Data Device Inc EX-LDGCQ241D GH30106986BW` | 2560×1440@59.95 | 1 | −2560×−360 (left) |
-| Cintiq Pro 22 | `Wacom Tech Cintiq Pro 22 4DQ01C1000153` | 3840×2160@120 | 1 | −1920×1080 (below-left) |
-| Viewteck | `Viewteck Co. Ltd. GFV22CB` | 1920×1080@144.00 | 1 | 0×0 (primary/centre) |
+| Output        | Description                                     | Mode             | Scale | Position                |
+| ------------- | ----------------------------------------------- | ---------------- | ----- | ----------------------- |
+| I-O Data 24"  | `I-O Data Device Inc EX-LDGCQ241D GH30106986BW` | 2560×1440@59.95  | 1     | −2560×−360 (left)       |
+| Cintiq Pro 22 | `Wacom Tech Cintiq Pro 22 4DQ01C1000153`        | 3840×2160@120    | 1     | −1920×1080 (below-left) |
+| Viewteck      | `Viewteck Co. Ltd. GFV22CB`                     | 1920×1080@144.00 | 1     | 0×0 (primary/centre)    |
 
 Workspace pinning at the same file (`hyprland-outputs.nix:49-50`):
 workspace 8 → Cintiq, workspace 9 → I-O Data, both with `default:true`.
@@ -128,9 +128,9 @@ All at `scale = 1`.
 
 **GEN-LPC** (`dotfiles-nix/hosts/GEN-LPC/hyprland-outputs.nix:6-12`):
 
-| Output | Mode | Scale | Position |
-|---|---|---|---|
-| `eDP-1` (built-in) | 2560×1440@59.998 | 1.5 | 0×0 |
+| Output             | Mode             | Scale | Position |
+| ------------------ | ---------------- | ----- | -------- |
+| `eDP-1` (built-in) | 2560×1440@59.998 | 1.5   | 0×0      |
 
 Only host with a non-1 scale. No `primaryMonitor` pinned; the greeter's
 `primaryRule` (`system-nix/modules/greeter.nix:53-54`) is empty here and
@@ -276,6 +276,7 @@ surface for the flakiness recorded in memory
   - `services.power-profiles-daemon.enable = true`
 
   Applied to **both** hosts via `system-nix/modules/default.nix:4`.
+
 - **Power verbs surfaced**:
   - Auth screen (both greeter and lock): only **Hibernate** and **Power
     off** (`dotfiles-nix/assets/home/.config/ags/common/power.ts:11-14`),
@@ -482,11 +483,11 @@ flagged in brackets.
 
 - **0001 Disable flatpak management** — `programs.flatpakManagement`
   stays commented out in favour of a lighter update mechanism; block
-  preserved deliberately. *Not shell/UI.*
+  preserved deliberately. _Not shell/UI._
 - **0002 Structure parity with system-nix** — mirrors modules/, hosts/,
   docs/ layout with system-nix; lists dotfiles-nix-only deviations
   (`assets/`, `constants/`, `modules/sway/` — sway historical, now
-  Hyprland). *Meta.*
+  Hyprland). _Meta._
 - **0003 Standalone profiles with nixGL** — every GUI package must go
   through `config.lib.nixGL.wrap`; two standalone profiles
   (`genzo-graphical`, `genzo-terminal`) kept as insurance. **Touches
@@ -494,7 +495,7 @@ flagged in brackets.
   hyprland, waybar, mako) is wrapped this way.
 - **0004 Lean ambient layer, toolchains in devshell catalog** — no
   compilers in `home.packages`; toolchains under `devshells/`; "default
-  development environment" prepends to PATH. *Not shell/UI.*
+  development environment" prepends to PATH. _Not shell/UI._
 - **0005 Assets by default, Nix only for computed slices** — raw files
   under `assets/` are the default; Nix earns a config only for computed
   slices joined through the app's own include mechanism. **Touches
@@ -526,7 +527,7 @@ or one of the hosts):
 
 - `modules/hyprland.nix:1-41` — Hyprland package (nixGL-wrapped) +
   generated `theme.conf` (border/lock colours, slurp screenshot colours)
-  + empty defaults for `monitors.conf`/`env.conf` that hosts override.
+  - empty defaults for `monitors.conf`/`env.conf` that hosts override.
 - `modules/hypridle.nix:1-22` — `hypridle` binary + user service; policy
   body in `assets/…/hypr/hypridle.conf` (`lock_cmd = genzo-lock`,
   `before_sleep_cmd = genzo-lock`,
@@ -580,24 +581,24 @@ Skipped (present under `modules/` but not shell/UI): `bash.nix`,
 ### 2.5 Hosts
 
 - `hosts/GEN-DPC/default.nix:1-14` — imports its `hyprland-outputs.nix`
-  + `modules/ags.nix` + `modules/ags-session-lock.nix` +
-  `modules/mako.nix`. Comment: waybar already replaced by the AGS bar
-  here; mako stays "until the AGS notification surface replaces it".
-  Three-monitor NVIDIA workstation
-  (`hosts/GEN-DPC/hyprland-outputs.nix:24-78`) as tabled in §1.2.
-  Workspaces 8→Cintiq, 9→I-O Data (defaults pinned). Pen + touch mapped
-  to the Cintiq. Nvidia env vars: `LIBVA_DRIVER_NAME`,
-  `__GLX_VENDOR_LIBRARY_NAME`, `NVD_BACKEND`,
-  `cursor.no_hardware_cursors = true`.
+  - `modules/ags.nix` + `modules/ags-session-lock.nix` +
+    `modules/mako.nix`. Comment: waybar already replaced by the AGS bar
+    here; mako stays "until the AGS notification surface replaces it".
+    Three-monitor NVIDIA workstation
+    (`hosts/GEN-DPC/hyprland-outputs.nix:24-78`) as tabled in §1.2.
+    Workspaces 8→Cintiq, 9→I-O Data (defaults pinned). Pen + touch mapped
+    to the Cintiq. Nvidia env vars: `LIBVA_DRIVER_NAME`,
+    `__GLX_VENDOR_LIBRARY_NAME`, `NVD_BACKEND`,
+    `cursor.no_hardware_cursors = true`.
 - `hosts/GEN-LPC/default.nix:1-17` — imports its `hyprland-outputs.nix`
-  + `waybar.nix` + `modules/ags.nix` (renders nothing yet) +
-  `modules/hyprlock.nix` (legacy lock still) + `modules/mako.nix` +
-  `modules/waybar.nix`. Single-display laptop
-  (`hosts/GEN-LPC/hyprland-outputs.nix:6-20`) as tabled in §1.2.
-  Synaptics touchpad disabled. `hosts/GEN-LPC/waybar.nix:1-21` wires two
-  bars (top + bottom, both `bars/top.jsonc`/`bars/bottom.jsonc` +
-  `modules.jsonc`) pinned to `eDP-1`. Per memory, GEN-LPC is not
-  currently running NixOS.
+  - `waybar.nix` + `modules/ags.nix` (renders nothing yet) +
+    `modules/hyprlock.nix` (legacy lock still) + `modules/mako.nix` +
+    `modules/waybar.nix`. Single-display laptop
+    (`hosts/GEN-LPC/hyprland-outputs.nix:6-20`) as tabled in §1.2.
+    Synaptics touchpad disabled. `hosts/GEN-LPC/waybar.nix:1-21` wires two
+    bars (top + bottom, both `bars/top.jsonc`/`bars/bottom.jsonc` +
+    `modules.jsonc`) pinned to `eDP-1`. Per memory, GEN-LPC is not
+    currently running NixOS.
 
 ### 2.6 Existing keybinds (Hyprland)
 
@@ -720,8 +721,8 @@ during grilling.
 
 - **One continuous session** (wake to sleep, many hours), no discrete
   modes.
-- **Boot → terminal + browser co-launched immediately** *(often, not
-  always — corrected during grilling)*.
+- **Boot → terminal + browser co-launched immediately** _(often, not
+  always — corrected during grilling)_.
 - High multimedia concurrency: up to 4 PIP'd livestreams + chat + coding
   (`nvim` + `claude` / `codex`) + comms + music.
 - Multi-monitor with a **"satellite"** (YouTube-first, promoted to main
@@ -755,21 +756,21 @@ confirmed / declined by the user.
   hours unnoticed. Hyperfocus territories: **coding, singing/recording**
   (both named). User has partial workaround via hyperawareness.
 - **Task-switching cost — confirmed.** Works on one thing at a time.
-  The 4-parallel Claude sessions read *mentally* as one session, not
+  The 4-parallel Claude sessions read _mentally_ as one session, not
   multitasking. Matches the ~65-cell slim-terminal preference.
 - **Working-memory pressure — confirmed as major problem.** Mental
   notes evaporate the moment attention shifts. Mental resources are
   consumed maintaining retention until the note is logged, which
   prevents the current task. Structural, not preferential.
 - **Hyperfocus — confirmed (via time-blindness).** Not just a symptom —
-  a *resource*. Coding and singing/recording are its territories.
+  a _resource_. Coding and singing/recording are its territories.
 - **Rejection-sensitivity / shame aversion — confirmed subconsciously.**
   Not surface-level acute, but active enough that streak-loss counters
   and red-day rendering are net-negative.
 - **Novelty-seeking / boredom aversion — parked.** User could not
   self-answer; not designed around explicitly.
-- **Executive-function fatigue — confirmed strongly.** *"One at a time.
-  As simple as possible. Measurable progress."* Directly opposes
+- **Executive-function fatigue — confirmed strongly.** _"One at a time.
+  As simple as possible. Measurable progress."_ Directly opposes
   put-everything-on-the-bar; validates the framework's Nothing default.
 - **Object permanence for tasks — confirmed with the desk analogy.**
   User's real desk-top: bills in front until resolved. Hates clutter,
@@ -793,42 +794,42 @@ Additional axis surfaced during grilling:
 ### 3.4 Anxiety axes
 
 Anxiety is a first-class design axis alongside the framework's
-response-required rule. The user surfaces it as *"is there something I
-should prioritize now?"* pressure that drives repeat-checking, avoidance,
+response-required rule. The user surfaces it as _"is there something I
+should prioritize now?"_ pressure that drives repeat-checking, avoidance,
 and hyperfocus retention.
 
-- **A. Uncertainty anxiety** — *am I missing something?* Remedy:
-  legible presence. Anxiety-relief surfaces must be *visible even when
-  nothing needs attention*, so the state of nothing-to-do is confirmable,
-  not inferrable. User's phrasing: *"stay on screen as small overlay so
-  I know it's dormant, not bugged."*
+- **A. Uncertainty anxiety** — _am I missing something?_ Remedy:
+  legible presence. Anxiety-relief surfaces must be _visible even when
+  nothing needs attention_, so the state of nothing-to-do is confirmable,
+  not inferrable. User's phrasing: _"stay on screen as small overlay so
+  I know it's dormant, not bugged."_
 - **B. Missed-thing / memory anxiety** — merged into A during grilling.
-  *"Did I forget X?"* is served by capture-everything-forever + trust
+  _"Did I forget X?"_ is served by capture-everything-forever + trust
   the store, not the memory.
 - **C. Confirmation anxiety** — needing to re-check the same fact
   repeatedly (phone calendar many times a day when bad). Remedy:
   easy re-summon + visible confirmation; checking must be zero-cost, no
   shame for repeating.
-- **D. Task-completion anxiety** — *did I actually finish that
-  correctly?* Remedy: artifacts are visible; the thing you did leaves a
+- **D. Task-completion anxiety** — _did I actually finish that
+  correctly?_ Remedy: artifacts are visible; the thing you did leaves a
   findable trace in the sqlite life-database.
-- **E. Interruption anxiety** — *the moment I look away, everything
-  piles up.* Remedy: quiet accretion + on-demand review; nothing during
+- **E. Interruption anxiety** — _the moment I look away, everything
+  piles up._ Remedy: quiet accretion + on-demand review; nothing during
   away-time, everything present-and-manageable on return.
-- **F. Procedural anxiety** — *I don't want to do X because I don't
-  know how to do X.* Confirmed with concrete example: US phone calls
+- **F. Procedural anxiety** — _I don't want to do X because I don't
+  know how to do X._ Confirmed with concrete example: US phone calls
   fine; Japanese phone calls / emails avoided because cadence and
   vocabulary unfamiliar. Causes avoidance, not just discomfort. Current
   workaround: ad-hoc web-based LLM chat. **Design answer is aspirational
   and currently blocked** by offline-first + local-model quality
   constraints (see §3.5 and §3.11).
-- **G. Loss anxiety** — *did the system lose my work / is it bugged?*
+- **G. Loss anxiety** — _did the system lose my work / is it bugged?_
   Remedy: artifacts have durable, findable homes; system health-check
   is legible (dormant, not bugged) — same primitive as A.
 
-Anxiety-relief pattern from the user's own life: *pull-when-anxious →
+Anxiety-relief pattern from the user's own life: _pull-when-anxious →
 push-gently → glance-recognize-dismiss, and the dismiss is
-confidence-building, not friction.* The phone calendar embodies this.
+confidence-building, not friction._ The phone calendar embodies this.
 Any anxiety-relief surface on the shell must preserve this shape — not
 degrade the dismiss into an obligation.
 
@@ -839,21 +840,21 @@ questions. Each is load-bearing on downstream tickets.
 
 1. **Two orthogonal lenses, applied in this order:**
    1. **Response-required** (Saleh / EEMUA) governs **shell surfaces** —
-      chrome, notifications, ambient, interruption. *Subtractive.*
+      chrome, notifications, ambient, interruption. _Subtractive._
    2. **Low-friction / low-shame** governs **content flows** — habits,
-      journal, drills, quick note. *Additive to reachability;
-      subtractive to guilt-instrumentation.*
-   User's own phrasing of (2): *"reduce friction for correct behavior
-   rather than forced rules to enforce correct behavior."*
+      journal, drills, quick note. _Additive to reachability;
+      subtractive to guilt-instrumentation._
+      User's own phrasing of (2): _"reduce friction for correct behavior
+      rather than forced rules to enforce correct behavior."_
 
 2. **Silent measurement / sqlite life-database.** Capture every artifact
-   + event. Surface **nothing accountability-shaped** to the user. No
-   streaks, no red, no counts on screen. User-initiated retrieval only.
-   Sqlite as long-term store.
+   - event. Surface **nothing accountability-shaped** to the user. No
+     streaks, no red, no counts on screen. User-initiated retrieval only.
+     Sqlite as long-term store.
 
 3. **Invitation without enforcement (Design 2+3 hybrid, confirmed).**
    Zero-measurement surfaces + ambient presence. The presence of a
-   surface is a *summoning affordance*, not an accountability signal.
+   surface is a _summoning affordance_, not an accountability signal.
    No completion checkbox anywhere; Goodhart's law dissolves because
    the question isn't asked.
 
@@ -861,7 +862,7 @@ questions. Each is load-bearing on downstream tickets.
    models the interaction (kitchen twist-timer for timer,
    desk-with-bills for object permanence, iPad Action Center pull-drawer
    for cross-host action panel), prefer that model. Not skeuomorphism
-   as decoration — skeuomorphism as *interaction metaphor*.
+   as decoration — skeuomorphism as _interaction metaphor_.
 
 5. **Single source of truth per signal.** Never render the same
    underlying state in two surfaces. Drift → confusion. Explicitly
@@ -877,14 +878,14 @@ questions. Each is load-bearing on downstream tickets.
    consistently comes back to, so the IA anchors real-life habits too.
 
 7. **Legible presence (dormant vs bugged).** Anxiety-relief surfaces
-   must show *"nothing to worry about right now"* as an active,
+   must show _"nothing to worry about right now"_ as an active,
    confirmable state — not an absence. Any surface that could be dormant
-   *or* broken must make the distinction legible.
+   _or_ broken must make the distinction legible.
 
 8. **Task-inertia handling (per-event opt-in, not per-channel).** The
    IA does not attempt to interrupt hyperfocus by default. When the
    user knows a specific obligation is at risk (interview, hard
-   deadline), they *pre-authorize* the shell to escalate for that one.
+   deadline), they _pre-authorize_ the shell to escalate for that one.
    Rare by design; power comes from rarity. See flow #77.
 
 9. **Procedural anxiety scaffolding (unsolved gap).** The IA should
@@ -907,7 +908,7 @@ questions. Each is load-bearing on downstream tickets.
     procedural coaching) and degrades gracefully when absent.
 
 13. **No auto-switch on device change (audio).** Bluetooth speakers
-    connecting should *not* silently become the default sink. Explicit
+    connecting should _not_ silently become the default sink. Explicit
     user selection only, via a legible quick-switch UI.
 
 14. **Outlook as canonical for calendar + todos.** Both desktop and
@@ -929,10 +930,10 @@ can reference specific flows.
 **All-day focus arcs** (occupy primary indefinitely; hyperfocus-eligible)
 
 1. **Coding session start** — terminal-heavy, browser co-launch
-   (often); primary; Monocle-planned. *Long-focus · Nothing.*
+   (often); primary; Monocle-planned. _Long-focus · Nothing._
 2. **Mid-session context switch** — mental re-seat; expensive.
 3. **Session end** — voluntary wind-down.
-4. **Gaming session start** — Steam full-screen. *Long-focus.*
+4. **Gaming session start** — Steam full-screen. _Long-focus._
 5. **Meeting / call arc** — app chrome; auto-muzzle safety class fires.
 6. **Reading long-form** — PDF, Obsidian, textbook (folds book study).
 7. **Pure consumption** (watching a stream, not promoted) — player
@@ -948,7 +949,7 @@ can reference specific flows.
 **Session-boundary events** (system-driven or user-driven state
 transitions)
 
-13. **Boot → co-launch** *(often, not always)*.
+13. **Boot → co-launch** _(often, not always)_.
 14. **Unlock-after-lock** — auth → resume.
 15. **Return-from-long-AFK** — auth + orient; distinct from short-cycle
     unlock.
@@ -970,8 +971,8 @@ transitions)
 23. **Password lookup** (keepassxc summon) — overlay near active field.
 24. **IME switch** (fcitx) — inline; `Mod+Space`.
 25. **Emoji picker** — flow-level exists independent of fulfillment
-    (fcitx handles today). *The flow is user-intent; the daemon is
-    implementation.*
+    (fcitx handles today). _The flow is user-intent; the daemon is
+    implementation._
 26. **Screenshot → clipboard** — region + capture; result to clipboard.
 27. **Per-window audio route** — context menu / anchored overlay on
     the target window.
@@ -1058,8 +1059,8 @@ one-tap acknowledgment (put-away gesture, not scorekeeping).
 59. **Compose message** (Discord / Outlook DM) — deliberate outbound.
 60. **Initiate call** (voice / video) — outgoing.
 
-*(Voice memo and screen-recording-for-send deferred; not first-class
-yet.)*
+_(Voice memo and screen-recording-for-send deferred; not first-class
+yet.)_
 
 **Media & consumption**
 
@@ -1078,8 +1079,8 @@ Split, not lumped:
 65. **YouTube → mp3 → mpd** (with album art). Background download +
     notify; automation.
 
-*(Adjacent — bookmark video, save article for later, save image — noted
-but not confirmed as first-class this pass.)*
+_(Adjacent — bookmark video, save article for later, save image — noted
+but not confirmed as first-class this pass.)_
 
 **System controls / environment** (Cintiq bento / drawer)
 
@@ -1099,15 +1100,15 @@ but not confirmed as first-class this pass.)*
 75. **Gate**.
 76. **Limiters**.
 
-*Fulfillment currently gapped — no native Linux Reason 10 equivalent.
-See §3.11.*
+_Fulfillment currently gapped — no native Linux Reason 10 equivalent.
+See §3.11._
 
 **Network transparency** (privacy / leakage awareness)
 
 77. **Ambient network activity indicator** — tiny live readout,
     Cintiq monitoring cluster.
 78. **Summoned network detail** — full panel, on-demand.
-79. **Alert on unexpected outbound** — reclassified as *emergency* not
+79. **Alert on unexpected outbound** — reclassified as _emergency_ not
     ambient (fires the reserved edge alongside #56).
 
 **Sysadmin / iteration**
@@ -1148,12 +1149,12 @@ See §3.11.*
 98. **App crashed / hung** — notification + kill flow.
 99. **Compositor / shell died** — TTY recovery runbook
     (`docs/maintenance.md`).
-100. **Network down / degraded** — see F1.
-101. **Disk near full** — warning + summoned prune.
-102. **Battery critical** — ambient escalating to emergency.
-103. **Build / CI failed** — notification → triage.
-104. **External interruption** (phone, doorbell, IRL) — not
-     shell-driven; shell degrades gracefully.
+100.  **Network down / degraded** — see F1.
+101.  **Disk near full** — warning + summoned prune.
+102.  **Battery critical** — ambient escalating to emergency.
+103.  **Build / CI failed** — notification → triage.
+104.  **External interruption** (phone, doorbell, IRL) — not
+      shell-driven; shell degrades gracefully.
 
 **Cintiq mode**
 
@@ -1170,8 +1171,8 @@ See §3.11.*
 **Notification channel — three sub-channels + triage**
 
 109. **Regular notification** (build done, download complete) — toast.
-110. **Human presence ping** (Discord, Outlook DM) — *sound only, no
-     visual*. Content lives in the originating app.
+110. **Human presence ping** (Discord, Outlook DM) — _sound only, no
+     visual_. Content lives in the originating app.
 111. **Emergency alarm** (compositor died, battery hard threshold,
      disk-hard-fail, unexpected outbound) — reserved edge treatment.
 112. **Notification triage** — the meta-flow when one lands.
@@ -1197,31 +1198,31 @@ Rough characterisation per group. Every group aggregates flows with
 similar shape — downstream per-flow tickets may refine. See §3.6 for
 individual flow numbers.
 
-| Group | Where | When | Frequency | Duration |
-|---|---|---|---|---|
-| All-day focus arcs (#1–#12) | primary; occasionally 4-way terminal split when using Claude (not default; default plan is Monocle + alt-tab) | daytime + evening; hyperfocus territories = coding, singing/recording | daily (coding, browsing); sub-daily (others) | 2–8+ hours |
-| Session-boundary events (#13–#18) | primary (full-screen event surface) | daily rhythms (boot, session-end); ad-hoc (lock/unlock) | 1–several per day | seconds to <1 min |
-| Break / social (#19–#21) | varies (no shell for #19); primary for #20/#21 | punctuates focus arcs | 3–10 per day | minutes |
-| Mid-session micro-flows (#22–#28) | primary (summoned overlays) | mid-session | many per day (10–50) | seconds |
-| Quick capture (#29–#34) | primary (summoned) | throughout day, ADHD-driven | many per day (5–20) | seconds to 2 min |
-| Quick retrieval (#35–#41) | primary (summoned) or drawer (Cintiq) | anxiety-driven or plan-driven | several per day | seconds to <1 min |
-| Habits — desk-clutter (#42–#52) | Cintiq bento primarily; drawer peek on laptop | daily rhythm | daily reset | variable — the *doing* varies, the tile is instant |
-| Time / calendar (#53–#57) | primary overlay (#54); drawer (#53, #55); reserved edge for #56 | day-long | passive (#54 ambient); event-driven (#55–#56) | seconds |
-| Day-guide surface (#58) | primary (both stack and peek) | during work | many peeks/day | seconds to minutes |
-| Comms out (#59–#60) | in-app on primary | day | daily | seconds (msg) to 1 h (call) |
-| Audio consumption (#61–#62) | Cintiq controls; audio ambient | most of day background; foreground for #62 | daily | hours |
-| Video consumption (#63–#64) | multi-monitor (satellite + primary) | evening + background daytime | daily | minutes to hours |
-| Library-building (#65) | background (system) + notify | ad-hoc | few per week | background |
-| System controls (#66–#71) | Cintiq bento + drawer (both hosts) | as needed | 5–20 per day | seconds |
-| Audio processing (#72–#76) | full-screen DAW-like (currently gapped) | recording sessions only | few per week when active | 30 min–hours |
-| Network transparency (#77–#79) | Cintiq monitoring cluster (#77–#78); reserved edge (#79) | passive #77–#78; event-driven #79 | passive always; event rare | seconds |
-| Sysadmin / iteration (#80–#91) | primary terminal (most); GUI aspiration for #91 | weekly-ish (varies) | weekly-ish | minutes to 30 min |
-| Rare / one-off (#92–#93) | primary terminal + external machine | rare | <monthly | hours |
-| Cross-boot / cross-device (#94–#97) | multi-device | Windows: task-driven; files: ad-hoc; handoff: parked | Windows: few/week; files: several/week | Windows: hours; files: seconds |
-| Exception / event-driven (#98–#104) | wherever they fire (primary usually) | unpredictable | rare-to-often (network flaky) | seconds to minutes |
-| Cintiq mode (#105) | GEN-DPC only | rare | rare | mode-switch instant |
-| Utilities (#106–#108) | Cintiq bento; drawer peek on laptop | ad-hoc | few per day | seconds |
-| Notification channel (#109–#112) | notification surface (currently mako pending AGS); reserved edge for #111 | event-driven | many per day (#109/#110); rare (#111) | seconds |
+| Group                               | Where                                                                                                         | When                                                                  | Frequency                                     | Duration                                           |
+| ----------------------------------- | ------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- | --------------------------------------------- | -------------------------------------------------- |
+| All-day focus arcs (#1–#12)         | primary; occasionally 4-way terminal split when using Claude (not default; default plan is Monocle + alt-tab) | daytime + evening; hyperfocus territories = coding, singing/recording | daily (coding, browsing); sub-daily (others)  | 2–8+ hours                                         |
+| Session-boundary events (#13–#18)   | primary (full-screen event surface)                                                                           | daily rhythms (boot, session-end); ad-hoc (lock/unlock)               | 1–several per day                             | seconds to <1 min                                  |
+| Break / social (#19–#21)            | varies (no shell for #19); primary for #20/#21                                                                | punctuates focus arcs                                                 | 3–10 per day                                  | minutes                                            |
+| Mid-session micro-flows (#22–#28)   | primary (summoned overlays)                                                                                   | mid-session                                                           | many per day (10–50)                          | seconds                                            |
+| Quick capture (#29–#34)             | primary (summoned)                                                                                            | throughout day, ADHD-driven                                           | many per day (5–20)                           | seconds to 2 min                                   |
+| Quick retrieval (#35–#41)           | primary (summoned) or drawer (Cintiq)                                                                         | anxiety-driven or plan-driven                                         | several per day                               | seconds to <1 min                                  |
+| Habits — desk-clutter (#42–#52)     | Cintiq bento primarily; drawer peek on laptop                                                                 | daily rhythm                                                          | daily reset                                   | variable — the _doing_ varies, the tile is instant |
+| Time / calendar (#53–#57)           | primary overlay (#54); drawer (#53, #55); reserved edge for #56                                               | day-long                                                              | passive (#54 ambient); event-driven (#55–#56) | seconds                                            |
+| Day-guide surface (#58)             | primary (both stack and peek)                                                                                 | during work                                                           | many peeks/day                                | seconds to minutes                                 |
+| Comms out (#59–#60)                 | in-app on primary                                                                                             | day                                                                   | daily                                         | seconds (msg) to 1 h (call)                        |
+| Audio consumption (#61–#62)         | Cintiq controls; audio ambient                                                                                | most of day background; foreground for #62                            | daily                                         | hours                                              |
+| Video consumption (#63–#64)         | multi-monitor (satellite + primary)                                                                           | evening + background daytime                                          | daily                                         | minutes to hours                                   |
+| Library-building (#65)              | background (system) + notify                                                                                  | ad-hoc                                                                | few per week                                  | background                                         |
+| System controls (#66–#71)           | Cintiq bento + drawer (both hosts)                                                                            | as needed                                                             | 5–20 per day                                  | seconds                                            |
+| Audio processing (#72–#76)          | full-screen DAW-like (currently gapped)                                                                       | recording sessions only                                               | few per week when active                      | 30 min–hours                                       |
+| Network transparency (#77–#79)      | Cintiq monitoring cluster (#77–#78); reserved edge (#79)                                                      | passive #77–#78; event-driven #79                                     | passive always; event rare                    | seconds                                            |
+| Sysadmin / iteration (#80–#91)      | primary terminal (most); GUI aspiration for #91                                                               | weekly-ish (varies)                                                   | weekly-ish                                    | minutes to 30 min                                  |
+| Rare / one-off (#92–#93)            | primary terminal + external machine                                                                           | rare                                                                  | <monthly                                      | hours                                              |
+| Cross-boot / cross-device (#94–#97) | multi-device                                                                                                  | Windows: task-driven; files: ad-hoc; handoff: parked                  | Windows: few/week; files: several/week        | Windows: hours; files: seconds                     |
+| Exception / event-driven (#98–#104) | wherever they fire (primary usually)                                                                          | unpredictable                                                         | rare-to-often (network flaky)                 | seconds to minutes                                 |
+| Cintiq mode (#105)                  | GEN-DPC only                                                                                                  | rare                                                                  | rare                                          | mode-switch instant                                |
+| Utilities (#106–#108)               | Cintiq bento; drawer peek on laptop                                                                           | ad-hoc                                                                | few per day                                   | seconds                                            |
+| Notification channel (#109–#112)    | notification surface (currently mako pending AGS); reserved edge for #111                                     | event-driven                                                          | many per day (#109/#110); rare (#111)         | seconds                                            |
 
 ### 3.8 Friction inventory expansion
 
@@ -1229,34 +1230,34 @@ Each of the map's seven original frictions plus nine surfaced during
 grilling, with current end-to-end experience.
 
 **F1. Wifi state discovery.**
-*Actual current flow:* connection degrades →
+_Actual current flow:_ connection degrades →
 turn wifi off (waybar GUI) → turn iPhone hotspot off → turn iPhone
 hotspot on → turn wifi back on → wait to reconnect. If perpetually
 shoddy: fall back to wired USB tether. Debugging is manual terminal
-(`ping`, `ifconfig`). *What breaks:* debugging is manual and terminal-
+(`ping`, `ifconfig`). _What breaks:_ debugging is manual and terminal-
 gated; a 2-click procedure for a very common problem; state discovery is
 late (already stuck before user checks).
 
 **F2. Bluetooth speaker auto-takeover.**
-*Actual current flow:* Bluetooth
+_Actual current flow:_ Bluetooth
 speaker usually auto-connects near-instantly at boot; default sink often
 silently becomes the speaker. To change: `pavucontrol` or waybar toggle.
-*What breaks:* no surface tells you the current active sink; auto-switch
-is undesirable — *design intent for the resolution: no auto-switch on
-connect, explicit user selection only via a legible quick-switch UI.*
+_What breaks:_ no surface tells you the current active sink; auto-switch
+is undesirable — _design intent for the resolution: no auto-switch on
+connect, explicit user selection only via a legible quick-switch UI._
 
 **F3. Audio device switching + volume.**
 `XF86Audio*` keys change volume
 on current default sink with **no OSD feedback**. Sink change requires
 `pavucontrol`; per-window routing requires `pavucontrol → Playback tab`.
-*What breaks:* no OSD, no first-class per-window control, sink switch
+_What breaks:_ no OSD, no first-class per-window control, sink switch
 buried three clicks deep.
 
 **F4. Workspace navigation ("fumble to find my terminal").**
 `$mod + 1..9`
 jumps by number (requires remembering which workspace holds what);
 `$mod + H/J/K/L` moves focus in current workspace; `$win + T` launches a
-*new* kitty rather than finding the existing one. *What breaks:*
+_new_ kitty rather than finding the existing one. _What breaks:_
 finding-existing-window is a hunt; mental model is location-first
 (workspace number), not identity-first (which app).
 
@@ -1264,14 +1265,14 @@ finding-existing-window is a hunt; mental model is location-first
 `dmenu_run` enumerates PATH executables. Steam
 games are launched via `steam://run/appid` handlers, not PATH — they
 don't appear in dmenu. Projects under `~/repositories` also not
-launchable directly; user navigates manually. *What breaks:* launcher
+launchable directly; user navigates manually. _What breaks:_ launcher
 scope is limited to PATH; games and projects are second-class.
 
 **F6. Time awareness.**
 No clock in AGS bar (workspaces only). Clock on
 auth screen only visible when locked / logging in. GEN-LPC waybar has
 clock. During hyperfocus, even when clock is visible, user doesn't look.
-Meetings/interviews missed absent phone pings. *What breaks:* clock is
+Meetings/interviews missed absent phone pings. _What breaks:_ clock is
 either absent or ignored during focus — the ambient countdown flow (#54)
 answers this.
 
@@ -1279,66 +1280,66 @@ answers this.
 Discord notification →
 mako toast + sound → glance-decide-dismiss. Framework's
 human-presence-ping shape (sound-only would be even more correct).
-*What breaks:* one gap — **Discord is not on autostart**, so pings
+_What breaks:_ one gap — **Discord is not on autostart**, so pings
 before Discord launches are missed. Autostart consideration for
 downstream.
 
 **F8. Reason 10 has no Linux equivalent.**
 Audio production requires
-reboot to Windows. Wine tried, insufficient. *What breaks:* cross-boot
+reboot to Windows. Wine tried, insufficient. _What breaks:_ cross-boot
 friction; session state doesn't transfer. Blocked by third-party (not
 IA).
 
 **F9. Clip Studio Paint has no Linux equivalent.**
 Digital art (higher-fidelity
-than Krita) requires reboot to Windows. *What breaks:* same cross-boot
+than Krita) requires reboot to Windows. _What breaks:_ same cross-boot
 friction as F8; Krita is a partial substitute.
 
 **F10. Phone reminders too much friction to set.**
 iPhone's reminder-set
 requires multiple taps + Siri unreliable for the user. Reminders are
-avoided → forgotten. *What breaks:* the tool that should reduce anxiety
+avoided → forgotten. _What breaks:_ the tool that should reduce anxiety
 adds friction; user avoids it. The desktop remind-me-at-X flow (#55)
 answers this.
 
 **F11. Building habits.**
 No system for daily-repeating tasks; user relies
 on memory + willpower; things user wants to build (journal, kanji,
-dishes, laundry) drift because there's no visible reminder. *What
-breaks:* memory + willpower are the wrong tools per ADHD-I. The
+dishes, laundry) drift because there's no visible reminder. _What
+breaks:_ memory + willpower are the wrong tools per ADHD-I. The
 desk-clutter reinforcement design (§3.5, axis 6) answers this. **User's
 strong "YES" on this friction — highest personal priority.**
 
 **F12. Procedural anxiety on unfamiliar tasks.**
 User avoids Japanese
 phone calls / emails because cadence/vocabulary is unfamiliar. No tool
-coaches through them. *Current workaround:* ad-hoc web-based LLM chat.
-*What breaks:* offline-first constraint blocks a native solution;
+coaches through them. _Current workaround:_ ad-hoc web-based LLM chat.
+_What breaks:_ offline-first constraint blocks a native solution;
 playbooks too rigid. Pinning as unsolved gap (§3.11).
 
 **F13. "Should I be doing something?" anxiety.**
 No surface tells user
 if there's something to prioritize now. User either checks phone /
 calendar / todos manually (many times/day when bad) or doesn't check
-and worries. *What breaks:* legible-presence gap; the day-guide anxiety
+and worries. _What breaks:_ legible-presence gap; the day-guide anxiety
 pill answers this (§3.10).
 
 **F14. Working-memory pressure on unlogged thoughts.**
 A thought arrives
 mid-task. Not logging → lost. Logging costs attention from current task.
 User keeps it in working memory instead, blocking the current task.
-*What breaks:* capture friction directly opposes focus. Yeet-thoughts
+_What breaks:_ capture friction directly opposes focus. Yeet-thoughts
 (#30) + quick-note (#29) answer this.
 
 **F15. Time-blindness during hyperfocus.**
 Hours pass unnoticed;
 meetings/interviews missed. Current mitigation: hyperawareness + phone
-pings. *What breaks:* human attention system doesn't produce a
+pings. _What breaks:_ human attention system doesn't produce a
 time-check prompt when hyperfocused. Ambient countdown (#54) answers.
 
 **F16. Task-inertia against urgent-pivot.**
 User knows they should stop
-for X (interview prep). Keeps coding. Margin evaporates. *What breaks:*
+for X (interview prep). Keeps coding. Margin evaporates. _What breaks:_
 self-trust fails under hyperfocus; per-event hyperfocus-penetration
 opt-in (#56) answers.
 
@@ -1354,12 +1355,12 @@ sender-side interruption discipline suffices; introducing modes would
 gate behavior on a state the user does not naturally maintain, and would
 trigger the shame axis (F) when the user forgets to change mode.
 
-Two exceptions to "no modes" that survived grilling and are *not* modes:
+Two exceptions to "no modes" that survived grilling and are _not_ modes:
 
 - **Cintiq-as-regular-screen** (#105) is a mode toggle, but it is a
   hardware / surface toggle, not an attention-discipline mode.
-- **Per-event hyperfocus-penetration opt-in** (#56) is per-*event*, not
-  per-*mode* — the user pre-authorises the shell for one specific
+- **Per-event hyperfocus-penetration opt-in** (#56) is per-_event_, not
+  per-_mode_ — the user pre-authorises the shell for one specific
   obligation, not for a period.
 
 ### 3.10 Surface home decisions made during grilling
@@ -1370,7 +1371,7 @@ surface inventory ticket.
 **Two-surface split for ambient state + universal actions:**
 
 - **Drawer (universal, exists on both hosts, identical shape).**
-  Contains *actions* — the things you reach for on any host, so muscle
+  Contains _actions_ — the things you reach for on any host, so muscle
   memory transfers. Cross-host analog: iPad Action Center → iPhone
   Control Center → Mac control drawer. Pull-up gesture on primary; also
   reachable via keybind for the keyboard-first case.
@@ -1391,7 +1392,7 @@ surface inventory ticket.
   - Habit peek (laptop-side view of the desk-clutter surface)
 
 - **Cintiq bento (GEN-DPC only, ambient dashboards).** Contains
-  *dashboards* — information you glance at. Cintiq is bonus, not
+  _dashboards_ — information you glance at. Cintiq is bonus, not
   required for function; laptop peek dashboard replicates equivalents
   via the drawer.
 
@@ -1428,7 +1429,7 @@ surface inventory ticket.
   primary. Passive next-todo card visible; peek-timeline summoned when
   density is wanted.
 - **Notification channel** (#109–#112) as it evolves post-mako. Toast /
-  sound / emergency lives on primary. Reserved edge is *cross-modal*
+  sound / emergency lives on primary. Reserved edge is _cross-modal_
   (Cintiq + desktop speakers) but that is the interruption-defense
   design, not a shared render surface.
 
@@ -1447,14 +1448,14 @@ surface inventory ticket.
   Krita, DaVinci, drills, textbook study, flashcards perform, compose
   message, initiate call — all live on primary at full-screen or in
   their own chrome. Not the IA's job to design their internal
-  interaction; the IA's job is to *not interfere* while they run.
+  interaction; the IA's job is to _not interfere_ while they run.
 
 **In-app placements:**
 
 - **Per-window audio route** (#27) — context menu / anchored overlay on
   the window itself. Not a shell surface.
-- **Emoji picker** (#25) — fcitx inline. The *flow* is IA-visible; the
-  *fulfillment* is in-app.
+- **Emoji picker** (#25) — fcitx inline. The _flow_ is IA-visible; the
+  _fulfillment_ is in-app.
 
 ### 3.11 Unsolved gaps for future tickets
 
@@ -1484,7 +1485,7 @@ Each should become its own ticket or feed a broader open one.
   sysadmin flows (rebuild status, generation list, service state).
   Downstream ticket, not designed here.
 
-- **Sync architecture design (Outlook target chosen — but *how*).**
+- **Sync architecture design (Outlook target chosen — but _how_).**
   Q16 settled Outlook as canonical target. The bridge mechanism
   (CalDAV, EAS, Graph API) and conflict semantics are downstream.
 
@@ -1493,7 +1494,7 @@ Each should become its own ticket or feed a broader open one.
   archive an old habit, edit a mis-clear, define an artifact for a new
   digital habit) not designed here.
 
-- **Cintiq-mode-switch UX.** #105 exists as a flow but the *transition*
+- **Cintiq-mode-switch UX.** #105 exists as a flow but the _transition_
   UX (are widgets frozen? does state persist? how do you get back?) is
   not designed.
 
@@ -1514,7 +1515,7 @@ it should consume from this doc:
 - **§3.6** — the ~85 flows are the substrate. Each flow needs a
   surface (or an in-app placement) named.
 - **§3.10** — the surface homes are pre-committed. The surface
-  inventory ticket enumerates the *specific surfaces* implied by these
+  inventory ticket enumerates the _specific surfaces_ implied by these
   homes, not the homes themselves.
 - **§3.5 axes** govern per-surface design (silent measurement,
   invitation without enforcement, real-world equivalents, single
@@ -1532,7 +1533,7 @@ Explicit **reforming targets** derived from §2 audited against §3:
   (all §3.10 primary-only). Everything else stays in the drawer or on
   Cintiq.
 - The **auth screen** (§2.1) already carries a status rail; its role
-  doesn't change but the rail's *content* may be audited against the
+  doesn't change but the rail's _content_ may be audited against the
   drawer's canonical shape (single-source rule).
 - **mako** — will be replaced by an AGS notification surface (#109);
   the surface inventory ticket must name it and its three sub-channels.

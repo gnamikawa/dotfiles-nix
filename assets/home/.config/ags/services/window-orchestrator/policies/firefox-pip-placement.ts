@@ -233,7 +233,7 @@ export function selectPromotionCandidate(
   const floating = pips.find((p) => p.floating) ?? null;
   const focused =
     focusedAddress != null
-      ? pips.find((p) => p.address === focusedAddress) ?? null
+      ? (pips.find((p) => p.address === focusedAddress) ?? null)
       : null;
   const tiledOnPrimary = pips.find(
     (p) => !p.floating && p.monitorId === primaryId,

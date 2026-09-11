@@ -129,11 +129,7 @@ export default function Runner() {
   });
 
   return (
-    <box
-      class="runner-wrap"
-      orientation={Gtk.Orientation.VERTICAL}
-      spacing={0}
-    >
+    <box class="runner-wrap" orientation={Gtk.Orientation.VERTICAL} spacing={0}>
       <entry
         class="runner-input"
         hexpand

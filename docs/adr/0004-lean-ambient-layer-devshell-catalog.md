@@ -14,7 +14,7 @@ Why this shape:
   daemon binaries whose services were never enabled, and `.dev` headers
   that no global search path ever saw. `gcc foo.c -lssl` never worked.
   As mkShell `buildInputs`, the same headers work.
-- The Debian *feel* — tools at your fingertips — is kept, but delivered by
+- The Debian _feel_ — tools at your fingertips — is kept, but delivered by
   the layer that travels: `home.packages` follows the user to non-NixOS
   machines (standalone mode), and devShells run identically anywhere Nix
   runs. `environment.systemPackages` travels nowhere.

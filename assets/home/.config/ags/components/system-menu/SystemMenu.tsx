@@ -54,16 +54,8 @@ export default function SystemMenu() {
         </box>
         {VERBS.map((verb) => (
           <box class="system-menu-row" spacing={12}>
-            <box
-              orientation={Gtk.Orientation.VERTICAL}
-              hexpand
-              spacing={0}
-            >
-              <label
-                class="system-menu-label"
-                label={verb.label}
-                xalign={0}
-              />
+            <box orientation={Gtk.Orientation.VERTICAL} hexpand spacing={0}>
+              <label class="system-menu-label" label={verb.label} xalign={0} />
               <label
                 class="system-menu-desc"
                 label={verb.description}

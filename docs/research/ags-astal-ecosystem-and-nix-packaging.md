@@ -29,8 +29,8 @@ as investigated.
   home-manager module.
 - **nixGL**: the shell is a GJS + GTK4 app, GPU-rendered by default, so the
   final derivation must go through `config.lib.nixGL.wrap` like every other
-  GUI package (ADR 0003). Wrap the *bundled output derivation*; the upstream
-  home-manager module *accepts* a wrapped package but then silently drops
+  GUI package (ADR 0003). Wrap the _bundled output derivation_; the upstream
+  home-manager module _accepts_ a wrapped package but then silently drops
   its own `extraPackages` and ldflag overrides (see §4, corrected per
   [#37](https://github.com/gnamikawa/dotfiles-nix/issues/37)), so prefer
   bundling + a self-managed unit, wrapping last.
@@ -116,16 +116,16 @@ Library list from
 (<https://github.com/Aylur/astal/tree/main/lib>). References per library at
 `https://docs.astal.dev/<name>`.
 
-| Surface | Library | Notes |
-| --- | --- | --- |
-| Hyprland workspaces | `hyprland` | "Library and cli tool for Hyprland IPC socket" |
-| PipeWire/PulseAudio | `wireplumber` | "A library for audio control using wireplumber" — controls PipeWire via its session manager; there is no separate PulseAudio library |
-| Network | `network` | "NetworkManager wrapper library" (requires NetworkManager as the backend) |
-| Bluetooth | `bluetooth` | "Library to control bluez over dbus" |
-| Backlight | `brightness` | "Library and CLI tool to read and control device brightness"; sysfs backlight + LED devices, guessed `screen`/`keyboard` singletons, normalized 0–1 `brightness`; default backend writes via systemd-logind, a udev-rules backend is a meson option (`docs/guide/libraries/brightness.md`) |
-| Tray | `tray` | Implements the freedesktop StatusNotifierItem protocol (`docs/guide/libraries/tray.md`) |
-| Notifications (daemon) | `notifd` | Freedesktop notification-spec daemon as a library; first instance becomes the daemon, later instances become clients, so bar and popup processes can share it (`docs/guide/libraries/notifd.md`) |
-| App launching | `apps` | "Library and cli tool for querying applications" with `.desktop` files; `fuzzy_query` + launch (`docs/guide/libraries/apps.md`) |
+| Surface                | Library       | Notes                                                                                                                                                                                                                                                                                      |
+| ---------------------- | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Hyprland workspaces    | `hyprland`    | "Library and cli tool for Hyprland IPC socket"                                                                                                                                                                                                                                             |
+| PipeWire/PulseAudio    | `wireplumber` | "A library for audio control using wireplumber" — controls PipeWire via its session manager; there is no separate PulseAudio library                                                                                                                                                       |
+| Network                | `network`     | "NetworkManager wrapper library" (requires NetworkManager as the backend)                                                                                                                                                                                                                  |
+| Bluetooth              | `bluetooth`   | "Library to control bluez over dbus"                                                                                                                                                                                                                                                       |
+| Backlight              | `brightness`  | "Library and CLI tool to read and control device brightness"; sysfs backlight + LED devices, guessed `screen`/`keyboard` singletons, normalized 0–1 `brightness`; default backend writes via systemd-logind, a udev-rules backend is a meson option (`docs/guide/libraries/brightness.md`) |
+| Tray                   | `tray`        | Implements the freedesktop StatusNotifierItem protocol (`docs/guide/libraries/tray.md`)                                                                                                                                                                                                    |
+| Notifications (daemon) | `notifd`      | Freedesktop notification-spec daemon as a library; first instance becomes the daemon, later instances become clients, so bar and popup processes can share it (`docs/guide/libraries/notifd.md`)                                                                                           |
+| App launching          | `apps`        | "Library and cli tool for querying applications" with `.desktop` files; `fuzzy_query` + launch (`docs/guide/libraries/apps.md`)                                                                                                                                                            |
 
 Also available if wanted later: `battery` (upower), `mpris` (media
 players), `powerprofiles`, `cava` (audio visualizer), `greet` (greetd),
@@ -205,8 +205,8 @@ The interaction is unusually Nix-friendly:
   is upstream's problem, not the config repo's.
 - Canonical project derivation (from `docs/guide/nix.md`):
   `stdenv.mkDerivation` with `nativeBuildInputs = [ wrapGAppsHook3
-  gobject-introspection ags.packages.<sys>.default ]`, `buildInputs =
-  [ glib gjs astal.io astal.astal4 <service libs> ]`, and
+gobject-introspection ags.packages.<sys>.default ]`, `buildInputs =
+[ glib gjs astal.io astal.astal4 <service libs> ]`, and
   `installPhase = "ags bundle app.ts $out/bin/my-shell"`; runtime
   executables are prefixed onto PATH via `gappsWrapperArgs`. The service
   libraries must be `buildInputs` of the derivation — on Nix, GI libraries
@@ -255,7 +255,7 @@ Requirements for the AGS shell specifically:
   entrypoint, so the two compose.
 - **The upstream hm module silently discards its own overrides when given
   a nixGL-wrapped package.** This note originally claimed the module
-  *rejects* such a package — that `finalPackage`'s `.override` call cannot
+  _rejects_ such a package — that `finalPackage`'s `.override` call cannot
   be satisfied because wrapping loses `.override`, that `finalPackage`
   being read-only is an obstacle, and that `ExecStart` ends up unwrapped.
   [#37](https://github.com/gnamikawa/dotfiles-nix/issues/37) built the

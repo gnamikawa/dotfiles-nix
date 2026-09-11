@@ -118,11 +118,7 @@ export default function WindowContext() {
     // perspective — routing all four would silently steal TETR.IO's
     // sink when the user clicked from Outlook.
     const matching =
-      byTitle.length > 0
-        ? byTitle
-        : pidStreams.length === 1
-          ? pidStreams
-          : [];
+      byTitle.length > 0 ? byTitle : pidStreams.length === 1 ? pidStreams : [];
 
     const currentTarget =
       matching[0]?.targetEndpoint ?? defaultSpeaker() ?? null;
@@ -237,10 +233,7 @@ export default function WindowContext() {
                     // and both sides mod on speakers.length so the visible
                     // highlight and the row Alt+Return picks agree.
                     createEffect(() => {
-                      const idx = wrapCursor(
-                        cursorIndex(),
-                        d.speakers.length,
-                      );
+                      const idx = wrapCursor(cursorIndex(), d.speakers.length);
                       const isCursored = idx === i;
                       const ctx = self.get_style_context();
                       if (isCursored) ctx.add_class("cursored");

@@ -118,9 +118,7 @@ function applyPassthroughFlags(): void {
     touchedAddresses.add(address);
     batch.push(buildSetProp(address, "opacity_inactive", DIMMED_OPACITY));
     const isFocused = address === focusedAddress;
-    batch.push(
-      buildSetProp(address, "no_focus", isFocused ? "false" : "true"),
-    );
+    batch.push(buildSetProp(address, "no_focus", isFocused ? "false" : "true"));
   }
   appendPointerRefresh(batch);
   sendBatch(batch);

@@ -223,9 +223,7 @@ export const liveGeom = createExternal<Geom | null>(null, (mut) => {
         return;
       }
       const monitorId = win.monitor as number;
-      const monitor = hyprland
-        .get_monitors()
-        .find((m) => m.id === monitorId);
+      const monitor = hyprland.get_monitors().find((m) => m.id === monitorId);
       if (!monitor) {
         mut(null);
         return;

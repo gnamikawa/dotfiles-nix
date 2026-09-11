@@ -17,7 +17,7 @@ untouched by this note, per the issue.
   `background` 100/200 default/secondary pair. No drift. The one liberty is
   that `colorVariantGenerator` applies the legend to all eight scales where
   Geist states it once, on gray.
-- **`palette.nix` is a faithful hex transcription of Geist's *dark* theme,
+- **`palette.nix` is a faithful hex transcription of Geist's _dark_ theme,
   with exactly one real error.** 81 of 82 values land on Geist's published
   dark tokens. **purple 200 (`#432155`) holds purple 300's colour** — Geist's
   purple 200 is markedly darker and less saturated.
@@ -95,18 +95,18 @@ Yes — completely. Source: the "Color 1..Color 10" legend block in the raw HTML
 of <https://vercel.com/geist/colors>, where each row pairs `var(--ds-gray-N00)`
 with a purpose string.
 
-| step | Geist's stated purpose (verbatim) | `constants/theme.nix` |
-|---|---|---|
-| 100 | Default background | `componentBackground.default` |
-| 200 | Hover background | `componentBackground.hover` |
-| 300 | Active background | `componentBackground.active` |
-| 400 | Default border | `border.default` |
-| 500 | Hover border | `border.hover` |
-| 600 | Active border | `border.active` |
-| 700 | High contrast background | `highContrastBackground.default` |
-| 800 | Hover high contrast background | `highContrastBackground.hover` |
-| 900 | Secondary text and icons | `text.secondary` |
-| 1000 | Primary text and icons | `text.primary` |
+| step | Geist's stated purpose (verbatim) | `constants/theme.nix`            |
+| ---- | --------------------------------- | -------------------------------- |
+| 100  | Default background                | `componentBackground.default`    |
+| 200  | Hover background                  | `componentBackground.hover`      |
+| 300  | Active background                 | `componentBackground.active`     |
+| 400  | Default border                    | `border.default`                 |
+| 500  | Hover border                      | `border.hover`                   |
+| 600  | Active border                     | `border.active`                  |
+| 700  | High contrast background          | `highContrastBackground.default` |
+| 800  | Hover high contrast background    | `highContrastBackground.hover`   |
+| 900  | Secondary text and icons          | `text.secondary`                 |
+| 1000 | Primary text and icons            | `text.primary`                   |
 
 Ten out of ten. The sub-key names (`default` / `hover` / `active` /
 `secondary` / `primary`) are transcriptions of Geist's own words, not
@@ -140,7 +140,7 @@ and compared against Geist's dark `--ds-*-value`.
 - **68 bit-exact.**
 - **13 off by exactly one unit in one HSL component** — below the precision
   Geist publishes. These are the same colour. Their near-perfection is itself
-  evidence that Geist's HSL triples were *rounded from* the very hexes
+  evidence that Geist's HSL triples were _rounded from_ the very hexes
   `palette.nix` holds.
 - **1 genuine mismatch.**
 
@@ -159,13 +159,13 @@ difference in two places, which is what hid the duplication.
 **The correct replacement hex is not established** — see UNVERIFIED. The
 direction and magnitude of the error are certain; the exact byte is not.
 
-### The three anomalies that are *not* errors
+### The three anomalies that are _not_ errors
 
 **Gray 600–900 is non-monotonic in Geist itself.** Dark `--ds-gray-*-value`
 lightness runs 53 → 56 → **49** → 63 (`#878787`, `#8F8F8F`, `#7D7D7D`,
 `#A0A0A0`), and generation L's hex block agrees byte-for-byte on all four.
 The dip is explained by §2's semantics: 700/800 are a high-contrast **fill**
-pair whose hover goes darker, while 900 is secondary *text* and must jump
+pair whose hover goes darker, while 900 is secondary _text_ and must jump
 back up for legibility. Lightness is monotonic within each role band, not
 across the whole ramp.
 
@@ -312,18 +312,18 @@ into the shell, which is what
 
 Every family in §4 except page widths and z-index:
 
-| need | Geist has it | `constants/` has it |
-|---|---|---|
-| colour steps + roles | yes | **yes** (§2, §3) |
-| alpha scale (`--ds-gray-alpha-*`) | yes | no — needed by shadow + focus tokens |
-| spacing (padding, gaps between bar modules) | 4px scale | no |
-| control heights (bar height, button height) | 32/36/40 | no |
-| type (bar labels, notification body/title) | label/copy/heading by px | no |
-| font family + feature settings | `--font-sans`, `ss11`/`calt` | no |
-| radii (notification card, launcher, popovers) | 6/12/16 by elevation | no |
-| shadows (every floating surface) | 20 tokens, dark-scoped | no |
-| focus ring (launcher is keyboard-driven) | yes, dark-specific colour | no |
-| motion (OSD fade, popover open) | 2 durations, 1 curve | no |
+| need                                          | Geist has it                 | `constants/` has it                  |
+| --------------------------------------------- | ---------------------------- | ------------------------------------ |
+| colour steps + roles                          | yes                          | **yes** (§2, §3)                     |
+| alpha scale (`--ds-gray-alpha-*`)             | yes                          | no — needed by shadow + focus tokens |
+| spacing (padding, gaps between bar modules)   | 4px scale                    | no                                   |
+| control heights (bar height, button height)   | 32/36/40                     | no                                   |
+| type (bar labels, notification body/title)    | label/copy/heading by px     | no                                   |
+| font family + feature settings                | `--font-sans`, `ss11`/`calt` | no                                   |
+| radii (notification card, launcher, popovers) | 6/12/16 by elevation         | no                                   |
+| shadows (every floating surface)              | 20 tokens, dark-scoped       | no                                   |
+| focus ring (launcher is keyboard-driven)      | yes, dark-specific colour    | no                                   |
+| motion (OSD fade, popover open)               | 2 durations, 1 curve         | no                                   |
 
 The focus ring is the sharpest of these: the launcher is driven entirely by
 keyboard, and Geist's focus colour differs between themes, so it cannot be
@@ -370,7 +370,7 @@ Geist's served tokens. It works — it found the purple 200 error. But §1
 establishes there is no versioned Geist artifact, only content-hashed
 `immutable` URLs that change on every Vercel redeploy. So this check cannot
 be automated against upstream; it is a re-scrape, and it silently becomes a
-diff against a *different* Geist each time.
+diff against a _different_ Geist each time.
 
 The way to make it checkable is to **commit the extracted token table as the
 pinned reference** — this note is the first such snapshot, dated. Then drift
@@ -408,7 +408,7 @@ passes it at `:82`/`:103`; `modules/yazi.nix` (~90 references),
 Geist assigns meaning per step (§2): a border takes 400/500/600, text takes
 900/1000. Whether a surface honours that is normally only visible to review.
 But it becomes **structural** if the token surface exposed to the shell is
-`theme.nix`'s roles and *not* raw `palette.nix` steps — then a wrong step is
+`theme.nix`'s roles and _not_ raw `palette.nix` steps — then a wrong step is
 unspellable rather than merely wrong.
 
 That is exactly the question [#39](https://github.com/gnamikawa/dotfiles-nix/issues/39)
@@ -418,7 +418,7 @@ is trustworthy — it is Geist's own words, ten for ten — so withholding
 
 ### What is not checkable
 
-Whether a surface *looks* Geist — typographic rhythm, spacing balance,
+Whether a surface _looks_ Geist — typographic rhythm, spacing balance,
 whether the overshoot curve feels right on an OSD — is not mechanisable. That
 belongs to prototype tickets with the human present, not to a check.
 
@@ -462,7 +462,7 @@ Two traps: an unresolvable `var()` becomes **`unset`** (inherit-or-initial)
 plus a warning on stderr, not a dropped declaration — worth wiring a
 `GtkCssProvider::parsing-error` handler. And custom properties are untyped
 and non-interpolable: there is no `@property`, so a variable cannot be
-animated (a property *referencing* one can).
+animated (a property _referencing_ one can).
 
 ### What Geist expresses that GTK CSS cannot
 
@@ -488,7 +488,7 @@ properties (`spacing`, `halign`, `hexpand`). Nor is there `width`/`height`/
 percentages** — so control heights are `min-height` plus layout, and page
 widths have no expression at all.
 
-**`rem` is a trap.** It is *not* the root font-size. `GTK_CSS_REM` multiplies
+**`rem` is a trap.** It is _not_ the root font-size. `GTK_CSS_REM` multiplies
 by `gtk_css_font_size_get_default_px()`, which reads the `gtk-font-name`
 setting (`gtkcssnumbervalue.c:405-408`); setting `font-size` on the root node
 does not change it. Likewise `pt`/`in`/`cm`/`mm` convert via `-gtk-dpi`, not
@@ -501,7 +501,7 @@ Gtk.Overflow.HIDDEN`, which pushes a rounded clip on the padding box
 (`gtkwidget.c:12131-12136`).
 
 **Frosted glass isn't available on 4.20.3.** No `backdrop-filter`. `filter:
-blur()` blurs the widget's *own* content, not what is behind it, and
+blur()` blurs the widget's _own_ content, not what is behind it, and
 `opacity` fades text along with the surface. Translucency has to be
 `background-color: rgba(…)` with the compositor blurring the layer (Hyprland
 `blurls`) — a compositor concern, not CSS.
@@ -537,7 +537,7 @@ Also absent, each verified by absence from both registration tables:
   `calc()` inside colours. The missing `--ds-gray-alpha-*` scale (§4) is
   derivable with `color-mix()` rather than needing transcription.
 - **`calc()` plus a large math set**: `min max clamp round mod rem abs sign
-  hypot pow sqrt exp log` and the trig functions.
+hypot pow sqrt exp log` and the trig functions.
 - **`transition`, `animation` and `@keyframes`**, over 58 animatable
   properties including `color`, `background-color`, `opacity`, `filter`,
   `box-shadow`, all four `border-*-radius`, `margin-*`, `padding-*`,
@@ -561,7 +561,7 @@ Also absent, each verified by absence from both registration tables:
    all three CSS chunks (only the dead generation-L `#341142`, the P3-only
    `oklch(25.91% .0921 314.41)`, and the HSL triple).
 2. **Which colour token generation Vercel considers deprecated.** Established
-   which wins the cascade *today* (H, by declaration order — and H is what
+   which wins the cascade _today_ (H, by declaration order — and H is what
    `palette.nix` matches), but found no first-party statement. If the load
    order flips, the effective palette changes wholesale.
 3. **No browser was run.** Cascade precedence is reasoned from the served CSS
@@ -595,7 +595,7 @@ Also absent, each verified by absence from both registration tables:
     before covering **grid tokens, breakpoints, and any motion tokens beyond
     the `--ds-motion-*` family**. The families reported in §4 (spacing, type,
     radii, shadows, focus, motion) were each read to completion and are
-    accurate; what is not established is that they are *all* the families
+    accurate; what is not established is that they are _all_ the families
     Geist publishes. Breakpoints and grid are web-layout concepts GTK cannot
     express (§7) so little is likely lost for the shell, but §4 should not be
     treated as an exhaustive inventory. Re-run against

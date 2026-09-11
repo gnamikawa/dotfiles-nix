@@ -3,10 +3,10 @@
 ------------------*/
 
 #windowcount {
-	margin-right: 12px;
+  margin-right: 12px;
 }
 #windowcount label {
-	color: @hover-fg;
+  color: @hover-fg;
 }
 
 /*-----------------
@@ -14,7 +14,7 @@
 -----------------*/
 
 #temperature {
-	background-color: @temperature;
+  background-color: @temperature;
 }
 
 /*------------
@@ -22,7 +22,7 @@
 ------------*/
 
 #memory {
-	background-color: @main-bg;
+  background-color: @main-bg;
 }
 
 /*---------
@@ -30,7 +30,7 @@
 ---------*/
 
 #cpu {
-	background-color: @main-bg;
+  background-color: @main-bg;
 }
 
 /*-----------------
@@ -38,9 +38,9 @@
 -----------------*/
 
 #custom-distro {
-	padding: 0 10px 0 5px;
-	background-color: @accent;
-	color: @main-bg;
+  padding: 0 10px 0 5px;
+  background-color: @accent;
+  color: @main-bg;
 }
 
 /*--------------------
@@ -48,7 +48,7 @@
 --------------------*/
 
 #idle_inhibitor {
-	background-color: @time;
+  background-color: @time;
 }
 
 /*----------
@@ -56,8 +56,8 @@
 ----------*/
 
 #clock.time {
-	padding-right: 6px;
-	background-color: @main-bg;
+  padding-right: 6px;
+  background-color: @main-bg;
 }
 
 /*----------
@@ -65,8 +65,8 @@
 ----------*/
 
 #clock.date {
-	padding-left: 6px;
-	background-color: @date;
+  padding-left: 6px;
+  background-color: @date;
 }
 
 /*-----------------
@@ -74,10 +74,10 @@
 -----------------*/
 
 #network {
-	background-color: @main-bg;
-	padding: 4px 8px;
+  background-color: @main-bg;
+  padding: 4px 8px;
 }
 #bluetooth {
-	background-color: @main-bg;
-	padding: 4px 8px;
+  background-color: @main-bg;
+  padding: 4px 8px;
 }
