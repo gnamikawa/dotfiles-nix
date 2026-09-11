@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+# Runs treefmt against the files staged for this commit and fails when
+# any of them had to be rewritten. The reformatted content is left in
+# the working tree; re-stage and retry to commit it.
+#
+# Unstaged edits on top of a staged file are overwritten by the rewrite,
+# so run `nix fmt` yourself and re-stage before committing whenever the
+# same file has both staged and unstaged changes. See AGENTS.md
+# "Formatting".
+set -euo pipefail
+
+if ! command -v nix >/dev/null 2>&1; then
+  echo "pre-commit: nix not on PATH; skipping treefmt check." >&2
+  exit 0
+fi
+
+mapfile -t staged < <(git diff --cached --name-only --diff-filter=ACMR)
+[ ${#staged[@]} -eq 0 ] && exit 0
+
+exec nix fmt -- --fail-on-change "${staged[@]}"

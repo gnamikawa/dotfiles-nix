@@ -38,6 +38,31 @@ inspect incomplete work but does not represent completed work.
 
 Agents must never merge pull requests. Leave every pull request open for a human to review and merge.
 
+## Formatting
+
+Every commit is gated by treefmt via `.githooks/pre-commit`. The hook
+runs treefmt against the files staged for the commit — not the whole
+working tree — and fails when any of them had to be rewritten. The
+reformatted content is left in the working tree; re-stage and retry to
+commit it.
+
+Before committing, run `nix fmt` yourself so the hook stays a check
+rather than a fix. Always do this when the same file has both staged
+and unstaged changes: the hook rewrites the working tree in place and
+would clobber the unstaged portion.
+
+Enable the hook once per checkout with
+`git config core.hooksPath .githooks`. Git worktrees inherit that
+setting from the main checkout, so an agent branching off a worktree
+does not need to re-enable it — but the setting must exist on the main
+repository for the inheritance to apply.
+
+The set of formatters and the excluded paths live in `treefmt.nix`;
+change that file when a new language or a new generated tree enters the
+repository. `nix flake check` runs the same treefmt config across every
+tracked file as its `formatting` check, so a CI or pre-push sweep can
+catch drift the per-commit hook missed.
+
 ## Agent skills
 
 ### Issue tracker

@@ -26,6 +26,12 @@
       url = "github:aylur/ags";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    # Repo-wide formatter. `nix fmt` and the pre-commit hook both go
+    # through the evaluated module (see ./treefmt.nix).
+    treefmt-nix = {
+      url = "github:numtide/treefmt-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
@@ -36,6 +42,7 @@
       home-manager,
       nixgl,
       ags,
+      treefmt-nix,
       ...
     }:
     let
@@ -47,6 +54,10 @@
         config.allowUnfree = true;
       };
       constants = import ./constants;
+
+      # Repo-wide formatter, wired to `formatter.${system}` and the
+      # `formatting` flake check below.
+      treefmtEval = treefmt-nix.lib.evalModule pkgs ./treefmt.nix;
 
       # agsFull rather than the bare `ags`: it sets extraPackages at
       # construction (every Astal library plus libadwaita), so no `.override`
@@ -130,6 +141,10 @@
         inherit greeter geistdesign;
         session-lock = sessionLock;
       };
+
+      # `nix fmt` in this repo. The wrapper knows every formatter declared
+      # in ./treefmt.nix; the pre-commit hook calls it in --ci mode.
+      formatter.${system} = treefmtEval.config.build.wrapper;
 
       nixosModules.default =
         { config, ... }:
@@ -228,6 +243,9 @@
         session-lock = sessionLock;
         ags-alias = agsAliasCheck;
         ags-event-coordinator = agsEventCoordinatorCheck;
+        # Fails `nix flake check` when any tracked file drifts from
+        # treefmt's expected formatting.
+        formatting = treefmtEval.config.build.check self;
       };
     };
 }
