@@ -4,7 +4,7 @@
 
 {
   xdg.configFile."generated/hypr/monitors.lua".text = ''
-    hl.monitor({ output = "eDP-1", mode = "2560x1440@59.998", position = "0x0", scale = 1.5 })
+    hl.monitor({ output = "eDP-1", mode = "2560x1440@59.99800", position = "0x0", scale = 1 })
 
     -- Permanently disable the Synaptics touchpad. Device name to be
     -- confirmed against `hyprctl devices` during cutover verification.
