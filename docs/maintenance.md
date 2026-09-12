@@ -12,9 +12,9 @@ Every desktop profile exposes one host-selected command for manual locking:
 genzo-lock
 ```
 
-On GEN-DPC this starts the production AGS locker through the on-demand
-`genzo-session-lock.service`; on GEN-LPC it starts Hyprlock. Hypridle uses the
-same command for logind lock requests and before-suspend locking.
+On both hosts this starts the production AGS locker through the on-demand
+`genzo-session-lock.service`. Hypridle uses the same command for logind lock
+requests and before-suspend locking.
 
 ## Recover an abandoned AGS lock from a TTY
 

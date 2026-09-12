@@ -85,8 +85,8 @@
       };
 
       # The user-session lock is packaged separately from both the greetd
-      # greeter and the persistent AGS shell. Hyprlock remains wired until each
-      # host cuts over in its own ticket.
+      # greeter and the persistent AGS shell. Both hosts now use it; Hyprlock
+      # has been fully retired.
       sessionLock = import ./packages/session-lock.nix {
         inherit pkgs constants geistdesign;
         agsPackages = ags.packages.${system};
