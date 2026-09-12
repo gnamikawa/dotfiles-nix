@@ -3,8 +3,7 @@
 #
 # Hyprland 0.55 moved per-namespace layer animations to Lua-only, so the
 # compositor's own config is a set of `.lua` slices `dofile`'d from
-# hyprland.lua. Hyprlock still parses `.conf`, so its lock colours land in
-# a separate `hyprlock-theme.conf` slice sourced from hyprlock.conf.
+# hyprland.lua.
 
 {
   pkgs,
@@ -23,9 +22,7 @@ in
 {
   home.packages = [ (config.lib.nixGL.wrap pkgs.hyprland) ];
 
-  # Theme globals for hyprland.lua and binds.lua (Lua). The three lock
-  # colours live in a companion `.conf` slice below, since hyprlock hasn't
-  # moved to Lua.
+  # Theme globals for hyprland.lua and binds.lua (Lua).
   xdg.configFile."generated/hypr/theme.lua".text = ''
     borderActive    = "${rgb constants.theme.dark.border.active.gray}"
     borderDefault   = "${rgb constants.theme.dark.border.default.gray}"
@@ -33,14 +30,6 @@ in
     slurpBackground = "#${lib.removePrefix "#" constants.palette.black}00"
     slurpBorder     = "#${lib.removePrefix "#" constants.palette.white}ff"
     slurpSelection  = "#${lib.removePrefix "#" constants.theme.dark.border.active.blue}55"
-  '';
-
-  # Hyprlock still parses .conf and hyprlock.conf sources this file for
-  # $lockFont / $lockInner / $lockOuter.
-  xdg.configFile."generated/hypr/hyprlock-theme.conf".text = ''
-    $lockFont  = ${rgb constants.theme.dark.text.primary.gray}
-    $lockInner = ${rgb constants.theme.dark.componentBackground.active.gray}
-    $lockOuter = ${rgb constants.theme.dark.background.default}
   '';
 
   # Host slices — hosts/<NAME>/hyprland-outputs.nix overrides both. The
