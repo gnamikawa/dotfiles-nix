@@ -7,7 +7,6 @@ local mod = "ALT"
 local win = "SUPER"
 
 -- ── Applications ─────────────────────────────────────────────────────────
-hl.bind(mod .. " + R", hl.dsp.exec_cmd("ranger"))
 hl.bind(mod .. " + F4", hl.dsp.window.close())
 hl.bind(mod .. " + F3", hl.dsp.exec_cmd("ags request runner-open"))
 hl.bind(win .. " + F", hl.dsp.window.float({ action = "toggle" }))

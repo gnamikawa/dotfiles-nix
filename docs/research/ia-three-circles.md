@@ -670,23 +670,11 @@ pavucontrol, Thunar rename dialog; Firefox PiP pinned top-right at
   trees (see §2.1). `style.css` at the root is the session's own
   stylesheet (currently only bar rules). **Shapes chrome,
   notifications-future, theming** (imports geistdesign via CSS `@import`).
-- **`.config/waybar/`** — `bars/{top,bottom,etc}.jsonc` (three bar
-  bodies), `modules.jsonc` (module definitions), `style.css` +
-  `theme.css` + `styles/*.css` (fonts, dividers, left/right/center
-  modules, states, global), `scripts/*.sh` (bluetooth, power-menu,
-  volume, network[toggle], bluetoothtoggle, fzf-colors, backlight,
-  qrscan), `themes/fzf/catppuccin.txt` (legacy catppuccin remnant —
-  ADR-0006 notes these are "slated for deletion"). **Shapes chrome,
-  notifications (implicit via scripts), theming**.
-- **`.config/terminator/config`** — terminator terminal config (legacy;
-  kitty is the primary today).
 - **`.config/nix/`** — `nix.conf`, `registry.json` (registers the
   `dotfiles` flake alias used by `.envrc` files; see
   `modules/direnv.nix:3-6`).
 - **`.config/nixpkgs/config.nix`** — nixpkgs settings.
 - **`.config/lazygit/config.yml`** — lazygit UI settings.
-- **`.config/ranger/`** — `rc.conf`, `commands.py`, `scope.sh`,
-  `devicons.py`, `plugins/`. TUI file manager.
 - **`.config/nvim/lua/`** — neovim lua config tree.
 - **`.config/mimeapps.list`** — MIME defaults.
 
