@@ -12,7 +12,7 @@
 {
   imports = [
     ./terminal.nix
-    ./firefox.nix
+    ./firefox
     ./keepassxc.nix
     ./kitty.nix
     ./fcitx5.nix

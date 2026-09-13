@@ -56,6 +56,14 @@ distinct responsibilities start to tangle inside one file, is the signal to
 refactor into a folder of smaller files with succinct identities — not
 before.
 
+A module also becomes a directory the moment it gains a Module source (a
+non-Nix file pulled in via `builtins.readFile` because the option consuming
+it demands a string, not an out-of-store path) — regardless of the module's
+own line count. `modules/firefox/{default.nix,userChrome.css}` is the first
+instance: `userChrome.css` only takes effect through a rebuild, so it gets
+none of the live-edit benefit `assets/` exists to provide, and belongs beside
+the module that reads it instead.
+
 ## Generated slices
 
 Computed slices (ADR-0005) are emitted to `~/.config/generated/<app>/…`

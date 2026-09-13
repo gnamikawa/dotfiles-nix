@@ -125,7 +125,7 @@ in
         "toolkit.legacyUserProfileCustomizations.stylesheets" = true;
       };
 
-      userChrome = builtins.readFile ../assets/home/.mozilla/firefox/minimal.default/chrome/userChrome.css;
+      userChrome = builtins.readFile ./userChrome.css;
 
       extensions = {
         force = true;

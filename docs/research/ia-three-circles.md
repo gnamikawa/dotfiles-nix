@@ -563,8 +563,9 @@ or one of the hosts):
   the Hyprland launcher/yazi keybinds.)
 - `modules/keepassxc.nix:1-34` — GUI app, autostart candidate (currently
   disabled service).
-- `modules/firefox.nix:1-40+` — GUI app with `userChrome` from
-  `assets/home/.mozilla/firefox/minimal.default/chrome/userChrome.css`.
+- `modules/firefox/default.nix:1-40+` — GUI app with `userChrome` from
+  the co-located `modules/firefox/userChrome.css` (a module source, not
+  an asset — see ADR-0013).
 - `modules/apps.nix:1-26` — aggregator for `terminal`, `firefox`,
   `keepassxc`, `kitty`, `fcitx5`, `theme`, `obsidian` + packages.
 - `modules/default.nix:1-27` — desktop aggregator: `apps`, `hyprland`,
@@ -688,9 +689,6 @@ pavucontrol, Thunar rename dialog; Firefox PiP pinned top-right at
   `devicons.py`, `plugins/`. TUI file manager.
 - **`.config/nvim/lua/`** — neovim lua config tree.
 - **`.config/mimeapps.list`** — MIME defaults.
-- **`.mozilla/firefox/minimal.default/`** — Firefox profile assets;
-  `chrome/userChrome.css` inlined by `modules/firefox.nix:26`.
-  **Shapes chrome** (browser).
 
 ---
 

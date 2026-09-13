@@ -21,12 +21,11 @@
 
   # Vendored and generated trees are out of scope. The @girs directory is
   # regenerated from GObject introspection; formatting it churns on every
-  # regeneration. The Mozilla and node_modules trees are third-party.
+  # regeneration. The node_modules tree is third-party.
   settings.global.excludes = [
     "flake.lock"
     ".gitignore"
     "assets/home/.config/ags/@girs/**"
-    "assets/home/.mozilla/**"
     "tests/ags/node_modules/**"
     "tests/ags/package-lock.json"
     ".claude/**"

@@ -50,8 +50,9 @@ One concern, one file, directly under `modules/`. A module is shared by every
 host; anything host-specific does not belong in one. Modules are composed into
 profiles rather than all imported at once, so no single file imports them
 all — a host may import a module its profile leaves out. A module may become
-a directory only when one file no longer holds its responsibilities cleanly
-(see `docs/maintenance.md`); none currently does.
+a directory when one file no longer holds its responsibilities cleanly, or
+when it gains a co-located Module source (see `docs/maintenance.md`);
+`firefox` is the first.
 
 ### Package bundle
 
@@ -152,6 +153,16 @@ joined to its asset via the application's own include mechanism. A
 rationale for Nix management admits only the slice that needs it, never
 the whole config: ten host-varying lines earn generation; the static
 body around them stays an asset.
+
+### Module source
+
+A non-Nix file (CSS, shell, HTML, TypeScript, …) that a module's own
+`default.nix` pulls in via `builtins.readFile` because the option consuming
+it accepts only a string value, never an out-of-store path. It lives beside
+its module (`modules/<name>/<file>`), promoting that module to a directory —
+never under `assets/`, because unlike an Asset it takes effect only through
+a rebuild and so gets none of the live-edit benefit `assets/` exists to
+provide. `modules/firefox/userChrome.css` is the first.
 
 ### Keyboard-first
 
