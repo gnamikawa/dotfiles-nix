@@ -87,10 +87,25 @@ hl.bind(
 -- ── Audio ────────────────────────────────────────────────────────────────
 -- wpctl (WirePlumber), not pactl — pactl isn't installed on this system, so
 -- these were dead binds. Raise is capped at 100% (--limit); lower has no
--- floor to clamp.
-hl.bind("XF86AudioRaiseVolume", hl.dsp.exec_cmd("wpctl set-volume --limit 1.0 @DEFAULT_AUDIO_SINK@ 5%+"))
-hl.bind("XF86AudioLowerVolume", hl.dsp.exec_cmd("wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"))
-hl.bind("XF86AudioMute", hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"))
+-- floor to clamp. `locked` and `repeating` match Hyprland's own shipped
+-- reference config for these exact hardware keys (embedded in the binary
+-- as its default example) — locked so volume still works from the lock
+-- screen, repeating so holding the key ramps continuously.
+hl.bind(
+	"XF86AudioRaiseVolume",
+	hl.dsp.exec_cmd("wpctl set-volume --limit 1.0 @DEFAULT_AUDIO_SINK@ 5%+"),
+	{ locked = true, repeating = true }
+)
+hl.bind(
+	"XF86AudioLowerVolume",
+	hl.dsp.exec_cmd("wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"),
+	{ locked = true, repeating = true }
+)
+hl.bind(
+	"XF86AudioMute",
+	hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"),
+	{ locked = true, repeating = true }
+)
 
 -- ── Workspace layout ─────────────────────────────────────────────────
 -- Per-workspace dwindle↔monocle toggle. The Lua parser rejects
