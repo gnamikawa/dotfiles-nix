@@ -7,11 +7,12 @@
 -- below; everything else in this tree is save + `hyprctl reload`.
 --
 -- Sub-files:
---   ~/.config/generated/hypr/theme.lua     — palette locals (host-agnostic)
---   ~/.config/generated/hypr/monitors.lua  — per-host outputs + tablet map
---   ~/.config/generated/hypr/env.lua       — per-host env vars + cursor knobs
---   ~/.config/hypr/binds.lua               — keybindings
---   ~/.config/hypr/rules.lua               — window + layer rules
+--   ~/.config/generated/hypr/theme.lua      — palette locals (host-agnostic)
+--   ~/.config/generated/hypr/monitors.lua   — per-host outputs + tablet map
+--   ~/.config/generated/hypr/env.lua        — per-host env vars + cursor knobs
+--   ~/.config/generated/hypr/animations.lua — per-host animation overrides
+--   ~/.config/hypr/binds.lua                — keybindings
+--   ~/.config/hypr/rules.lua                — window + layer rules
 
 local home = os.getenv("HOME")
 
@@ -97,6 +98,11 @@ hl.animation({ leaf = "workspaces", enabled = true, speed = 4, bezier = "ease", 
 hl.animation({ leaf = "layers", enabled = true, speed = 3, bezier = "ease", style = "fade" })
 hl.animation({ leaf = "border", enabled = true, speed = 6, bezier = "ease" })
 hl.animation({ leaf = "fade", enabled = true, speed = 3, bezier = "ease" })
+
+-- Sourced last so a host can override a leaf set above (e.g. GEN-LPC turns
+-- "workspaces" off — its primary monitor's low refresh rate turns the fixed
+-- 400ms slide into a visible jump-cut; see ADR-0012).
+dofile(home .. "/.config/generated/hypr/animations.lua")
 
 -- Parity notes vs. the retired sway config:
 -- - sway's urgent indicator color has no Hyprland equivalent; dropped.

@@ -32,9 +32,12 @@ in
     slurpSelection  = "#${lib.removePrefix "#" constants.theme.dark.border.active.blue}55"
   '';
 
-  # Host slices — hosts/<NAME>/hyprland-outputs.nix overrides both. The
-  # empty defaults keep hyprland.lua's `dofile` calls resolvable on a
-  # standalone profile with no host directory.
+  # Host slices — hosts/<NAME>/hyprland-outputs.nix overrides any of the
+  # three. The empty defaults keep hyprland.lua's `dofile` calls resolvable
+  # on a standalone profile with no host directory.
   xdg.configFile."generated/hypr/monitors.lua".text = lib.mkDefault "";
   xdg.configFile."generated/hypr/env.lua".text = lib.mkDefault "";
+  # Sourced after hyprland.lua's own hl.animation calls (see that file) so a
+  # host can override a leaf without being clobbered by the shared defaults.
+  xdg.configFile."generated/hypr/animations.lua".text = lib.mkDefault "";
 }

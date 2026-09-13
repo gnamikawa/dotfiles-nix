@@ -176,6 +176,15 @@ the window-level sibling of Etc packages. Contents are summonable over
 the current view on demand and banished back out of sight; the space
 occupies no output. A grab-bag by design, tolerated deliberately.
 
+### Primary output
+
+The output that carries a host's default attention and chrome: where the
+greeter places itself (system-nix's `hardware.primaryMonitor`), where an
+attention satellite window docks, and where everything lives on a host that
+designates no media output (GEN-LPC, below). Animation-smoothness guarantees
+(ADR-0012) apply only to the primary output — a host's media output may run
+at a lower refresh rate and is not held to the same standard.
+
 ### Satellite window
 
 A small window that belongs near the user's attention but never in the
@@ -196,9 +205,13 @@ output is a large-plus-sliver composition, not a single window.
 ### Media output
 
 The output a host designates for ambient satellites — passive media
-real estate beside the primary output. On GEN-DPC it is the TV
-(the I-O Data display); GEN-LPC designates none. May be absent; its
-absence changes ambient satellites' behavior, never their existence.
+real estate beside the primary output. On GEN-DPC it is the TV (the I-O
+Data display), the same output the window-orchestrator service and its
+TypeScript code (`findSatelliteMonitor`) name `satellite`; GEN-LPC
+designates none. May be absent; its absence changes ambient satellites'
+behavior, never their existence.
+_Avoid_: satellite monitor, satellite output — use Media output in new
+prose; the code's `satellite` naming predates this glossary entry.
 
 ### Geist
 

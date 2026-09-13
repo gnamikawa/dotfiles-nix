@@ -10,4 +10,12 @@
     -- confirmed against `hyprctl devices` during cutover verification.
     hl.device({ name = "synaptics-tm3289-002", enabled = false })
   '';
+
+  # eDP-1 is this host's only monitor, so it is always the primary monitor
+  # (CONTEXT.md) and always ~60Hz. The shared "workspaces" slide (hyprland.lua)
+  # assumes a fixed animation duration renders into enough frames to read as
+  # smooth; at ~60Hz it doesn't, and reads as a jump-cut instead (ADR-0012).
+  xdg.configFile."generated/hypr/animations.lua".text = ''
+    hl.animation({ leaf = "workspaces", enabled = false })
+  '';
 }
