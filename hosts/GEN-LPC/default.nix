@@ -1,4 +1,4 @@
-{ ... }:
+{ pkgs, ... }:
 {
   imports = [
     # This host's computed slices.
@@ -12,4 +12,9 @@
     ../../modules/ags-session-lock.nix
     ../../modules/mako.nix
   ];
+
+  # Backlight control for the Fn-row brightness keys (hyprland-outputs.nix).
+  # Modern brightnessctl talks to systemd-logind for the actual write, so no
+  # udev rule is needed — just the package.
+  home.packages = [ pkgs.brightnessctl ];
 }

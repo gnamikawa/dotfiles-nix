@@ -33,11 +33,15 @@ in
   '';
 
   # Host slices — hosts/<NAME>/hyprland-outputs.nix overrides any of the
-  # three. The empty defaults keep hyprland.lua's `dofile` calls resolvable
-  # on a standalone profile with no host directory.
+  # four. The empty defaults keep hyprland.lua's/binds.lua's `dofile` calls
+  # resolvable on a standalone profile with no host directory.
   xdg.configFile."generated/hypr/monitors.lua".text = lib.mkDefault "";
   xdg.configFile."generated/hypr/env.lua".text = lib.mkDefault "";
   # Sourced after hyprland.lua's own hl.animation calls (see that file) so a
   # host can override a leaf without being clobbered by the shared defaults.
   xdg.configFile."generated/hypr/animations.lua".text = lib.mkDefault "";
+  # Sourced after binds.lua's own hl.bind calls (see that file) — keybinds
+  # tied to hardware only some hosts have (e.g. a laptop's Fn row) live here
+  # instead of in the shared asset.
+  xdg.configFile."generated/hypr/binds-host.lua".text = lib.mkDefault "";
 }

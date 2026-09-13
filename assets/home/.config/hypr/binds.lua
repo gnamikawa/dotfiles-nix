@@ -86,9 +86,12 @@ hl.bind(
 )
 
 -- ── Audio ────────────────────────────────────────────────────────────────
-hl.bind("XF86AudioRaiseVolume", hl.dsp.exec_cmd("pactl set-sink-volume @DEFAULT_SINK@ +5%"))
-hl.bind("XF86AudioLowerVolume", hl.dsp.exec_cmd("pactl set-sink-volume @DEFAULT_SINK@ -5%"))
-hl.bind("XF86AudioMute", hl.dsp.exec_cmd("pactl set-sink-mute @DEFAULT_SINK@ toggle"))
+-- wpctl (WirePlumber), not pactl — pactl isn't installed on this system, so
+-- these were dead binds. Raise is capped at 100% (--limit); lower has no
+-- floor to clamp.
+hl.bind("XF86AudioRaiseVolume", hl.dsp.exec_cmd("wpctl set-volume --limit 1.0 @DEFAULT_AUDIO_SINK@ 5%+"))
+hl.bind("XF86AudioLowerVolume", hl.dsp.exec_cmd("wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"))
+hl.bind("XF86AudioMute", hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"))
 
 -- ── Workspace layout ─────────────────────────────────────────────────
 -- Per-workspace dwindle↔monocle toggle. The Lua parser rejects
@@ -190,3 +193,7 @@ hl.bind(win .. " + MINUS", hl.dsp.layout("preselect d"))
 -- ── Floating drag (sway floating_modifier) ───────────────────────────────
 hl.bind(win .. " + mouse:272", hl.dsp.window.drag(), { mouse = true })
 hl.bind(win .. " + mouse:273", hl.dsp.window.resize(), { mouse = true })
+
+-- Binds tied to hardware only some hosts have (e.g. a laptop's Fn row).
+-- Empty by default; see hosts/<NAME>/hyprland-outputs.nix.
+dofile(os.getenv("HOME") .. "/.config/generated/hypr/binds-host.lua")
