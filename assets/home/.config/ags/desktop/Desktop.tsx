@@ -21,6 +21,10 @@
 //                     Alt-hold. Every screen carries its own key card —
 //                     which physical screen this is (connector) plus which
 //                     workspace is currently in front on it (ADR-0009).
+//   Osd             — primary output only, bottom-right. Transient readout
+//                     for volume/brightness/mic/bluetooth/radio hardware
+//                     keys (hypr/binds.lua, hosts/GEN-LPC); host-wide state,
+//                     so one instance like the bar rather than per-output.
 // The leaf components stay just their content and know nothing about which
 // monitor they are on beyond a connector string, when they need it.
 
@@ -35,6 +39,7 @@ import WindowContext from "../components/window-context/WindowContext";
 import Runner from "../components/runner/Runner";
 import SystemMenu from "../components/system-menu/SystemMenu";
 import MonitorId from "../components/monitor-id/MonitorId";
+import Osd from "../components/osd/Osd";
 import { findPrimaryMonitor } from "../common/monitors";
 import { windowMenuOpen } from "../common/window-menu";
 import {
@@ -45,6 +50,7 @@ import {
 import { runnerOpen } from "../common/runner";
 import { systemMenuOpen } from "../common/system-menu";
 import { workspaceVizOpen } from "../common/workspace-viz";
+import { osdOpen } from "../common/osd";
 
 const hyprland = AstalHyprland.get_default();
 const focusedWorkspace = createBinding(hyprland, "focusedWorkspace");
@@ -311,6 +317,42 @@ function MonitorIdSurface({ gdkmonitor }: { gdkmonitor: Gdk.Monitor }) {
 }
 
 /**
+ * Layer-shell surface that hosts the transient hardware-key OSD.
+ *
+ * Mounted on the primary output only, like the bar — volume, brightness,
+ * and radio state are host-wide, not per-monitor. Anchored BOTTOM|RIGHT.
+ *
+ * @param props.gdkmonitor - The output to mount this surface on.
+ */
+function OsdSurface({ gdkmonitor }: { gdkmonitor: Gdk.Monitor }) {
+  let window: Astal.Window;
+  const connector = gdkmonitor.connector;
+  const { BOTTOM, RIGHT } = Astal.WindowAnchor;
+
+  onCleanup(() => window.destroy());
+
+  return connector ? (
+    <window
+      $={(self) => (window = self)}
+      visible={osdOpen}
+      class="osd-window"
+      namespace="ags-osd"
+      name={`osd-${connector}`}
+      gdkmonitor={gdkmonitor}
+      exclusivity={Astal.Exclusivity.IGNORE}
+      anchor={BOTTOM | RIGHT}
+      marginBottom={32}
+      marginRight={32}
+      application={app}
+    >
+      <Osd />
+    </window>
+  ) : (
+    <></>
+  );
+}
+
+/**
  * The always-on desktop screen: the bar on the primary output, and one
  * of every summoned surface per output.
  *
@@ -333,6 +375,13 @@ export default function Desktop() {
         {(monitor: Gdk.Monitor) => (
           <This this={app}>
             <BarSurface gdkmonitor={monitor} />
+          </This>
+        )}
+      </For>
+      <For each={primary}>
+        {(monitor: Gdk.Monitor) => (
+          <This this={app}>
+            <OsdSurface gdkmonitor={monitor} />
           </This>
         )}
       </For>

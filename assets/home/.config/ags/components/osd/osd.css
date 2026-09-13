@@ -1,0 +1,57 @@
+/* Transient OSD — bottom-right, one plate for both physical metaphors it
+ * renders (ADR-0009: fader for volume/brightness, status LED for the three
+ * toggles). Entrance/exit is a hard cut at the window level, like every
+ * other summoned surface here (MonitorId's own outer window included) —
+ * a truly animated entrance would need something like Gtk.Revealer, not
+ * used anywhere in this shell yet. The motion budget that IS guaranteed to
+ * work on an already-mapped widget goes to the two transitions below: the
+ * fader fill sliding to its new width, and a toggle icon's colour flipping
+ * on state change — both real ADR-0009 "changing is the interaction" cases. */
+window.osd-window {
+  background: transparent;
+}
+
+.osd-plate {
+  min-height: 40px;
+  padding: 8px 14px;
+  background-color: var(--ds-background-default);
+  border: 1px solid var(--ds-border-default-gray);
+  border-radius: var(--ds-radius-base);
+  box-shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.45);
+}
+
+.osd-icon {
+  color: var(--ds-text-secondary-gray);
+}
+
+.osd-fader-track {
+  min-width: 64px;
+  min-height: 6px;
+  background-color: var(--ds-component-background-default-gray);
+  border-radius: 3px;
+}
+
+.osd-fader-fill {
+  min-height: 6px;
+  background-color: var(--ds-component-background-active-blue);
+  border-radius: 3px;
+  transition: min-width var(--ds-motion-popover-duration)
+    var(--ds-motion-popover-timing);
+}
+
+.osd-fader-fill.muted {
+  background-color: var(--ds-component-background-default-gray-alpha);
+}
+
+.osd-toggle-icon {
+  transition: color var(--ds-motion-popover-duration)
+    var(--ds-motion-popover-timing);
+}
+
+.osd-toggle-icon.on {
+  color: var(--ds-text-secondary-green);
+}
+
+.osd-toggle-icon.off {
+  color: var(--ds-text-secondary-gray);
+}

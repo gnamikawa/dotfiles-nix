@@ -91,19 +91,31 @@ hl.bind(
 -- reference config for these exact hardware keys (embedded in the binary
 -- as its default example) — locked so volume still works from the lock
 -- screen, repeating so holding the key ramps continuously.
+--
+-- Each bind re-reads wpctl's own `get-volume` line right after changing it
+-- and forwards it verbatim to the AGS OSD (components/osd/Osd.tsx) — the
+-- OSD parses that one line for both the level and the `[MUTED]` flag, so
+-- the parsing logic lives in exactly one place (see app.tsx's "osd-volume"
+-- case) rather than being duplicated across three binds.
 hl.bind(
 	"XF86AudioRaiseVolume",
-	hl.dsp.exec_cmd("wpctl set-volume --limit 1.0 @DEFAULT_AUDIO_SINK@ 5%+"),
+	hl.dsp.exec_cmd(
+		"bash -lc 'wpctl set-volume --limit 1.0 @DEFAULT_AUDIO_SINK@ 5%+; ags request osd-volume \"$(wpctl get-volume @DEFAULT_AUDIO_SINK@)\"'"
+	),
 	{ locked = true, repeating = true }
 )
 hl.bind(
 	"XF86AudioLowerVolume",
-	hl.dsp.exec_cmd("wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"),
+	hl.dsp.exec_cmd(
+		"bash -lc 'wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-; ags request osd-volume \"$(wpctl get-volume @DEFAULT_AUDIO_SINK@)\"'"
+	),
 	{ locked = true, repeating = true }
 )
 hl.bind(
 	"XF86AudioMute",
-	hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"),
+	hl.dsp.exec_cmd(
+		"bash -lc 'wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle; ags request osd-volume \"$(wpctl get-volume @DEFAULT_AUDIO_SINK@)\"'"
+	),
 	{ locked = true, repeating = true }
 )
 
