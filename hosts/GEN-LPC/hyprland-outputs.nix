@@ -21,9 +21,9 @@
 
   # Fn-row binds matching this host's physical keyboard (ThinkPad X1 Carbon
   # Gen 5). XF86AudioMute/Raise/LowerVolume (F1-F3) are generic keysyms
-  # shared with every host via binds.lua; these four are specific to this
-  # laptop's hardware — a desktop has no backlight, and no other host's
-  # keyboard has an airplane-mode or Bluetooth Fn key.
+  # shared with every host via binds.lua; these five are specific to this
+  # laptop's hardware — a desktop has no backlight, no external-display Fn
+  # key, and no airplane-mode or Bluetooth Fn key.
   #
   # F9 (gear), F11 (keyboard — this unit has no keyboard backlight), and F12
   # (star/"Favorites", a blank user-programmable slot) are skipped: they
@@ -54,6 +54,34 @@
     	hl.dsp.exec_cmd("brightnessctl -e4 -n2 set 5%+"),
     	{ locked = true, repeating = true }
     )
+
+    -- F7 (external display / project): toggle the external monitor between
+    -- extended and mirrored. No-ops if nothing is plugged in; only considers
+    -- the first non-eDP-1 output, since this host has no multi-external-
+    -- monitor dock scenario today. UNVERIFIED against real hardware — there
+    -- was no external monitor available to test hotplug/field names against;
+    -- confirm hl.get_monitors()'s field names (name, mirrorOf) the first
+    -- time a monitor is actually plugged in.
+    local function toggleExternalDisplay()
+    	local external = nil
+    	for _, monitor in ipairs(hl.get_monitors()) do
+    		if monitor.name ~= "eDP-1" then
+    			external = monitor
+    			break
+    		end
+    	end
+    	if not external then
+    		return
+    	end
+
+    	local isMirrored = external.mirrorOf ~= nil and external.mirrorOf ~= "" and external.mirrorOf ~= "none"
+    	if isMirrored then
+    		hl.monitor({ output = external.name, mirrorOf = "none", position = "auto-right" })
+    	else
+    		hl.monitor({ output = external.name, mirrorOf = "eDP-1" })
+    	end
+    end
+    hl.bind("XF86Display", toggleExternalDisplay, { locked = true })
 
     -- F8 (radio tower, slashed): toggle Wi-Fi and Bluetooth together.
     hl.bind(
