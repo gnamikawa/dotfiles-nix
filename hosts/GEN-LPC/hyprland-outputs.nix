@@ -69,27 +69,74 @@
     -- F7 (external display / project): toggle the external monitor between
     -- extended and mirrored. No-ops if nothing is plugged in; only considers
     -- the first non-eDP-1 output, since this host has no multi-external-
-    -- monitor dock scenario today. UNVERIFIED against real hardware — there
-    -- was no external monitor available to test hotplug/field names against;
-    -- confirm hl.get_monitors()'s field names (name, mirrorOf) the first
-    -- time a monitor is actually plugged in.
+    -- monitor dock scenario today.
+    --
+    -- Field names are HL.MonitorSpec's `mirror` (setter, a string: a
+    -- monitor name to mirror, or "none") — confirmed from the Lua API's own
+    -- type stub, share/hypr/stubs/hl.meta.lua, shipped in the Hyprland
+    -- package itself. Both branches fully specify mode/position/scale
+    -- rather than setting only `mirror` — real Hyprland monitor rules
+    -- aren't incremental (each one fully replaces the prior rule for that
+    -- output).
+    --
+    -- The actual bug (diagnosed live against real hardware, isolating
+    -- hl.get_monitors() via a scratch instrumented bind): once a monitor is
+    -- mirroring, `hl.get_monitors()` stops listing it at all — same
+    -- behavior as `hyprctl monitors` (without `all`) excluding mirrored
+    -- outputs. So the mirror→extend branch's own lookup loop could never
+    -- find the monitor it needed to un-mirror, and silently no-op'd every
+    -- time. Fixed by remembering the monitor's name locally the one time
+    -- it's discoverable (while extended, before it starts mirroring) and
+    -- reusing that name to un-mirror it later, instead of re-discovering it
+    -- via hl.get_monitors() on every call. `externalDisplayMirrored` still
+    -- tracks direction in a local rather than reading state back from the
+    -- API, same reasoning and same pattern as `workspaceLayouts` above in
+    -- binds.lua (HL.Workspace doesn't expose a reliably-fresh tiledLayout
+    -- either). This does mean a monitor unplug/replug or an external change
+    -- via `hyprctl` directly can desync this from reality; acceptable for a
+    -- single-external-monitor best effort.
+    --
+    -- Two earlier "fixes" here (a 400ms debounce guard against a suspected
+    -- hardware double-fire, and reading `external.is_mirror` back to detect
+    -- state) were both disproven by the same instrumentation: a single
+    -- physical press reliably fires the bind exactly once, and local state
+    -- persists correctly across separate presses. Removed rather than left
+    -- in as speculative defense against problems that don't exist.
+    local externalDisplayName = nil
+    local externalDisplayMirrored = false
     local function toggleExternalDisplay()
-    	local external = nil
-    	for _, monitor in ipairs(hl.get_monitors()) do
-    		if monitor.name ~= "eDP-1" then
-    			external = monitor
-    			break
+    	if not externalDisplayMirrored then
+    		local external = nil
+    		for _, monitor in ipairs(hl.get_monitors()) do
+    			if monitor.name ~= "eDP-1" then
+    				external = monitor
+    				break
+    			end
     		end
-    	end
-    	if not external then
-    		return
-    	end
-
-    	local isMirrored = external.mirrorOf ~= nil and external.mirrorOf ~= "" and external.mirrorOf ~= "none"
-    	if isMirrored then
-    		hl.monitor({ output = external.name, mirrorOf = "none", position = "auto-right" })
+    		if not external then
+    			return
+    		end
+    		externalDisplayName = external.name
+    		externalDisplayMirrored = true
+    		hl.monitor({
+    			output = externalDisplayName,
+    			mode = "preferred",
+    			position = "auto",
+    			scale = "auto",
+    			mirror = "eDP-1",
+    		})
     	else
-    		hl.monitor({ output = external.name, mirrorOf = "eDP-1" })
+    		if not externalDisplayName then
+    			return
+    		end
+    		externalDisplayMirrored = false
+    		hl.monitor({
+    			output = externalDisplayName,
+    			mode = "preferred",
+    			position = "auto-right",
+    			scale = "auto",
+    			mirror = "none",
+    		})
     	end
     end
     hl.bind("XF86Display", toggleExternalDisplay, { locked = true })
