@@ -71,18 +71,7 @@ hl.bind(mod .. " + SHIFT + F12", hl.dsp.exec_cmd("systemctl poweroff"))
 -- ── Screenshots ──────────────────────────────────────────────────────────
 hl.bind("CTRL + SHIFT + 2", hl.dsp.exec_cmd("grimblast copy output"))
 hl.bind("CTRL + SHIFT + 3", hl.dsp.exec_cmd("grimblast copy active"))
-hl.bind(
-	"CTRL + SHIFT + 4",
-	hl.dsp.exec_cmd(
-		'SLURP_ARGS="-b'
-			.. slurpBackground
-			.. " -c"
-			.. slurpBorder
-			.. " -s"
-			.. slurpSelection
-			.. ' -w1" grimblast copy area'
-	)
-)
+hl.bind("CTRL + SHIFT + 4", hl.dsp.exec_cmd("grimblast copy area"))
 
 -- ── Audio ────────────────────────────────────────────────────────────────
 -- `locked` and `repeating` match Hyprland's own shipped reference config
