@@ -2,7 +2,7 @@
 // output. Left half is a placeholder for the upcoming drag-down summon
 // gesture (iOS-Control-Center style, not built yet — the handle lives here
 // so the swipe target is discoverable later). Right half carries the
-// ambient triad: bluetooth, wifi, clock.
+// ambient cluster: bluetooth, wifi, battery (when present), clock.
 //
 // The layer-shell surface that hosts this lives in desktop/Desktop.tsx, so
 // Bar takes no props and knows nothing about which monitor it is on.
@@ -14,6 +14,7 @@ import Gio from "gi://Gio";
 import GLib from "gi://GLib";
 import NM from "gi://NM";
 import AstalBluetooth from "gi://AstalBluetooth";
+import AstalBattery from "gi://AstalBattery";
 
 const bluetooth = AstalBluetooth.get_default();
 
@@ -98,6 +99,27 @@ function getWifiDevice(): NM.DeviceWifi | null {
   return null;
 }
 
+// Looked up once, not re-scanned per tick — same "fixed for the life of the
+// shell" tradeoff as `bluetooth` above. A Wi-Fi adapter hot-plugged after AGS
+// starts won't be picked up without a restart; this machine's adapter is
+// built in, so that gap doesn't bite in practice.
+const wifiDevice = getWifiDevice();
+
+const wirelessEnabled = createBinding(nmClient, "wirelessEnabled");
+const connectivity = createBinding(nmClient, "connectivity");
+// `createBinding`'s multi-property form re-subscribes to the *new* access
+// point's `strength` whenever `activeAccessPoint` itself changes (each hop
+// re-evaluates via a nested `createComputed`), so reassociating to a
+// different AP keeps the signal-strength binding live without any manual
+// resubscription.
+const wifiState = wifiDevice ? createBinding(wifiDevice, "state") : null;
+const wifiStrength = wifiDevice
+  ? createBinding(wifiDevice, "activeAccessPoint", "strength")
+  : null;
+const wifiConnectionName = wifiDevice
+  ? createBinding(wifiDevice, "activeConnection", "id")
+  : null;
+
 /**
  * Derive the Lucide glyph that best represents the current Wi-Fi state.
  *
@@ -107,16 +129,13 @@ function getWifiDevice(): NM.DeviceWifi | null {
  * @returns Lucide icon basename for {@link lucideIcon}.
  */
 function computeWifiIcon(): string {
-  const wifi = getWifiDevice();
-  if (!wifi || !nmClient.wireless_enabled) return "wifi-off";
+  if (!wifiDevice || !wirelessEnabled()) return "wifi-off";
 
-  const state = wifi.get_state();
+  const state = wifiState!();
   if (state !== NM.DeviceState.ACTIVATED) return "wifi-off";
-  if (nmClient.get_connectivity() !== NM.ConnectivityState.FULL) {
-    return "wifi-zero";
-  }
+  if (connectivity() !== NM.ConnectivityState.FULL) return "wifi-zero";
 
-  const strength = wifi.get_active_access_point()?.get_strength() ?? 0;
+  const strength = wifiStrength!() ?? 0;
   if (strength >= 75) return "wifi";
   if (strength >= 50) return "wifi-high";
   if (strength >= 25) return "wifi-low";
@@ -131,35 +150,26 @@ function computeWifiIcon(): string {
  * @returns Tooltip text for the bar's Wi-Fi glyph.
  */
 function computeWifiTooltip(): string {
-  const wifi = getWifiDevice();
-  if (!wifi) return "No Wi-Fi adapter";
-  if (!nmClient.wireless_enabled) return "Wi-Fi off";
+  if (!wifiDevice) return "No Wi-Fi adapter";
+  if (!wirelessEnabled()) return "Wi-Fi off";
 
-  const state = wifi.get_state();
+  const state = wifiState!();
   const DS = NM.DeviceState;
   if (state === DS.UNAVAILABLE) return "Wi-Fi unavailable";
   if (state === DS.DISCONNECTED) return "Not connected";
   if (state === DS.FAILED) return "Connection failed";
   if (state !== DS.ACTIVATED) return "Connecting…";
 
-  const name = wifi.get_active_connection()?.get_id() ?? "Wi-Fi";
-  if (nmClient.get_connectivity() !== NM.ConnectivityState.FULL) {
+  const name = wifiConnectionName!() ?? "Wi-Fi";
+  if (connectivity() !== NM.ConnectivityState.FULL) {
     return `${name} — no internet`;
   }
-  const strength = wifi.get_active_access_point()?.get_strength() ?? 0;
+  const strength = wifiStrength!() ?? 0;
   return `${name} · ${strength}%`;
 }
 
-const wifiIconName = createPoll<string>(
-  computeWifiIcon(),
-  3000,
-  computeWifiIcon,
-);
-const wifiTooltip = createPoll<string>(
-  computeWifiTooltip(),
-  3000,
-  computeWifiTooltip,
-);
+const wifiIconName = createComputed(computeWifiIcon);
+const wifiTooltip = createComputed(computeWifiTooltip);
 
 const isPowered = createBinding(bluetooth, "isPowered");
 const isConnected = createBinding(bluetooth, "isConnected");
@@ -174,9 +184,59 @@ const btTooltip = createComputed(() => {
   return "Bluetooth on";
 });
 
+// AstalBattery talks to UPower over the system bus (D-Bus activates upowerd
+// on first use — confirmed live, no NixOS module change needed), the same
+// reason AstalBluetooth works above but the raw-/sys reader in
+// common/sysinfo.ts doesn't: that reader exists for the greeter and lock
+// screen, which run before/outside a login session and have no bus to talk
+// to. The bar runs inside a full user session, so it gets the real thing:
+// property-change signals instead of re-reading sysfs on a timer.
+const battery = AstalBattery.get_default();
+
+// Whether the machine has a battery is fixed for the life of the shell — a
+// desktop does not grow one — so this is a one-time check, not a binding.
+// Gates whether the bar renders the glyph at all (GEN-DPC has none; GEN-LPC
+// does).
+const hasBattery = battery.get_is_present();
+
+const batteryPercentage = createBinding(battery, "percentage");
+const batteryCharging = createBinding(battery, "charging");
+
+/**
+ * Derive the Lucide glyph for the current battery state: the charging glyph
+ * while plugged in, otherwise a four-step ramp bucketed off capacity.
+ *
+ * @returns Lucide icon basename for {@link lucideIcon}.
+ */
+function computeBatteryIcon(): string {
+  const pct = Math.round(batteryPercentage() * 100);
+  if (batteryCharging()) return "battery-charging";
+  if (pct <= 15) return "battery-warning";
+  if (pct <= 40) return "battery-low";
+  if (pct <= 80) return "battery-medium";
+  return "battery-full";
+}
+
+/**
+ * Derive a human-readable battery tooltip: charging state plus percentage
+ * remaining.
+ *
+ * @returns Tooltip text for the bar's battery glyph.
+ */
+function computeBatteryTooltip(): string {
+  const pct = Math.round(batteryPercentage() * 100);
+  if (batteryCharging()) {
+    return pct >= 100 ? "Fully charged" : `Charging · ${pct}%`;
+  }
+  return `${pct}% remaining`;
+}
+
+const batteryIconName = createComputed(computeBatteryIcon);
+const batteryTooltip = createComputed(computeBatteryTooltip);
+
 /**
  * The bar surface's content: a left-hand drag-down handle stub and a
- * right-hand ambient triad (Bluetooth, Wi-Fi, clock).
+ * right-hand ambient cluster (Bluetooth, Wi-Fi, battery when present, clock).
  *
  * Takes no props — the layer-shell surface in `desktop/Desktop.tsx` owns
  * output selection.
@@ -218,6 +278,14 @@ export default function Bar() {
           pixelSize={16}
           $={(self) => bindLucideIcon(self, wifiIconName)}
         />
+        {hasBattery && (
+          <image
+            class="bar-icon"
+            tooltipText={batteryTooltip}
+            pixelSize={16}
+            $={(self) => bindLucideIcon(self, batteryIconName)}
+          />
+        )}
         <label
           class="bar-clock text-button-14"
           label={time}

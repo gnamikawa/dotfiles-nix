@@ -1,7 +1,8 @@
 /* Bar — the always-on strip anchored to the top of the primary output.
  * Component: components/Bar.tsx. Surface: desktop/Desktop.tsx
  * BarSurface. Contents: drag-down handle stub (left) and the ambient
- * triad — Bluetooth, Wi-Fi, clock — on the right. */
+ * cluster — Bluetooth, Wi-Fi, battery (when present), clock — on the
+ * right. */
 window.bar {
   background: transparent;
   color: var(--ds-text-primary-gray);
