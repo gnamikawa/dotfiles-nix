@@ -17,7 +17,16 @@ import {
 import { setRunnerOpen } from "./common/runner";
 import { setSystemMenuOpen } from "./common/system-menu";
 import { bumpLayoutTick } from "./common/workspace-viz";
-import { showOsd } from "./common/osd";
+import {
+  volumeUp,
+  volumeDown,
+  volumeMuteToggle,
+  micMuteToggle,
+  brightnessUp,
+  brightnessDown,
+  radioToggle,
+  bluetoothToggle,
+} from "./common/hardware";
 import {
   resetPrimaryPip,
   startWindowOrchestrator,
@@ -160,40 +169,42 @@ app.start({
         bumpLayoutTick();
         res("ok");
         return;
-      case "osd-volume": {
-        // argv[1] is wpctl's own `get-volume` line verbatim (e.g.
-        // "Volume: 0.45" or "Volume: 0.45 [MUTED]"), read by the Lua bind
-        // right after it changes the volume — see common/osd.ts for why
-        // this is a snapshot rather than a live Astal binding.
-        const raw = argv[1] ?? "";
-        const match = raw.match(/([\d.]+)/);
-        const level = match ? Math.round(parseFloat(match[1]) * 100) : 0;
-        showOsd({ kind: "volume", level, on: !raw.includes("MUTED") });
+      // Every verb below is a bare `ags request <verb>` from a Hyprland
+      // Fn-row/audio bind, no payload — the handler in common/hardware.ts
+      // owns the actual wpctl/brightnessctl/NM/Bluetooth call and shows the
+      // OSD itself. `res()` fires immediately rather than waiting on the
+      // (async) hardware call: the Hyprland bind doesn't consume the reply,
+      // it only needs the DBus round-trip to complete.
+      case "volume-up":
+        volumeUp();
         res("ok");
         return;
-      }
-      case "osd-brightness": {
-        // argv[1] is `brightnessctl -m i`'s machine-readable line verbatim:
-        // "device,class,current,percent%,max".
-        const raw = argv[1] ?? "";
-        const percentField = raw.split(",")[3] ?? "0%";
-        const level = parseInt(percentField, 10) || 0;
-        showOsd({ kind: "brightness", level });
+      case "volume-down":
+        volumeDown();
         res("ok");
         return;
-      }
-      case "osd-mic": {
-        const raw = argv[1] ?? "";
-        showOsd({ kind: "mic", on: !raw.includes("MUTED") });
+      case "volume-mute-toggle":
+        volumeMuteToggle();
         res("ok");
         return;
-      }
-      case "osd-bluetooth":
-        showOsd({ kind: "bluetooth", on: argv[1] === "1" });
+      case "mic-mute-toggle":
+        micMuteToggle();
         res("ok");
         return;
-      case "osd-radio":
-        showOsd({ kind: "radio", on: argv[1] === "1" });
+      case "brightness-up":
+        brightnessUp();
+        res("ok");
+        return;
+      case "brightness-down":
+        brightnessDown();
+        res("ok");
+        return;
+      case "radio-toggle":
+        radioToggle();
+        res("ok");
+        return;
+      case "bluetooth-toggle":
+        bluetoothToggle();
         res("ok");
         return;
       default:
