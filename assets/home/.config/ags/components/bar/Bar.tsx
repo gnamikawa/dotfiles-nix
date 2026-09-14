@@ -195,22 +195,34 @@ const battery = AstalBattery.get_default();
 
 // Whether the machine has a battery is fixed for the life of the shell — a
 // desktop does not grow one — so this is a one-time check, not a binding.
-// Gates whether the bar renders the glyph at all (GEN-DPC has none; GEN-LPC
-// does).
-const hasBattery = battery.get_is_present();
+// Gates whether the bar renders the glyph at all: GEN-DPC (desktop) has no
+// battery, so upowerd's DisplayDevice aggregates zero real batteries and
+// reports `isPresent: false` — it does NOT report present just because the
+// synthetic DisplayDevice object itself always exists. GEN-LPC (laptop)
+// has BAT0, so DisplayDevice aggregates it and reports true. `get_default()`
+// can also return null outright if upowerd's DisplayDevice isn't reachable
+// at all (not just battery-less) — same defensive-null posture as
+// `wifiDevice` above, so a upowerd hiccup hides the glyph instead of
+// crashing the whole bar.
+const hasBattery = battery?.get_is_present() ?? false;
 
-const batteryPercentage = createBinding(battery, "percentage");
-const batteryCharging = createBinding(battery, "charging");
+const batteryPercentage = hasBattery
+  ? createBinding(battery!, "percentage")
+  : null;
+const batteryCharging = hasBattery ? createBinding(battery!, "charging") : null;
 
 /**
  * Derive the Lucide glyph for the current battery state: the charging glyph
  * while plugged in, otherwise a four-step ramp bucketed off capacity.
  *
+ * Only ever called while `hasBattery` gates the glyph into existence, so
+ * the bindings above are guaranteed non-null here.
+ *
  * @returns Lucide icon basename for {@link lucideIcon}.
  */
 function computeBatteryIcon(): string {
-  const pct = Math.round(batteryPercentage() * 100);
-  if (batteryCharging()) return "battery-charging";
+  const pct = Math.round(batteryPercentage!() * 100);
+  if (batteryCharging!()) return "battery-charging";
   if (pct <= 15) return "battery-warning";
   if (pct <= 40) return "battery-low";
   if (pct <= 80) return "battery-medium";
@@ -224,8 +236,8 @@ function computeBatteryIcon(): string {
  * @returns Tooltip text for the bar's battery glyph.
  */
 function computeBatteryTooltip(): string {
-  const pct = Math.round(batteryPercentage() * 100);
-  if (batteryCharging()) {
+  const pct = Math.round(batteryPercentage!() * 100);
+  if (batteryCharging!()) {
     return pct >= 100 ? "Fully charged" : `Charging · ${pct}%`;
   }
   return `${pct}% remaining`;
