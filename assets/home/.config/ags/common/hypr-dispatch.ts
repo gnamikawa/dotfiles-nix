@@ -20,10 +20,12 @@ import Gio from "gi://Gio?version=2.0";
 import { buildSetProp } from "./hypr-dispatch-builders";
 
 export {
+  buildFocus,
   buildMoveCursor,
   buildMoveWindowExact,
   buildMoveWindowToWorkspaceSilent,
   buildResizeWindow,
+  buildRestoreTail,
   buildSetFloating,
   buildSetFullscreen,
   buildSetPinned,

@@ -59,6 +59,58 @@ export function buildSetPinned(address: string, pinned: boolean): string {
 }
 
 /**
+ * Build a same-batch tail that restores the focused client and cursor
+ * position to what they were before the batch ran.
+ *
+ * Purpose: several Hyprland dispatchers (notably `hl.dsp.window.move`
+ * with `workspace = N, silent = true` when the target ends up on a
+ * different monitor) warp the cursor and shift focus onto the moved
+ * window as a side effect. Appending this tail to the SAME `hyprctl
+ * --batch` call runs the restore atomically with the batch, so the
+ * compositor never renders an interim frame with focus/cursor on the
+ * disturbed window.
+ *
+ * The `no_focus` clear before the focus dispatch mirrors `focusWindow`
+ * in `hypr-dispatch.ts` — the floating-dimmer may have set `no_focus`
+ * on the target while the peek was up, and Hyprland refuses to focus
+ * any window with that flag. The clear is idempotent on untouched
+ * clients, so the extra dispatch is safe.
+ *
+ * @param focusedAddress - The address focus should return to, or null
+ *   to skip the focus restore (nothing was focused before the batch).
+ * @param cursor - The cursor position to warp back to, or null to skip
+ *   (cursor was unreported before the batch).
+ */
+export function buildRestoreTail(
+  focusedAddress: string | null,
+  cursor: { x: number; y: number } | null,
+): string[] {
+  const tail: string[] = [];
+  if (focusedAddress !== null) {
+    tail.push(buildSetProp(focusedAddress, "no_focus", "false"));
+    tail.push(buildFocus(focusedAddress));
+  }
+  if (cursor !== null) {
+    tail.push(buildMoveCursor(cursor.x, cursor.y));
+  }
+  return tail;
+}
+
+/**
+ * Build the Lua expression that focuses a client by address.
+ *
+ * Pairs with a `no_focus` clear (see `focusWindow` in `hypr-dispatch.ts`)
+ * when the caller can't be sure the target didn't get `no_focus = true`
+ * from the floating-dimmer; batches that already reset focus themselves
+ * (like the cycle restore tail) prepend the clear separately.
+ *
+ * @param address - Client address in `0x…` form.
+ */
+export function buildFocus(address: string): string {
+  return `hl.dsp.focus({ window = ${windowSelector(address)} })`;
+}
+
+/**
  * Build the Lua expression that toggles a client's fullscreen mode.
  *
  * Two modes exist in Hyprland: `fullscreen` (borderless, covers the
@@ -164,11 +216,17 @@ export function buildSetProp(
 
 /**
  * Build the Lua expression that moves a client to another workspace
- * without shifting the user's focus.
+ * without switching the user's active workspace.
  *
  * Used to relocate a window across monitors: pass the target monitor's
  * `active_workspace` id and the compositor sends the window there while
  * the user's active workspace stays where it was.
+ *
+ * `silent` is a misnomer — it stops the user's active workspace from
+ * flipping, but when the target ends up on a DIFFERENT MONITOR from
+ * the cursor, Hyprland still warps the cursor onto the moved window
+ * and shifts keyboard focus to it. Callers that need cursor/focus to
+ * stay put must append {@link buildRestoreTail} to the same batch.
  *
  * @param address - Client address in `0x…` form.
  * @param workspaceId - Numeric workspace id from Astal's `Workspace.id`.

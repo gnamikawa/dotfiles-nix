@@ -12,7 +12,7 @@
 // the returned batch.
 
 import AstalHyprland from "gi://AstalHyprland";
-import { sendBatch } from "../../../common/hypr-dispatch";
+import { buildRestoreTail, sendBatch } from "../../../common/hypr-dispatch";
 import { loadConfig } from "../config";
 import {
   buildCycleBatch,
@@ -187,6 +187,13 @@ export function handle(client: AstalHyprland.Client): void {
  * asks the pure state machine which arm to fire, and dispatches its
  * batch. A no-op when the cycle resolves to `noop`, so spamming the
  * key costs one hyprctl call per press.
+ *
+ * Appends a {@link buildRestoreTail} to the same batch: several
+ * Hyprland dispatchers the cycle uses (notably `movetoworkspacesilent`
+ * when the target ends up on a different monitor) warp the cursor and
+ * shift focus onto the moved window as a side effect. The tail runs
+ * atomically with the cycle so the user never sees the intermediate
+ * state.
  */
 export function cyclePrimaryPip(): void {
   const primary = findPrimaryMonitor();
@@ -208,5 +215,7 @@ export function cyclePrimaryPip(): void {
     cursor,
   );
 
-  sendBatch(buildCycleBatch(cycle, primarySnap, satelliteSnap));
+  const batch = buildCycleBatch(cycle, primarySnap, satelliteSnap);
+  if (batch.length === 0) return;
+  sendBatch([...batch, ...buildRestoreTail(focusedAddress, cursor)]);
 }
