@@ -28,7 +28,7 @@ import {
   bluetoothToggle,
 } from "./common/hardware";
 import {
-  resetPrimaryPip,
+  cyclePrimaryPip,
   startWindowOrchestrator,
 } from "./services/window-orchestrator";
 import {
@@ -39,7 +39,7 @@ import {
 startWindowOrchestrator();
 
 // Quick Alt double-press (press → release → press within this window)
-// triggers `resetPrimaryPip` instead of re-opening the peek. Sized to be
+// triggers `cyclePrimaryPip` instead of re-opening the peek. Sized to be
 // comfortably longer than a fast human double-tap (~200ms round-trip)
 // but shorter than the "I meant to open the menu twice" beat, so a
 // deliberate single-tap → wait → single-tap still opens the peek both
@@ -72,11 +72,13 @@ app.start({
     switch (argv[0]) {
       case "window-menu-open": {
         // Quick Alt double-press (second press lands within
-        // ALT_DOUBLE_PRESS_MS of the previous one) is repurposed as
-        // "reset the primary PiP to its top-right corner" — the peek
-        // stays down and the reset fires instead. Clearing the
-        // timestamp afterwards means a third quick press starts a
-        // fresh double-press window, not another reset immediately.
+        // ALT_DOUBLE_PRESS_MS of the previous one) advances the PiP
+        // cycle instead of opening the peek — see
+        // `services/window-orchestrator/policies/firefox-pip-placement`
+        // for the arm priority. The peek stays down and the cycle
+        // fires instead. Clearing the timestamp afterwards means a
+        // third quick press starts a fresh double-press window, not
+        // another cycle immediately.
         const now = Date.now();
         if (now - lastAltPressAt < ALT_DOUBLE_PRESS_MS) {
           lastAltPressAt = 0;
@@ -84,8 +86,8 @@ app.start({
           setWindowMenuOpen(false);
           setWindowContextOpen(false);
           disableFloatingDimmer();
-          resetPrimaryPip();
-          res("reset");
+          cyclePrimaryPip();
+          res("cycle");
           return;
         }
         lastAltPressAt = now;

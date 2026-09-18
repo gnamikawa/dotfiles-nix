@@ -8,11 +8,11 @@
 
 import AstalHyprland from "gi://AstalHyprland";
 import {
+  cyclePrimaryPip,
   handle as handleFirefoxPip,
-  resetPrimaryPip,
 } from "./policies/firefox-pip";
 
-export { resetPrimaryPip };
+export { cyclePrimaryPip };
 
 /**
  * A window-placement policy: a pure handler over one Hyprland client that

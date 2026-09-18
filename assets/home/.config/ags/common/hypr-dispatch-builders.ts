@@ -59,6 +59,26 @@ export function buildSetPinned(address: string, pinned: boolean): string {
 }
 
 /**
+ * Build the Lua expression that toggles a client's fullscreen mode.
+ *
+ * Two modes exist in Hyprland: `fullscreen` (borderless, covers the
+ * whole monitor including exclusive layers) and `maximized` (respects
+ * reserved zones). Passing `on = true` sets `fullscreen` explicitly —
+ * `set` without a mode defaults to `maximized`, which the Firefox PiP
+ * `suppress_event = "maximize"` window rule blocks anyway. `off`
+ * restores whatever pose the window held before the mode was set.
+ *
+ * @param address - Client address in `0x…` form.
+ * @param on - `true` sets borderless fullscreen; `false` restores.
+ */
+export function buildSetFullscreen(address: string, on: boolean): string {
+  if (on) {
+    return `hl.dsp.window.fullscreen({ window = ${windowSelector(address)}, action = "set", mode = "fullscreen" })`;
+  }
+  return `hl.dsp.window.fullscreen({ window = ${windowSelector(address)}, action = "unset" })`;
+}
+
+/**
  * Build the Lua expression that moves a client to an absolute pixel
  * position in global compositor coordinates.
  *

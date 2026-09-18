@@ -1,36 +1,25 @@
 // Firefox Picture-in-Picture placement policy — AstalHyprland adapter.
 //
-// Every Firefox PiP window has the same class ("firefox") and title
-// ("Picture-in-Picture"). The policy routes by "does the primary already
-// hold a PiP?" — not by arrival count — so the invariant holds even when
-// the user drags a PiP off the primary or closes the corner PiP first:
-//   Primary has no PiP           → primary monitor, floating + pinned in
-//                                  the top-right corner. This is the
-//                                  stream you actually watch.
-//   Primary already holds a PiP,
-//   satellite present            → satellite monitor, tiled. Hyprland's
-//                                  layout engine splits the whole monitor
-//                                  between however many overflow PiPs are
-//                                  open, which is what you want when
-//                                  glancing between four co-streams.
-//   Primary already holds a PiP,
-//   no satellite                 → primary monitor, cascading floating
-//                                  windows offset from the corner. Laptop
-//                                  fallback.
+// Two entrypoints: `handle` runs on every `client-added` and gives a
+// freshly-mapped PiP a sensible pose (corner if the corner is empty,
+// satellite tile or cascade otherwise). `cyclePrimaryPip` fires on
+// the Alt double-press and advances the full state-machine cycle
+// (unfullscreen > sweep strays > demote/fullscreen > promote > swap).
 //
-// All geometry and batch-shape decisions live in
-// `firefox-pip-placement.ts` (pure, unit-testable). This module is the
-// thin adapter that snapshots live AstalHyprland state into that pure
-// module's inputs and dispatches the returned batch.
+// All decisions live in `firefox-pip-placement.ts` (pure, unit-
+// testable). This module is the thin adapter that snapshots live
+// AstalHyprland state into that pure module's inputs and dispatches
+// the returned batch.
 
 import AstalHyprland from "gi://AstalHyprland";
 import { sendBatch } from "../../../common/hypr-dispatch";
 import { loadConfig } from "../config";
 import {
+  buildCycleBatch,
   buildPlacementBatch,
-  buildResetBatch,
+  computeCycle,
   placementFor,
-  selectPromotionCandidate,
+  type CursorPosition,
   type MonitorSnapshot,
   type PipSnapshot,
 } from "./firefox-pip-placement";
@@ -96,6 +85,11 @@ function snapshotClient(client: AstalHyprland.Client): PipSnapshot {
     floating: client.floating,
     monitorId: client.monitor?.id ?? -1,
     workspaceId: client.workspace?.id ?? null,
+    x: client.x,
+    y: client.y,
+    width: client.width,
+    height: client.height,
+    fullscreen: client.fullscreen !== AstalHyprland.Fullscreen.NONE,
   };
 }
 
@@ -110,8 +104,22 @@ function snapshotMonitor(monitor: AstalHyprland.Monitor): MonitorSnapshot {
     x: monitor.x,
     y: monitor.y,
     width: monitor.width,
+    height: monitor.height,
     activeWorkspaceId: monitor.activeWorkspace.id,
   };
+}
+
+/**
+ * Snapshot the compositor's cursor position, or null if unavailable.
+ *
+ * Astal exposes `cursor_position` as a `Position` object. Under rare
+ * race conditions (very early startup) it can be missing; returning
+ * null lets the cycle engine fall through the Hovered tier cleanly.
+ */
+function snapshotCursor(): CursorPosition | null {
+  const pos = hyprland.cursor_position;
+  if (!pos) return null;
+  return { x: pos.x, y: pos.y };
 }
 
 /**
@@ -122,10 +130,6 @@ function snapshotMonitor(monitor: AstalHyprland.Monitor): MonitorSnapshot {
  * in lets the caller ask "does the primary already hold a PiP other
  * than this new one?" without racing against whether Astal's client
  * list already includes the newcomer.
- *
- * Placement keys on this count (not the total across all monitors) so
- * the corner-PiP invariant survives the user dragging a PiP off the
- * primary onto the satellite by hand.
  *
  * @param excludeAddress - Address to leave out of the count.
  * @param primaryId - The primary monitor id to filter clients against.
@@ -140,10 +144,11 @@ function otherPipsOnPrimary(excludeAddress: string, primaryId: number): number {
 }
 
 /**
- * Handle a newly-mapped client, applying the PiP policy if it matches.
+ * Handle a newly-mapped client, applying the on-arrival PiP placement
+ * if it matches.
  *
- * Called by the orchestrator's `index.ts` on every `client-added` signal.
- * No-ops for non-PiP clients.
+ * Called by the orchestrator's `index.ts` on every `client-added`
+ * signal. No-ops for non-PiP clients.
  *
  * The dispatches are collected as Lua strings and fired as one
  * `hyprctl --batch` call so Hyprland runs them in the order the code
@@ -175,28 +180,33 @@ export function handle(client: AstalHyprland.Client): void {
 }
 
 /**
- * Snap a PiP into the primary corner slot.
+ * Advance the PiP cycle one step.
  *
- * Called from `app.tsx` on a quick Alt double-press. Selects a candidate
- * via {@link selectPromotionCandidate} (focused > already-floating >
- * tiled-on-primary > tiled-on-satellite), and if that pick displaces an
- * existing floating PiP, demotes it into overflow in the same batch. A
- * no-op when no PiP exists. Idempotent when the current corner PiP is
- * the selection, so spamming the reset costs nothing.
+ * Called from `app.tsx` on a quick Alt double-press. Snapshots the
+ * full compositor state (every PiP, both monitors, focus, cursor),
+ * asks the pure state machine which arm to fire, and dispatches its
+ * batch. A no-op when the cycle resolves to `noop`, so spamming the
+ * key costs one hyprctl call per press.
  */
-export function resetPrimaryPip(): void {
+export function cyclePrimaryPip(): void {
   const primary = findPrimaryMonitor();
   if (!primary) return;
-
-  const focusedAddress = hyprland.get_focused_client()?.address ?? null;
-  const pips = hyprland.clients.filter(isPipClient).map(snapshotClient);
-
-  const selection = selectPromotionCandidate(pips, focusedAddress, primary.id);
-  if (!selection) return;
 
   const primarySnap = snapshotMonitor(primary);
   const satellite = findSatelliteMonitor();
   const satelliteSnap = satellite ? snapshotMonitor(satellite) : null;
 
-  sendBatch(buildResetBatch(selection, primarySnap, satelliteSnap));
+  const pips = hyprland.clients.filter(isPipClient).map(snapshotClient);
+  const focusedAddress = hyprland.get_focused_client()?.address ?? null;
+  const cursor = snapshotCursor();
+
+  const cycle = computeCycle(
+    pips,
+    primarySnap,
+    satelliteSnap,
+    focusedAddress,
+    cursor,
+  );
+
+  sendBatch(buildCycleBatch(cycle, primarySnap, satelliteSnap));
 }

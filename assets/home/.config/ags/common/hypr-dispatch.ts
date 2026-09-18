@@ -25,6 +25,7 @@ export {
   buildMoveWindowToWorkspaceSilent,
   buildResizeWindow,
   buildSetFloating,
+  buildSetFullscreen,
   buildSetPinned,
   buildSetProp,
 } from "./hypr-dispatch-builders";

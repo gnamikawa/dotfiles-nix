@@ -7,7 +7,9 @@ import {
   PIP_HEIGHT,
   PIP_WIDTH,
   type PipSnapshot,
-  buildResetBatch,
+  buildCycleBatch,
+  buildPlacementBatch,
+  placementFor,
 } from "../../assets/home/.config/ags/services/window-orchestrator/policies/firefox-pip-placement.ts";
 
 const PRIMARY: MonitorSnapshot = {
@@ -15,6 +17,7 @@ const PRIMARY: MonitorSnapshot = {
   x: 0,
   y: 0,
   width: 1920,
+  height: 1080,
   activeWorkspaceId: 10,
 };
 
@@ -23,8 +26,12 @@ const SATELLITE: MonitorSnapshot = {
   x: 1920,
   y: 0,
   width: 2560,
+  height: 1440,
   activeWorkspaceId: 20,
 };
+
+const CORNER_X = PRIMARY.width - PIP_WIDTH - INSET;
+const CORNER_Y = BAR_HEIGHT + INSET;
 
 /**
  * Build a PipSnapshot with sensible defaults; only spell out the fields
@@ -35,147 +42,302 @@ function pip(
 ): PipSnapshot {
   return {
     floating: false,
-    monitorId: PRIMARY.id,
-    workspaceId: PRIMARY.activeWorkspaceId,
+    monitorId: SATELLITE.id,
+    workspaceId: SATELLITE.activeWorkspaceId,
+    x: SATELLITE.x,
+    y: SATELLITE.y,
+    width: 800,
+    height: 720,
+    fullscreen: false,
     ...overrides,
   };
 }
 
-describe("buildResetBatch", () => {
-  test("candidate already floating on primary → single re-snap batch, no demotion", () => {
-    const candidate = pip({
-      address: "0xa",
-      floating: true,
-      workspaceId: PRIMARY.activeWorkspaceId,
-    });
-    const batch = buildResetBatch(
-      { candidate, demote: null },
+/**
+ * Build a Primary PiP — floating, on primary, at the exact docked pose.
+ */
+function primaryPip(
+  overrides: Partial<PipSnapshot> & { address: string },
+): PipSnapshot {
+  return {
+    floating: true,
+    monitorId: PRIMARY.id,
+    workspaceId: PRIMARY.activeWorkspaceId,
+    x: CORNER_X,
+    y: CORNER_Y,
+    width: PIP_WIDTH,
+    height: PIP_HEIGHT,
+    fullscreen: false,
+    ...overrides,
+  };
+}
+
+describe("buildCycleBatch — arm shapes", () => {
+  test("noop → empty batch", () => {
+    expect(buildCycleBatch({ kind: "noop" }, PRIMARY, SATELLITE)).toEqual([]);
+  });
+
+  test("fullscreenPrimary → single set-fullscreen dispatch", () => {
+    const p = primaryPip({ address: "0xa" });
+    const batch = buildCycleBatch(
+      { kind: "fullscreenPrimary", pip: p },
       PRIMARY,
-      SATELLITE,
+      null,
     );
-
-    // Every dispatch in the batch targets the same window.
-    expect(batch.every((line) => line.includes(candidate.address))).toBe(true);
-
-    // Floating stays on, workspace is already the target so no move,
-    // resize + move-exact + pin land in order. Rounding is owned by the
-    // compositor rule in hypr/rules.lua, so no setprop shows up here.
-    const expectedX = PRIMARY.x + PRIMARY.width - PIP_WIDTH - INSET;
-    const expectedY = PRIMARY.y + BAR_HEIGHT + INSET;
     expect(batch).toEqual([
-      expect.stringContaining(`action = "on"`),
-      expect.stringContaining(
-        `hl.dsp.window.resize({ window = "address:0xa", x = ${PIP_WIDTH}, y = ${PIP_HEIGHT} })`,
-      ),
-      expect.stringContaining(
-        `hl.dsp.window.move({ window = "address:0xa", x = ${expectedX}, y = ${expectedY}, relative = false })`,
-      ),
-      expect.stringContaining(`hl.dsp.window.pin`),
+      expect.stringContaining(`hl.dsp.window.fullscreen`),
     ]);
-    expect(batch.some((line) => line.includes(`prop = "rounding"`))).toBe(
-      false,
-    );
+    expect(batch[0]).toContain(`action = "set"`);
+    expect(batch[0]).toContain(`mode = "fullscreen"`);
+    expect(batch[0]).toContain(`address:0xa`);
   });
 
-  test("candidate on different workspace than target → workspace-move dispatch is inserted", () => {
-    const candidate = pip({
-      address: "0xa",
-      floating: false,
-      workspaceId: SATELLITE.activeWorkspaceId, // not on primary's active ws
-    });
-    const batch = buildResetBatch(
-      { candidate, demote: null },
+  test("demotePrimary → float off, workspace move to satellite, unpin", () => {
+    const p = primaryPip({ address: "0xa" });
+    const batch = buildCycleBatch(
+      { kind: "demotePrimary", pip: p },
       PRIMARY,
       SATELLITE,
     );
-
-    // First float-on, then move-to-workspace, then resize/move/pin.
     expect(batch[0]).toContain(`hl.dsp.window.float`);
-    expect(batch[0]).toContain(`action = "on"`);
-    expect(batch[1]).toContain(
-      `hl.dsp.window.move({ window = "address:0xa", workspace = ${PRIMARY.activeWorkspaceId}, silent = true })`,
-    );
-  });
-
-  test("focused satellite promotes, previous floating demotes into satellite tile", () => {
-    const promoted = pip({
-      address: "0xnew",
-      floating: false,
-      monitorId: SATELLITE.id,
-      workspaceId: SATELLITE.activeWorkspaceId,
-    });
-    const demoted = pip({
-      address: "0xold",
-      floating: true,
-      monitorId: PRIMARY.id,
-      workspaceId: PRIMARY.activeWorkspaceId,
-    });
-
-    const batch = buildResetBatch(
-      { candidate: promoted, demote: demoted },
-      PRIMARY,
-      SATELLITE,
-    );
-
-    // Promotion of the new window comes first; demotion of the old floater
-    // appears after in the same batch so Hyprland runs them in order.
-    const firstPromotedIdx = batch.findIndex((l) =>
-      l.includes(promoted.address),
-    );
-    const firstDemotedIdx = batch.findIndex((l) => l.includes(demoted.address));
-    expect(firstPromotedIdx).toBeGreaterThanOrEqual(0);
-    expect(firstDemotedIdx).toBeGreaterThan(firstPromotedIdx);
-
-    // Promotion floats-on + moves to primary corner.
-    expect(batch[0]).toContain(promoted.address);
-    expect(batch[0]).toContain(`action = "on"`);
-
-    // Demotion floats-off (tiled satellite), moves to satellite workspace,
-    // and unpins. Rounding rides on the compositor rule keyed on `float`
-    // so no `setprop rounding` shows up in either half of the batch.
-    const demotedLines = batch.filter((l) => l.includes(demoted.address));
-    expect(demotedLines[0]).toContain(`hl.dsp.window.float`);
-    expect(demotedLines[0]).toContain(`action = "off"`);
+    expect(batch[0]).toContain(`action = "off"`);
     expect(
-      demotedLines.some((l) =>
+      batch.some((l) =>
         l.includes(`workspace = ${SATELLITE.activeWorkspaceId}`),
       ),
     ).toBe(true);
     expect(
-      demotedLines.some(
+      batch.some(
         (l) => l.includes(`hl.dsp.window.pin`) && l.includes(`action = "off"`),
       ),
     ).toBe(true);
-    expect(batch.some((l) => l.includes(`prop = "rounding"`))).toBe(false);
   });
 
-  test("no satellite → demoted PiP falls back to cascade-floating on primary", () => {
-    const promoted = pip({
-      address: "0xnew",
-      floating: false,
-      workspaceId: PRIMARY.activeWorkspaceId,
-    });
-    const demoted = pip({
-      address: "0xold",
-      floating: true,
-      workspaceId: PRIMARY.activeWorkspaceId,
-    });
+  test("promoteSecondary → float on, workspace move to primary, resize + move-exact + pin on", () => {
+    const s = pip({ address: "0xa" });
+    const batch = buildCycleBatch(
+      { kind: "promoteSecondary", pip: s },
+      PRIMARY,
+      SATELLITE,
+    );
+    expect(batch[0]).toContain(`action = "on"`);
+    expect(
+      batch.some((l) => l.includes(`workspace = ${PRIMARY.activeWorkspaceId}`)),
+    ).toBe(true);
+    expect(
+      batch.some((l) =>
+        l.includes(
+          `hl.dsp.window.resize({ window = "address:0xa", x = ${PIP_WIDTH}, y = ${PIP_HEIGHT} })`,
+        ),
+      ),
+    ).toBe(true);
+    expect(
+      batch.some((l) =>
+        l.includes(
+          `hl.dsp.window.move({ window = "address:0xa", x = ${CORNER_X}, y = ${CORNER_Y}, relative = false })`,
+        ),
+      ),
+    ).toBe(true);
+    expect(
+      batch.some(
+        (l) => l.includes(`hl.dsp.window.pin`) && l.includes(`action = "on"`),
+      ),
+    ).toBe(true);
+  });
 
-    const batch = buildResetBatch(
-      { candidate: promoted, demote: demoted },
+  test("swap → promote's dispatches appear before demote's", () => {
+    const promote = pip({ address: "0xnew" });
+    const demote = primaryPip({ address: "0xold" });
+    const batch = buildCycleBatch(
+      { kind: "swap", promote, demote },
+      PRIMARY,
+      SATELLITE,
+    );
+    const firstPromote = batch.findIndex((l) => l.includes(promote.address));
+    const firstDemote = batch.findIndex((l) => l.includes(demote.address));
+    expect(firstPromote).toBeGreaterThanOrEqual(0);
+    expect(firstDemote).toBeGreaterThan(firstPromote);
+    // Demote lands as tiled on satellite: float off, workspace move,
+    // unpin.
+    const demoteLines = batch.filter((l) => l.includes(demote.address));
+    expect(demoteLines[0]).toContain(`action = "off"`);
+    expect(
+      demoteLines.some((l) =>
+        l.includes(`workspace = ${SATELLITE.activeWorkspaceId}`),
+      ),
+    ).toBe(true);
+  });
+
+  test("sweep with dock + tiles → tiles fire first, then dock", () => {
+    const primaryDock = pip({
+      address: "0xdock",
+      floating: true,
+      monitorId: PRIMARY.id,
+      x: 200,
+      y: 200,
+      width: PIP_WIDTH,
+      height: PIP_HEIGHT,
+    });
+    const straySat = pip({
+      address: "0xstray",
+      floating: true,
+      monitorId: SATELLITE.id,
+      x: SATELLITE.x + 500,
+      y: SATELLITE.y + 500,
+    });
+    const batch = buildCycleBatch(
+      { kind: "sweep", dock: primaryDock, tile: [straySat] },
+      PRIMARY,
+      SATELLITE,
+    );
+    const firstStray = batch.findIndex((l) => l.includes(straySat.address));
+    const firstDock = batch.findIndex((l) => l.includes(primaryDock.address));
+    expect(firstStray).toBeGreaterThanOrEqual(0);
+    expect(firstDock).toBeGreaterThan(firstStray);
+  });
+
+  test("sweep on satellite-absent host → tiles land on primary's active workspace", () => {
+    const stray = pip({
+      address: "0xa",
+      floating: true,
+      monitorId: PRIMARY.id,
+      x: 200,
+      y: 200,
+    });
+    const batch = buildCycleBatch(
+      { kind: "sweep", dock: null, tile: [stray] },
       PRIMARY,
       null,
     );
+    expect(batch[0]).toContain(`action = "off"`);
+    expect(
+      batch.some((l) => l.includes(`workspace = ${PRIMARY.activeWorkspaceId}`)),
+    ).toBe(true);
+  });
 
-    const demotedLines = batch.filter((l) => l.includes(demoted.address));
-
-    // Cascade fallback keeps the demoted window floating; the compositor
-    // rule keeps the rounded radius via the `float = true` match.
-    expect(demotedLines[0]).toContain(`action = "on"`);
-    // Cascade lands offset from the corner (pipsOnPrimary = 1 → one step in).
-    expect(demotedLines.some((l) => l.includes(`hl.dsp.window.move`))).toBe(
-      true,
+  test("unfullscreen with no displaced → unset then dock", () => {
+    const fs = pip({ address: "0xa", fullscreen: true });
+    const batch = buildCycleBatch(
+      { kind: "unfullscreen", pip: fs, displaced: null },
+      PRIMARY,
+      SATELLITE,
     );
-    expect(batch.some((l) => l.includes(`prop = "rounding"`))).toBe(false);
+    expect(batch[0]).toContain(`hl.dsp.window.fullscreen`);
+    expect(batch[0]).toContain(`action = "unset"`);
+    expect(
+      batch.some((l) =>
+        l.includes(
+          `hl.dsp.window.move({ window = "address:0xa", x = ${CORNER_X}, y = ${CORNER_Y}, relative = false })`,
+        ),
+      ),
+    ).toBe(true);
+    expect(batch.every((l) => l.includes(fs.address))).toBe(true);
+  });
+
+  test("unfullscreen with displaced → unset + dock target, then tile the displaced Primary", () => {
+    const fs = pip({ address: "0xnew", fullscreen: true });
+    const displaced = primaryPip({ address: "0xold" });
+    const batch = buildCycleBatch(
+      { kind: "unfullscreen", pip: fs, displaced },
+      PRIMARY,
+      SATELLITE,
+    );
+    const firstFs = batch.findIndex((l) => l.includes(fs.address));
+    const firstDisplaced = batch.findIndex((l) =>
+      l.includes(displaced.address),
+    );
+    expect(firstFs).toBeGreaterThanOrEqual(0);
+    expect(firstDisplaced).toBeGreaterThan(firstFs);
+    const displacedLines = batch.filter((l) => l.includes(displaced.address));
+    // Displaced Primary tiles as Secondary on the satellite.
+    expect(displacedLines[0]).toContain(`action = "off"`);
+    expect(
+      displacedLines.some((l) =>
+        l.includes(`workspace = ${SATELLITE.activeWorkspaceId}`),
+      ),
+    ).toBe(true);
+  });
+});
+
+describe("initial placement (on client-added)", () => {
+  test("first PiP with an empty corner → floating at corner", () => {
+    const placement = placementFor(PRIMARY, 0, SATELLITE);
+    expect(placement).toEqual({
+      kind: "floating",
+      monitor: PRIMARY,
+      x: CORNER_X,
+      y: CORNER_Y,
+    });
+  });
+
+  test("second PiP with satellite present → tiled on satellite", () => {
+    const placement = placementFor(PRIMARY, 1, SATELLITE);
+    expect(placement).toEqual({ kind: "tiled", monitor: SATELLITE });
+  });
+
+  test("second PiP on satellite-absent host → cascade floating on primary", () => {
+    const placement = placementFor(PRIMARY, 1, null);
+    expect(placement.kind).toBe("floating");
+    if (placement.kind !== "floating") return;
+    expect(placement.x).toBeLessThan(CORNER_X);
+    expect(placement.y).toBeGreaterThan(CORNER_Y);
+  });
+
+  test("floating placement batch emits float on, resize, move-exact, pin on", () => {
+    const client = pip({
+      address: "0xa",
+      floating: false,
+      workspaceId: PRIMARY.activeWorkspaceId,
+    });
+    const batch = buildPlacementBatch(client, {
+      kind: "floating",
+      monitor: PRIMARY,
+      x: CORNER_X,
+      y: CORNER_Y,
+    });
+    expect(batch[0]).toContain(`action = "on"`);
+    expect(
+      batch.some((l) =>
+        l.includes(
+          `hl.dsp.window.resize({ window = "address:0xa", x = ${PIP_WIDTH}, y = ${PIP_HEIGHT} })`,
+        ),
+      ),
+    ).toBe(true);
+    expect(
+      batch.some((l) =>
+        l.includes(
+          `hl.dsp.window.move({ window = "address:0xa", x = ${CORNER_X}, y = ${CORNER_Y}, relative = false })`,
+        ),
+      ),
+    ).toBe(true);
+    expect(
+      batch.some(
+        (l) => l.includes(`hl.dsp.window.pin`) && l.includes(`action = "on"`),
+      ),
+    ).toBe(true);
+  });
+
+  test("tiled placement batch emits float off, workspace move, unpin", () => {
+    const client = pip({
+      address: "0xa",
+      floating: true,
+      monitorId: PRIMARY.id,
+      workspaceId: PRIMARY.activeWorkspaceId,
+    });
+    const batch = buildPlacementBatch(client, {
+      kind: "tiled",
+      monitor: SATELLITE,
+    });
+    expect(batch[0]).toContain(`action = "off"`);
+    expect(
+      batch.some((l) =>
+        l.includes(`workspace = ${SATELLITE.activeWorkspaceId}`),
+      ),
+    ).toBe(true);
+    expect(
+      batch.some(
+        (l) => l.includes(`hl.dsp.window.pin`) && l.includes(`action = "off"`),
+      ),
+    ).toBe(true);
   });
 });

@@ -224,6 +224,39 @@ behavior, never their existence.
 _Avoid_: satellite monitor, satellite output — use Media output in new
 prose; the code's `satellite` naming predates this glossary entry.
 
+### Firefox PiP
+
+Any Firefox Picture-in-Picture window — the class-and-title pair Firefox
+stamps on a tab pop-out. Every Firefox PiP is a Satellite window in this
+repository's vocabulary; the four states below name the poses the
+window-orchestrator recognises for one.
+
+### Primary PiP
+
+The single Firefox PiP occupying the top-right docked pose on the primary
+output — pinned, at a fixed size, always visible. The Attention satellite
+tier applied to a PiP.
+
+### Secondary PiP
+
+A tiled Firefox PiP. On hosts with a Media output it lands there, sharing
+the output with any overflow PiPs via Hyprland's tiler (the Ambient
+satellite tier applied to a PiP). On hosts without a Media output it
+lands in the primary output's active workspace, participating in that
+workspace's tile tree.
+
+### Stray PiP
+
+A floating Firefox PiP that isn't the Primary PiP — a dragged-off corner
+PiP, a floating PiP on the Media output, anything the compositor lists
+as floating but not in the primary docked slot.
+
+### Fullscreen PiP
+
+A Firefox PiP set to Hyprland's borderless fullscreen mode. Reachable
+only on hosts without a Media output; its role there is "give the one
+PiP room to breathe when there's nowhere to park it."
+
 ### Geist
 
 The design system (Vercel's Geist) that governs all OS theming. It is
