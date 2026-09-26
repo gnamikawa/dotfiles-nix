@@ -4,8 +4,11 @@
     enable = true;
 
     theme = {
-      name = "Marwaita-Teal";
-      package = pkgs.marwaita-teal;
+      name = "Colloid-Teal-Dark";
+      package = pkgs.colloid-gtk-theme.override {
+        themeVariants = [ "teal" ];
+        colorVariants = [ "dark" ];
+      };
     };
 
     iconTheme = {
