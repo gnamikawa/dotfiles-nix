@@ -191,7 +191,8 @@ export function placementFor(
  * Dispatch batch that realises an on-arrival placement for one PiP.
  *
  * Same float-before-workspace-move ordering as the cycle batches — see
- * the rationale on {@link dockBatch}.
+ * the rationale on {@link dockBatch}. Tile paths unpin BEFORE
+ * `float off` — see {@link tileBatch}.
  *
  * @param client - Newly-mapped PiP snapshot.
  * @param placement - Where to put it, from {@link placementFor}.
@@ -203,6 +204,10 @@ export function buildPlacementBatch(
   const batch: string[] = [];
   const targetWorkspaceId = placement.monitor.activeWorkspaceId;
   const targetsFloating = placement.kind === "floating";
+
+  if (!targetsFloating) {
+    batch.push(buildSetPinned(client.address, false));
+  }
 
   batch.push(buildSetFloating(client.address, targetsFloating));
 
@@ -216,8 +221,6 @@ export function buildPlacementBatch(
     batch.push(buildResizeWindow(client.address, PIP_WIDTH, PIP_HEIGHT));
     batch.push(buildMoveWindowExact(client.address, placement.x, placement.y));
     batch.push(buildSetPinned(client.address, true));
-  } else {
-    batch.push(buildSetPinned(client.address, false));
   }
 
   return batch;
@@ -424,6 +427,13 @@ function dockBatch(pip: PipSnapshot, primary: MonitorSnapshot): string[] {
  * active workspace; on satellite-absent hosts it drops into the
  * primary output's active workspace tree. Unpins so the tiler owns it.
  *
+ * Ordering matters: unpin FIRST, then `float off`. Hyprland's `pin`
+ * dispatch only qualifies for floating windows and emits
+ * `warning: Window does not qualify to be pinned` when it lands on a
+ * tiled one. Since every caller of this function passes a currently-
+ * floating PiP (strays, Primary being demoted), the unpin lands while
+ * the window is still floating and dispatches cleanly.
+ *
  * @param pip - PiP snapshot to tile.
  * @param primary - Primary monitor snapshot.
  * @param satellite - Media output snapshot, or null when absent.
@@ -439,11 +449,11 @@ function tileBatch(
       ? satellite.activeWorkspaceId
       : primary.activeWorkspaceId;
 
+  batch.push(buildSetPinned(pip.address, false));
   batch.push(buildSetFloating(pip.address, false));
   if (pip.workspaceId !== targetWorkspace) {
     batch.push(buildMoveWindowToWorkspaceSilent(pip.address, targetWorkspace));
   }
-  batch.push(buildSetPinned(pip.address, false));
   return batch;
 }
 

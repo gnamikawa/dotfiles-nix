@@ -92,23 +92,27 @@ describe("buildCycleBatch — arm shapes", () => {
     expect(batch[0]).toContain(`address:0xa`);
   });
 
-  test("demotePrimary → float off, workspace move to satellite, unpin", () => {
+  test("demotePrimary → unpin first, then float off, workspace move to satellite", () => {
+    // Hyprland's `pin` dispatch only accepts floating windows and warns
+    // ("Window does not qualify to be pinned") on tiled ones — so the unpin
+    // must fire BEFORE `float off`, while the window is still floating.
     const p = primaryPip({ address: "0xa" });
     const batch = buildCycleBatch(
       { kind: "demotePrimary", pip: p },
       PRIMARY,
       SATELLITE,
     );
-    expect(batch[0]).toContain(`hl.dsp.window.float`);
-    expect(batch[0]).toContain(`action = "off"`);
+    const unpinIdx = batch.findIndex(
+      (l) => l.includes(`hl.dsp.window.pin`) && l.includes(`action = "off"`),
+    );
+    const floatOffIdx = batch.findIndex(
+      (l) => l.includes(`hl.dsp.window.float`) && l.includes(`action = "off"`),
+    );
+    expect(unpinIdx).toBeGreaterThanOrEqual(0);
+    expect(floatOffIdx).toBeGreaterThan(unpinIdx);
     expect(
       batch.some((l) =>
         l.includes(`workspace = ${SATELLITE.activeWorkspaceId}`),
-      ),
-    ).toBe(true);
-    expect(
-      batch.some(
-        (l) => l.includes(`hl.dsp.window.pin`) && l.includes(`action = "off"`),
       ),
     ).toBe(true);
   });
@@ -157,9 +161,11 @@ describe("buildCycleBatch — arm shapes", () => {
     const firstDemote = batch.findIndex((l) => l.includes(demote.address));
     expect(firstPromote).toBeGreaterThanOrEqual(0);
     expect(firstDemote).toBeGreaterThan(firstPromote);
-    // Demote lands as tiled on satellite: float off, workspace move,
-    // unpin.
+    // Demote lands as tiled on satellite: unpin, float off, workspace move
+    // (unpin comes first so the pin dispatch fires while the window is
+    // still floating — Hyprland warns on pin against tiled windows).
     const demoteLines = batch.filter((l) => l.includes(demote.address));
+    expect(demoteLines[0]).toContain(`hl.dsp.window.pin`);
     expect(demoteLines[0]).toContain(`action = "off"`);
     expect(
       demoteLines.some((l) =>
@@ -249,7 +255,10 @@ describe("buildCycleBatch — arm shapes", () => {
     expect(firstFs).toBeGreaterThanOrEqual(0);
     expect(firstDisplaced).toBeGreaterThan(firstFs);
     const displacedLines = batch.filter((l) => l.includes(displaced.address));
-    // Displaced Primary tiles as Secondary on the satellite.
+    // Displaced Primary tiles as Secondary on the satellite. Unpin fires
+    // first, then `float off` — see the ordering rationale on
+    // "demotePrimary".
+    expect(displacedLines[0]).toContain(`hl.dsp.window.pin`);
     expect(displacedLines[0]).toContain(`action = "off"`);
     expect(
       displacedLines.some((l) =>
@@ -317,7 +326,10 @@ describe("initial placement (on client-added)", () => {
     ).toBe(true);
   });
 
-  test("tiled placement batch emits float off, workspace move, unpin", () => {
+  test("tiled placement batch emits unpin, then float off, then workspace move", () => {
+    // Unpin fires before `float off` so the pin dispatch runs against a
+    // still-floating window — Hyprland warns on pin dispatches against
+    // tiled windows.
     const client = pip({
       address: "0xa",
       floating: true,
@@ -328,15 +340,17 @@ describe("initial placement (on client-added)", () => {
       kind: "tiled",
       monitor: SATELLITE,
     });
-    expect(batch[0]).toContain(`action = "off"`);
+    const unpinIdx = batch.findIndex(
+      (l) => l.includes(`hl.dsp.window.pin`) && l.includes(`action = "off"`),
+    );
+    const floatOffIdx = batch.findIndex(
+      (l) => l.includes(`hl.dsp.window.float`) && l.includes(`action = "off"`),
+    );
+    expect(unpinIdx).toBeGreaterThanOrEqual(0);
+    expect(floatOffIdx).toBeGreaterThan(unpinIdx);
     expect(
       batch.some((l) =>
         l.includes(`workspace = ${SATELLITE.activeWorkspaceId}`),
-      ),
-    ).toBe(true);
-    expect(
-      batch.some(
-        (l) => l.includes(`hl.dsp.window.pin`) && l.includes(`action = "off"`),
       ),
     ).toBe(true);
   });
