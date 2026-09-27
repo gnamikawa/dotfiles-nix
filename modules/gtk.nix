@@ -40,10 +40,11 @@
     # Pin `gtk4.theme` to the legacy default (`config.gtk.theme`) so the
     # home-manager 26.05 default-change warning stops firing without
     # adopting the new null default.
+    # No gtk-application-prefer-dark-theme here: libadwaita (AGS, most GTK4
+    # apps) warns "unsupported, use AdwStyleManager:color-scheme" on every
+    # start when it is set. Dark mode reaches GTK4 through the dconf
+    # color-scheme below and the dark theme name above.
     gtk4.theme = config.gtk.theme;
-    gtk4.extraConfig = {
-      gtk-application-prefer-dark-theme = true;
-    };
   };
 
   # ----------------------------------------------------------
