@@ -7,7 +7,7 @@
 // Restart after editing: systemctl --user restart ags
 
 import app from "ags/gtk4/app";
-import Desktop from "./desktop/Desktop";
+import mountDesktop from "./desktop/Desktop";
 import { cycleWindowMenu, setWindowMenuOpen } from "./common/window-menu";
 import {
   activateCursor,
@@ -214,5 +214,5 @@ app.start({
     }
   },
   /** GTK-app entry: mounts the always-on desktop surfaces. */
-  main: () => <Desktop />,
+  main: () => mountDesktop(),
 });

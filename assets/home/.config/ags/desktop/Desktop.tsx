@@ -359,8 +359,13 @@ function OsdSurface({ gdkmonitor }: { gdkmonitor: Gdk.Monitor }) {
  * The bar iterates a single-item slice (primary only); every other
  * surface iterates the full monitor set and decides per-monitor
  * visibility internally.
+ *
+ * Mounts rather than returns: each `<For>` hands its windows straight to
+ * `app` through `<This>`, so there is no shared parent to return. The loops
+ * must not be wrapped in `<>…</>` — every `<For>` is itself a gnim
+ * Fragment, and gnim throws "nesting Fragments are not yet supported".
  */
-export default function Desktop() {
+export default function mountDesktop(): void {
   const monitors = createBinding(app, "monitors");
   // Wrap the primary monitor (or nothing, when none is live) as a single-item
   // array so <For> mounts one BarSurface on the pinned output; the summoned
@@ -369,57 +374,53 @@ export default function Desktop() {
     const p = findPrimaryMonitor(all);
     return p ? [p] : [];
   });
-  return (
-    <>
-      <For each={primary}>
-        {(monitor: Gdk.Monitor) => (
-          <This this={app}>
-            <BarSurface gdkmonitor={monitor} />
-          </This>
-        )}
-      </For>
-      <For each={primary}>
-        {(monitor: Gdk.Monitor) => (
-          <This this={app}>
-            <OsdSurface gdkmonitor={monitor} />
-          </This>
-        )}
-      </For>
-      <For each={monitors}>
-        {(monitor: Gdk.Monitor) => (
-          <This this={app}>
-            <WindowMenuSurface gdkmonitor={monitor} />
-          </This>
-        )}
-      </For>
-      <For each={monitors}>
-        {(monitor: Gdk.Monitor) => (
-          <This this={app}>
-            <WindowContextSurface gdkmonitor={monitor} />
-          </This>
-        )}
-      </For>
-      <For each={monitors}>
-        {(monitor: Gdk.Monitor) => (
-          <This this={app}>
-            <RunnerSurface gdkmonitor={monitor} />
-          </This>
-        )}
-      </For>
-      <For each={monitors}>
-        {(monitor: Gdk.Monitor) => (
-          <This this={app}>
-            <SystemMenuSurface gdkmonitor={monitor} />
-          </This>
-        )}
-      </For>
-      <For each={monitors}>
-        {(monitor: Gdk.Monitor) => (
-          <This this={app}>
-            <MonitorIdSurface gdkmonitor={monitor} />
-          </This>
-        )}
-      </For>
-    </>
-  );
+  <For each={primary}>
+    {(monitor: Gdk.Monitor) => (
+      <This this={app}>
+        <BarSurface gdkmonitor={monitor} />
+      </This>
+    )}
+  </For>;
+  <For each={primary}>
+    {(monitor: Gdk.Monitor) => (
+      <This this={app}>
+        <OsdSurface gdkmonitor={monitor} />
+      </This>
+    )}
+  </For>;
+  <For each={monitors}>
+    {(monitor: Gdk.Monitor) => (
+      <This this={app}>
+        <WindowMenuSurface gdkmonitor={monitor} />
+      </This>
+    )}
+  </For>;
+  <For each={monitors}>
+    {(monitor: Gdk.Monitor) => (
+      <This this={app}>
+        <WindowContextSurface gdkmonitor={monitor} />
+      </This>
+    )}
+  </For>;
+  <For each={monitors}>
+    {(monitor: Gdk.Monitor) => (
+      <This this={app}>
+        <RunnerSurface gdkmonitor={monitor} />
+      </This>
+    )}
+  </For>;
+  <For each={monitors}>
+    {(monitor: Gdk.Monitor) => (
+      <This this={app}>
+        <SystemMenuSurface gdkmonitor={monitor} />
+      </This>
+    )}
+  </For>;
+  <For each={monitors}>
+    {(monitor: Gdk.Monitor) => (
+      <This this={app}>
+        <MonitorIdSurface gdkmonitor={monitor} />
+      </This>
+    )}
+  </For>;
 }
