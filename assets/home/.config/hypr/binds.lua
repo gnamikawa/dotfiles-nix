@@ -8,7 +8,7 @@ local win = "SUPER"
 
 -- ── Applications ─────────────────────────────────────────────────────────
 hl.bind(mod .. " + F4", hl.dsp.window.close())
-hl.bind(mod .. " + F3", hl.dsp.exec_cmd("ags request runner-open"))
+hl.bind(mod .. " + F3", hl.dsp.exec_cmd("ags request runner-open >/dev/null"))
 hl.bind(win .. " + F", hl.dsp.window.float({ action = "toggle" }))
 hl.bind(win .. " + T", hl.dsp.exec_cmd("kitty -e bash -lc yazi"))
 hl.bind(win .. " + B", hl.dsp.exec_cmd(os.getenv("BROWSER") or "xdg-open about:blank"))
@@ -30,28 +30,28 @@ hl.bind(win .. " + SPACE", hl.dsp.exec_cmd("fcitx5-remote -t"))
 -- returns the user to the Alt-hold state, so those release binds re-open the
 -- window-menu (which also closes the system menu). Dropping Alt tears the
 -- whole peek down and just closes the system menu.
-hl.bind(mod .. " + Shift_L", hl.dsp.exec_cmd("ags request system-menu-open"))
-hl.bind(mod .. " + Shift_R", hl.dsp.exec_cmd("ags request system-menu-open"))
-hl.bind("SHIFT + Alt_L", hl.dsp.exec_cmd("ags request system-menu-open"))
-hl.bind("SHIFT + Alt_R", hl.dsp.exec_cmd("ags request system-menu-open"))
+hl.bind(mod .. " + Shift_L", hl.dsp.exec_cmd("ags request system-menu-open >/dev/null"))
+hl.bind(mod .. " + Shift_R", hl.dsp.exec_cmd("ags request system-menu-open >/dev/null"))
+hl.bind("SHIFT + Alt_L", hl.dsp.exec_cmd("ags request system-menu-open >/dev/null"))
+hl.bind("SHIFT + Alt_R", hl.dsp.exec_cmd("ags request system-menu-open >/dev/null"))
 hl.bind(
 	mod .. " + SHIFT + Shift_L",
-	hl.dsp.exec_cmd("ags request window-menu-open"),
+	hl.dsp.exec_cmd("ags request window-menu-open >/dev/null"),
 	{ release = true, transparent = true }
 )
 hl.bind(
 	mod .. " + SHIFT + Shift_R",
-	hl.dsp.exec_cmd("ags request window-menu-open"),
+	hl.dsp.exec_cmd("ags request window-menu-open >/dev/null"),
 	{ release = true, transparent = true }
 )
 hl.bind(
 	mod .. " + SHIFT + Alt_L",
-	hl.dsp.exec_cmd("ags request system-menu-close"),
+	hl.dsp.exec_cmd("ags request system-menu-close >/dev/null"),
 	{ release = true, transparent = true }
 )
 hl.bind(
 	mod .. " + SHIFT + Alt_R",
-	hl.dsp.exec_cmd("ags request system-menu-close"),
+	hl.dsp.exec_cmd("ags request system-menu-close >/dev/null"),
 	{ release = true, transparent = true }
 )
 
@@ -82,9 +82,21 @@ hl.bind("CTRL + SHIFT + 4", hl.dsp.exec_cmd("grimblast copy area"))
 -- Each bind is a bare `ags request <verb>` — no wpctl, no shell. The actual
 -- wpctl call and the OSD update both live in common/hardware.ts, run as a
 -- consequence of the request instead of being chained onto it in Lua.
-hl.bind("XF86AudioRaiseVolume", hl.dsp.exec_cmd("ags request volume-up"), { locked = true, repeating = true })
-hl.bind("XF86AudioLowerVolume", hl.dsp.exec_cmd("ags request volume-down"), { locked = true, repeating = true })
-hl.bind("XF86AudioMute", hl.dsp.exec_cmd("ags request volume-mute-toggle"), { locked = true, repeating = true })
+hl.bind(
+	"XF86AudioRaiseVolume",
+	hl.dsp.exec_cmd("ags request volume-up >/dev/null"),
+	{ locked = true, repeating = true }
+)
+hl.bind(
+	"XF86AudioLowerVolume",
+	hl.dsp.exec_cmd("ags request volume-down >/dev/null"),
+	{ locked = true, repeating = true }
+)
+hl.bind(
+	"XF86AudioMute",
+	hl.dsp.exec_cmd("ags request volume-mute-toggle >/dev/null"),
+	{ locked = true, repeating = true }
+)
 
 -- ── Workspace layout ─────────────────────────────────────────────────
 -- Per-workspace dwindle↔monocle toggle. The Lua parser rejects
@@ -100,7 +112,7 @@ local function toggleWorkspaceLayout()
 	local next = workspaceLayouts[id] == "monocle" and "dwindle" or "monocle"
 	workspaceLayouts[id] = next
 	hl.workspace_rule({ workspace = tostring(id), layout = next })
-	hl.exec_cmd("ags request workspace-layout-changed")
+	hl.exec_cmd("ags request workspace-layout-changed >/dev/null")
 end
 hl.bind(mod .. " + GRAVE", toggleWorkspaceLayout)
 
@@ -117,7 +129,7 @@ hl.bind(mod .. " + L", hl.dsp.focus({ direction = "right" }))
 -- Cycle through the window-menu overlay's list in its exact display order.
 -- `layoutmsg cyclenext` walks the layout tree, which doesn't match what the
 -- overlay renders — see common/window-menu.ts for the shared sort.
-hl.bind(mod .. " + TAB", hl.dsp.exec_cmd("ags request window-menu-next"))
+hl.bind(mod .. " + TAB", hl.dsp.exec_cmd("ags request window-menu-next >/dev/null"))
 hl.bind(mod .. " + SHIFT + TAB", hl.dsp.exec_cmd("ags request window-menu-prev"))
 
 -- ── Alt-hold window-menu overlay ─────────────────────────────────────────
@@ -136,10 +148,18 @@ hl.bind(mod .. " + SHIFT + TAB", hl.dsp.exec_cmd("ags request window-menu-prev")
 -- key events (kitty in particular — its Alt+left drag stays inert if it
 -- never sees the Alt keydown despite the .modifiers update arriving) fail
 -- to notice Alt is held, so Alt+drag selection silently does nothing.
-hl.bind("Alt_L", hl.dsp.exec_cmd("ags request window-menu-open"), { non_consuming = true })
-hl.bind("Alt_R", hl.dsp.exec_cmd("ags request window-menu-open"), { non_consuming = true })
-hl.bind(mod .. " + Alt_L", hl.dsp.exec_cmd("ags request window-menu-close"), { release = true, transparent = true })
-hl.bind(mod .. " + Alt_R", hl.dsp.exec_cmd("ags request window-menu-close"), { release = true, transparent = true })
+hl.bind("Alt_L", hl.dsp.exec_cmd("ags request window-menu-open >/dev/null"), { non_consuming = true })
+hl.bind("Alt_R", hl.dsp.exec_cmd("ags request window-menu-open >/dev/null"), { non_consuming = true })
+hl.bind(
+	mod .. " + Alt_L",
+	hl.dsp.exec_cmd("ags request window-menu-close >/dev/null"),
+	{ release = true, transparent = true }
+)
+hl.bind(
+	mod .. " + Alt_R",
+	hl.dsp.exec_cmd("ags request window-menu-close >/dev/null"),
+	{ release = true, transparent = true }
+)
 
 -- ── Alt-hold summoned-surface navigation ─────────────────────────────────
 -- Reserved for controlling whatever surface the Alt-hold has open. Right

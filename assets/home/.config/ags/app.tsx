@@ -169,45 +169,48 @@ app.start({
         // dwindle↔monocle toggle in hypr/binds.lua pokes us after firing
         // `hl.workspace_rule` — bump the tick so MonitorId re-reads.
         bumpLayoutTick();
-        res("ok");
+        res("layout-tick-bumped");
         return;
       // Every verb below is a bare `ags request <verb>` from a Hyprland
       // Fn-row/audio bind, no payload — the handler in common/hardware.ts
       // owns the actual wpctl/brightnessctl/NM/Bluetooth call and shows the
       // OSD itself. `res()` fires immediately rather than waiting on the
       // (async) hardware call: the Hyprland bind doesn't consume the reply,
-      // it only needs the DBus round-trip to complete.
+      // it only needs the DBus round-trip to complete. The reply body names
+      // the specific hardware action queued so a hand-caller reading the
+      // reply (`ags request volume-up` from a terminal) sees what the
+      // handler ran, not a generic ack.
       case "volume-up":
         volumeUp();
-        res("ok");
+        res("volume-raised");
         return;
       case "volume-down":
         volumeDown();
-        res("ok");
+        res("volume-lowered");
         return;
       case "volume-mute-toggle":
         volumeMuteToggle();
-        res("ok");
+        res("volume-mute-toggled");
         return;
       case "mic-mute-toggle":
         micMuteToggle();
-        res("ok");
+        res("mic-mute-toggled");
         return;
       case "brightness-up":
         brightnessUp();
-        res("ok");
+        res("brightness-raised");
         return;
       case "brightness-down":
         brightnessDown();
-        res("ok");
+        res("brightness-lowered");
         return;
       case "radio-toggle":
         radioToggle();
-        res("ok");
+        res("radio-toggled");
         return;
       case "bluetooth-toggle":
         bluetoothToggle();
-        res("ok");
+        res("bluetooth-toggled");
         return;
       default:
         res(`unknown: ${argv.join(" ")}`);

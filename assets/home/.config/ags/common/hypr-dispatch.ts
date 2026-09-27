@@ -38,12 +38,19 @@ export {
  * Argv-form Gio.Subprocess so the shell never re-parses the Lua — no
  * escaping is needed for embedded quotes.
  *
+ * `STDOUT_SILENCE` drops hyprctl's `"ok"` acknowledgement instead of
+ * inheriting the daemon's stdout — otherwise every successful dispatch
+ * lands as an `ok` line in `journalctl --user -u ags.service`, and a
+ * busy overlay path (see {@link sendBatch}) fills the journal with
+ * thousands per keypress. Stderr is left open so a genuine hyprctl
+ * failure still surfaces there.
+ *
  * @param luaCall - A Lua expression the compositor's `hl` table exposes.
  */
 function send(luaCall: string): void {
   Gio.Subprocess.new(
     ["hyprctl", "dispatch", luaCall],
-    Gio.SubprocessFlags.NONE,
+    Gio.SubprocessFlags.STDOUT_SILENCE,
   );
 }
 
@@ -56,12 +63,20 @@ function send(luaCall: string): void {
  * --batch` accepts a `;`-joined list and runs them serially inside the
  * one compositor call, restoring the ordering the caller wrote.
  *
+ * `STDOUT_SILENCE` drops hyprctl's per-dispatch `"ok"` lines — `--batch`
+ * prints one `ok` per successful dispatch, so an eight-step overlay
+ * batch would emit eight journal lines otherwise. See {@link send} for
+ * the full rationale.
+ *
  * @param luaCalls - Lua expressions to dispatch, in intended order.
  */
 export function sendBatch(luaCalls: string[]): void {
   if (luaCalls.length === 0) return;
   const joined = luaCalls.map((c) => `dispatch ${c}`).join(" ; ");
-  Gio.Subprocess.new(["hyprctl", "--batch", joined], Gio.SubprocessFlags.NONE);
+  Gio.Subprocess.new(
+    ["hyprctl", "--batch", joined],
+    Gio.SubprocessFlags.STDOUT_SILENCE,
+  );
 }
 
 /**
