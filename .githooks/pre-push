@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+# Runs the full flake check before anything leaves this machine, without
+# realising packages or VM tests (`--no-build` stops at evaluation and
+# derivation instantiation). CI repeats the same command and then goes on to
+# build everything; this hook exists to catch a broken flake or a formatting
+# regression before the push, not to replace CI.
+set -euo pipefail
+
+if ! command -v nix >/dev/null 2>&1; then
+  echo "pre-push: nix not on PATH; skipping flake check." >&2
+  exit 0
+fi
+
+exec nix flake check --no-build
