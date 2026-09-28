@@ -865,7 +865,16 @@ Each is load-bearing on downstream tickets.
 compact shape tag. Numbering is stable so downstream tickets can reference
 specific flows.
 
-**All-day focus arcs** (occupy primary indefinitely; hyperfocus-eligible)
+<!-- markdownlint-disable MD029 -->
+
+The numbering below stays stable across the group headings that follow, so each
+heading's list resumes rather than restarts; the group headings break the list
+into several ordered-list blocks, so the sequential-numbering rule is disabled
+for this inventory.
+
+#### All-day focus arcs
+
+Occupy primary indefinitely; hyperfocus-eligible.
 
 1. **Coding session start** — terminal-heavy, browser co-launch (often);
    primary; Monocle-planned. _Long-focus · Nothing._
@@ -883,7 +892,9 @@ specific flows.
 12. **Drills** (practice / exercise, ≠ flashcards) — full-screen
     keyboard-driven.
 
-**Session-boundary events** (system-driven or user-driven state transitions)
+#### Session-boundary events
+
+System-driven or user-driven state transitions.
 
 13. **Boot → co-launch** _(often, not always)_.
 14. **Unlock-after-lock** — auth → resume.
@@ -892,14 +903,16 @@ specific flows.
 17. **Timer-based sleep** — countdown → suspend (new; user added).
 18. **Power-down decision arc** — verb menu.
 
-**Break / social**
+#### Break / social
 
 19. **Break** (voluntary AFK) — no shell action.
 20. **Comms check** — summoned or arc-shaped.
 21. **Media promotion** (satellite promotion — YouTube-first head gets promoted
     to primary when a stream earns it).
 
-**Mid-session micro-flows** (summoned overlays on primary)
+#### Mid-session micro-flows
+
+Summoned overlays on primary.
 
 22. **Launcher / project-opener** — dmenu today; extended to open a project
     directly from `~/repositories`.
@@ -912,7 +925,9 @@ specific flows.
     window.
 28. **Screen dim** — one action.
 
-**Quick capture** (working-memory-pressure remedy)
+#### Quick capture
+
+Working-memory-pressure remedy.
 
 29. **Quick note (Outpost)** — user-directed structured capture.
 30. **Yeet-thoughts** — unstructured mind-dump; auto-categorised + reformed into
@@ -922,7 +937,9 @@ specific flows.
 33. **Add calendar event** — form summoned; syncs to Outlook.
 34. **Create todo** — form summoned; unscheduled by default; syncs to Outlook.
 
-**Quick retrieval** (anxiety-relief; pull-only)
+#### Quick retrieval
+
+Anxiety-relief; pull-only.
 
 35. **Search notes / vault** — fuzzy over text.
 36. **"What was I doing"** — search over life-database.
@@ -932,10 +949,11 @@ specific flows.
 40. **Read logs** (journalctl) — terminal, summoned.
 41. **Diff nixos generations** — terminal, summoned.
 
-**Habits — desk-clutter tiles** (Cintiq bento; laptop peek in drawer)
+#### Habits — desk-clutter tiles
 
-Digital habits clear by artifact detection; physical habits clear by one-tap
-acknowledgment (put-away gesture, not scorekeeping).
+Cintiq bento; laptop peek in drawer. Digital habits clear by artifact detection;
+physical habits clear by one-tap acknowledgment (put-away gesture, not
+scorekeeping).
 
 42. **Journal (habit)** — tile clears when a real journal entry exists today.
 43. **Kanji practice** — clears on drill artifact.
@@ -954,7 +972,9 @@ acknowledgment (put-away gesture, not scorekeeping).
 52. **Habit creation / configuration** — one-off setup; tile appears on Cintiq
     bento thereafter.
 
-**Time / calendar** (anti-time-blindness)
+#### Time / calendar
+
+Anti-time-blindness.
 
 53. **Check calendar / next event** — summoned.
 54. **Ambient countdown to next event** — small persistent overlay on primary
@@ -969,7 +989,9 @@ acknowledgment (put-away gesture, not scorekeeping).
     thing at natural transitions. Offline-first, GUI-first, no LLM required; LLM
     optional enrichment on desktop only, side channel.
 
-**Day-guide surface** (integrates 34/37 with 54/57)
+#### Day-guide surface
+
+Integrates flows 34/37 with 54/57.
 
 58. **Day-guide surface: stack + peek-timeline** (Q14-f, locked). Stack =
     current next card, decision-fatigue defense (executive-function axis). Peek
@@ -981,14 +1003,16 @@ acknowledgment (put-away gesture, not scorekeeping).
     manual-triggered re-flow only if ever added later. Home: primary (see
     §3.10).
 
-**Comms out** (sender-side complement to notification channel)
+#### Comms out
+
+Sender-side complement to notification channel.
 
 59. **Compose message** (Discord / Outlook DM) — deliberate outbound.
 60. **Initiate call** (voice / video) — outgoing.
 
-_(Voice memo and screen-recording-for-send deferred; not first-class yet.)_
+(Voice memo and screen-recording-for-send deferred; not first-class yet.)
 
-**Media & consumption**
+#### Media & consumption
 
 Split, not lumped:
 
@@ -1000,7 +1024,7 @@ Split, not lumped:
     satellite head.
 64. **Video consumption: promoted-to-primary** — see flow #21.
 
-**Library-building**
+#### Library-building
 
 65. **YouTube → mp3 → mpd** (with album art). Background download + notify;
     automation.
@@ -1008,7 +1032,9 @@ Split, not lumped:
 _(Adjacent — bookmark video, save article for later, save image — noted but not
 confirmed as first-class this pass.)_
 
-**System controls / environment** (Cintiq bento / drawer)
+#### System controls / environment
+
+Cintiq bento / drawer.
 
 66. **Hyprland layout switcher on the fly** (per-monitor static buttons) —
     Cintiq-hosted; new flow surfaced during grilling.
@@ -1018,7 +1044,9 @@ confirmed as first-class this pass.)_
 70. **Wifi state + immediate retry** — see F1 friction.
 71. **Bluetooth pairing / selection** — no auto-takeover.
 
-**Audio-processing flows** (for input, singing/recording territory)
+#### Audio-processing flows
+
+For input, singing/recording territory.
 
 72. **EQ** — DAW-style, full-screen.
 73. **Compressor**.
@@ -1029,7 +1057,9 @@ confirmed as first-class this pass.)_
 _Fulfillment currently gapped — no native Linux Reason 10 equivalent. See
 §3.11._
 
-**Network transparency** (privacy / leakage awareness)
+#### Network transparency
+
+Privacy / leakage awareness.
 
 77. **Ambient network activity indicator** — tiny live readout, Cintiq
     monitoring cluster.
@@ -1037,7 +1067,7 @@ _Fulfillment currently gapped — no native Linux Reason 10 equivalent. See
 79. **Alert on unexpected outbound** — reclassified as _emergency_ not ambient
     (fires the reserved edge alongside #56).
 
-**Sysadmin / iteration**
+#### Sysadmin / iteration
 
 80. **Sysadmin rebuild cycle** (`nixos-rebuild switch`) — terminal arc.
 81. **NixOS option discovery / search** — new flow; find the right knob without
@@ -1056,19 +1086,21 @@ _Fulfillment currently gapped — no native Linux Reason 10 equivalent. See
     sysadmin elements (rebuild status, service state, generation list). Not
     designed here.
 
-**Rare / one-off**
+#### Rare / one-off
 
 92. **Reproduce dotfiles-nix on Debian** (non-NixOS) — multi-step.
 93. **Reproduce this NixOS distribution on another NixOS system** — multi-step.
 
-**Cross-boot / cross-device**
+#### Cross-boot / cross-device
 
 94. **Cross-boot to Windows for Reason 10** (audio) — reboot arc.
 95. **Cross-boot to Windows for Clip Studio Paint** (art) — reboot arc.
 96. **Transfer files** laptop ↔ phone ↔ desktop — multi-device.
 97. **Cross-host handoff** GEN-DPC ↔ GEN-LPC — parked pending GEN-LPC reinstall.
 
-**Exception / event-driven** (interruptive class)
+#### Exception / event-driven
+
+Interruptive class.
 
 98. **App crashed / hung** — notification + kill flow.
 99. **Compositor / shell died** — TTY recovery runbook (`docs/maintenance.md`).
@@ -1079,19 +1111,19 @@ _Fulfillment currently gapped — no native Linux Reason 10 equivalent. See
 104.  **External interruption** (phone, doorbell, IRL) — not shell-driven; shell
       degrades gracefully.
 
-**Cintiq mode**
+#### Cintiq mode
 
 105. **Cintiq-as-regular-screen** — occasional mode toggle out of quick-access
      mode entirely.
 
-**Utilities on Cintiq / drawer**
+#### Utilities on Cintiq / drawer
 
 106. **Pull-down timer** (kitchen twist analog; no label — multi-timer labelling
      is a future ticket).
 107. **Reminder-set** (large-button interval chips).
 108. **Calculator**.
 
-**Notification channel — three sub-channels + triage**
+#### Notification channel — three sub-channels + triage
 
 109. **Regular notification** (build done, download complete) — toast.
 110. **Human presence ping** (Discord, Outlook DM) — _sound only, no visual_.
@@ -1100,7 +1132,7 @@ _Fulfillment currently gapped — no native Linux Reason 10 equivalent. See
      disk-hard-fail, unexpected outbound) — reserved edge treatment.
 112. **Notification triage** — the meta-flow when one lands.
 
-**Non-flows explicitly rejected**
+#### Non-flows explicitly rejected
 
 - **Habit tap-log tile** (single tap records event) — user rejected;
   desk-clutter reinforcement is the alternative mechanism.
@@ -1112,6 +1144,8 @@ _Fulfillment currently gapped — no native Linux Reason 10 equivalent. See
 - **Voice memo / screen-recording-for-send** — deferred, not yet first-class.
 - **Search open browser tabs / clipboard history / dictionary / translate** —
   user rejected.
+
+<!-- markdownlint-enable MD029 -->
 
 ### 3.7 Physical/temporal context, frequency, duration
 

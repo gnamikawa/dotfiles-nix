@@ -6,9 +6,8 @@ This directory holds the desktop UI's information-architecture artifacts.
 
 Information-architecture work follows the Rosenfeld / Morville / Arango process
 (their book, _Information Architecture for the Web and Beyond_, 4th ed.). It
-runs in five phases:
-
-**Research → Strategy → Design → Implementation → Administration**
+runs through five phases, in order: Research, Strategy, Design, Implementation,
+and Administration.
 
 Each phase produces its own artifacts. The Strategy phase's artifact constrains
 everything that comes after it, so downstream phases cite it rather than
