@@ -19,10 +19,11 @@ treefmt — formatting plus ShellCheck, actionlint, and Markdownlint, all declar
 in `treefmt.nix` — against the files staged for the commit, not the whole
 working tree, and fails when any of them had to be rewritten or found a lint
 issue. Reformatted content is left in the working tree; re-stage and retry to
-commit it. `.githooks/pre-push` separately runs `nix flake check --no-build` —
-the same evaluation and instantiation checks CI runs first, without building
-anything — so a broken flake or missed formatting sweep is caught before the
-push, not after.
+commit it. `.githooks/pre-push` separately runs `nix flake show` (whole-flake
+evaluation) and the `formatting` check — the same two commands CI runs first,
+without building any package or VM test — so a broken flake or missed formatting
+sweep is caught before the push, not after. See the hook's own comment for why
+it doesn't run `nix flake check --no-build` instead.
 
 Before committing, run `nix fmt` yourself so the hook stays a check rather than
 a fix. Always do this when the same file has both staged and unstaged changes:

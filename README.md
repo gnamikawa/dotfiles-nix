@@ -150,9 +150,9 @@ that point on:
 - **Pre-commit** checks formatting (`nix fmt`), ShellCheck, actionlint, and
   Markdownlint against the files staged for that commit, and fails without
   changing anything if one of them would have rewritten a file.
-- **Pre-push** runs `nix flake check --no-build`: the same evaluation and
-  instantiation checks GitHub Actions runs first, without building any package
-  or VM test.
+- **Pre-push** runs `nix flake show` and the `formatting` check: the same
+  whole-flake evaluation and formatting/linting sweep GitHub Actions runs first,
+  without building any package or VM test.
 
 `nix fmt` applies the same tools' safe fixes — nixfmt, Prettier, StyLua, shfmt,
 and Markdownlint's auto-fixable rules — across the whole tree; run it yourself

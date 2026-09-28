@@ -1,9 +1,15 @@
 #!/usr/bin/env bash
-# Runs the full flake check before anything leaves this machine, without
-# realising packages or VM tests (`--no-build` stops at evaluation and
-# derivation instantiation). CI repeats the same command and then goes on to
-# build everything; this hook exists to catch a broken flake or a formatting
-# regression before the push, not to replace CI.
+# Confirms the flake still evaluates and the tree is still clean before
+# anything leaves this machine, without building any package or VM test.
+#
+# `nix flake check --no-build` cannot run on this repository: getting a
+# derivation's name (which every check, including this one, requires) reads a
+# version file out of an astal component's filtered source tree, which is
+# itself a derivation — an import-from-derivation that `--no-build` always
+# refuses, package-graph-wide, in every checkout. `nix flake show` hits the
+# same requirement but doesn't refuse it, realising only that handful of
+# small, near-instant source-filtering derivations rather than building
+# anything real, so it's the fast, whole-flake gate this hook needs.
 set -euo pipefail
 
 if ! command -v nix >/dev/null 2>&1; then
@@ -11,4 +17,5 @@ if ! command -v nix >/dev/null 2>&1; then
   exit 0
 fi
 
-exec nix flake check --no-build
+nix flake show >/dev/null
+exec nix build --no-link .#checks.x86_64-linux.formatting

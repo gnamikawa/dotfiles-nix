@@ -108,11 +108,16 @@ jobs:
           primary-key: nix-${{ runner.os }}-${{ hashFiles('flake.lock', 'system-nix/flake.lock') }}
           restore-prefixes-first-match: nix-${{ runner.os }}-
 
-      # Fast gate: source formatting, linting, and flake evaluation, before
-      # anything is built. Repeats what the pre-commit/pre-push hooks already
-      # checked locally, so a skipped or bypassed hook still gets caught.
-      - name: Check formatting, linting, and flake evaluation
-        run: nix flake check --no-build
+      # Fast gate: whole-flake evaluation plus formatting and linting, before
+      # anything real is built. Repeats what the pre-commit/pre-push hooks
+      # already checked locally, so a skipped or bypassed hook still gets
+      # caught. `nix flake check --no-build` cannot run here — see
+      # `.githooks/pre-push` for why — so this splits into the two commands
+      # that hook itself uses.
+      - name: Check flake evaluation
+        run: nix flake show >/dev/null
+      - name: Check formatting and linting
+        run: nix build --no-link .#checks.x86_64-linux.formatting
 
       # Builds every activation package and every native check this flake
       # declares (formatting, greeter, session-lock, the AGS checks, the
