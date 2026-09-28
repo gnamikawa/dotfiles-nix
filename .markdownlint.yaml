@@ -1,0 +1,6 @@
+# Prettier hard-wraps Markdown prose at 80 columns (see treefmt.nix), but it
+# cannot wrap table rows (it pads them to align columns) or headings (Markdown
+# requires them on one line), so the line-length rule skips both.
+MD013:
+  tables: false
+  headings: false

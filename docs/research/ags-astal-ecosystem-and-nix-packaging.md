@@ -198,13 +198,22 @@ The interaction is unusually Nix-friendly:
   upstream's problem, not the config repo's.
 - Canonical project derivation (from `docs/guide/nix.md`): `stdenv.mkDerivation`
   with
-  `nativeBuildInputs = [ wrapGAppsHook3 gobject-introspection ags.packages.<sys>.default ]`,
-  `buildInputs = [ glib gjs astal.io astal.astal4 <service libs> ]`, and
-  `installPhase = "ags bundle app.ts $out/bin/my-shell"`; runtime executables
-  are prefixed onto PATH via `gappsWrapperArgs`. The service libraries must be
-  `buildInputs` of the derivation — on Nix, GI libraries cannot be "installed
-  globally" and picked up at runtime
+
+  ```nix
+  nativeBuildInputs = [
+    wrapGAppsHook3
+    gobject-introspection
+    ags.packages.<sys>.default
+  ];
+  buildInputs = [ glib gjs astal.io astal.astal4 <service libs> ];
+  installPhase = "ags bundle app.ts $out/bin/my-shell";
+  ```
+
+  Runtime executables are prefixed onto PATH via `gappsWrapperArgs`. The service
+  libraries must be `buildInputs` of the derivation — on Nix, GI libraries
+  cannot be "installed globally" and picked up at runtime
   (<https://github.com/Aylur/astal/blob/main/docs/guide/nix.md>).
+
 - In v3 the bundle output is a Bash script embedding the JS, which handles the
   gtk4-layer-shell `LD_PRELOAD` itself (v3.0.0 release notes; the nix build
   passes the `gtk4-layer-shell` store path via ldflags).
