@@ -8,3 +8,11 @@ MD013:
   line_length: 100
   tables: false
   headings: false
+
+# Prettier owns ordered-list marker spacing too: it pads a marker past one
+# space to keep a list's content column aligned once its numbers cross a
+# digit-width boundary (e.g. "99." to "100."). Markdownlint's own
+# one-space-only rule has no such case and would fight Prettier's output
+# on every run, so it stays off wherever Prettier already reformats — every
+# Markdown file this repository tracks.
+MD030: false
