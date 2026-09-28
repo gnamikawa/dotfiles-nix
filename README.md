@@ -58,7 +58,10 @@ set of pinned dependencies and named outputs. This flake exposes four groups:
   environment as part of a NixOS system.
 - `devShells.x86_64-linux` contains named, self-sufficient development
   environments: `cpp`, `cuda`, `go`, `java`, `node`, `python`, and `rust`, plus
-  a small `default` environment and the combined `cpp-cuda` environment.
+  a small `default` environment and the combined `cpp-cuda` environment. A
+  separate `dotfiles-maintenance` environment holds this repository's own
+  formatters, linters, and git hooks (see "Contributing" below); it is not part
+  of the language catalog and never leaks into a Home Manager profile.
 - `packages.x86_64-linux` contains `greeter`, which supplies the login screen;
   `session-lock`, which locks the active graphical session; and `geistdesign`,
   which packages shared design-system assets. `system-nix` consumes these
@@ -134,6 +137,34 @@ the unstable Nix packages branch, and serves the maintainer's desktop and
 laptop. The standalone profiles are checked by the flake, but the project does
 not claim exhaustive manual testing across Linux distributions or graphical
 environments.
+
+## Contributing
+
+Formatting, linting, and the pull-request checks all run through one pinned
+toolchain: enter it with `nix develop .#dotfiles-maintenance`, or activate it
+automatically with [direnv](https://direnv.net/) (`direnv allow` once this
+repository's `.envrc` is trusted). Entering the environment — by either route —
+points git at `.githooks`, so the checks below run on every commit and push from
+that point on:
+
+- **Pre-commit** checks formatting (`nix fmt`), ShellCheck, actionlint, and
+  Markdownlint against the files staged for that commit, and fails without
+  changing anything if one of them would have rewritten a file.
+- **Pre-push** runs `nix flake show` and the `formatting` check: the same
+  whole-flake evaluation and formatting/linting sweep GitHub Actions runs first,
+  without building any package or VM test.
+
+`nix fmt` applies the same tools' safe fixes — nixfmt, Prettier, StyLua, shfmt,
+and Markdownlint's auto-fixable rules — across the whole tree; run it yourself
+before committing so the hook stays a check rather than a fix (see `AGENTS.md`
+"Formatting" for why this matters when a file has both staged and unstaged
+changes).
+
+GitHub Actions (`.github/workflows/ci.yaml`) repeats the same formatting and
+linting pass, evaluates and builds every check this flake declares, and then
+runs `system-nix`'s VM test suite against the commit under review, so a change
+that also needs a coordinated `system-nix` change can be tested together (see
+the workflow file for the `System-Nix-Ref` pull-request contract).
 
 ## Further reference
 

@@ -1,6 +1,18 @@
 # Prettier hard-wraps Markdown prose at 80 columns (see treefmt.nix), but it
 # cannot wrap table rows (it pads them to align columns) or headings (Markdown
-# requires them on one line), so the line-length rule skips both.
+# requires them on one line), so the line-length rule skips both. The 100-char
+# limit is slack above Prettier's 80-column wrap, not a wider target: prose
+# stays wrapped at 80 by the formatter, and this only catches lines a fixer
+# can't reach (long inline links, generated content).
 MD013:
+  line_length: 100
   tables: false
   headings: false
+
+# Prettier owns ordered-list marker spacing too: it pads a marker past one
+# space to keep a list's content column aligned once its numbers cross a
+# digit-width boundary (e.g. "99." to "100."). Markdownlint's own
+# one-space-only rule has no such case and would fight Prettier's output
+# on every run, so it stays off wherever Prettier already reformats — every
+# Markdown file this repository tracks.
+MD030: false

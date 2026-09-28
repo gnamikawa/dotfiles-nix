@@ -15,25 +15,33 @@ decides what leaves the machine.
 ## Formatting
 
 Every commit is gated by treefmt via `.githooks/pre-commit`. The hook runs
-treefmt against the files staged for the commit — not the whole working tree —
-and fails when any of them had to be rewritten. The reformatted content is left
-in the working tree; re-stage and retry to commit it.
+treefmt — formatting plus ShellCheck, actionlint, and Markdownlint, all declared
+in `treefmt.nix` — against the files staged for the commit, not the whole
+working tree, and fails when any of them had to be rewritten or found a lint
+issue. Reformatted content is left in the working tree; re-stage and retry to
+commit it. `.githooks/pre-push` separately runs `nix flake show` (whole-flake
+evaluation) and the `formatting` check — the same two commands CI runs first,
+without building any package or VM test — so a broken flake or missed formatting
+sweep is caught before the push, not after. See the hook's own comment for why
+it doesn't run `nix flake check --no-build` instead.
 
 Before committing, run `nix fmt` yourself so the hook stays a check rather than
 a fix. Always do this when the same file has both staged and unstaged changes:
 the hook rewrites the working tree in place and would clobber the unstaged
 portion.
 
-Enable the hook once per checkout with `git config core.hooksPath .githooks`.
-Git worktrees inherit that setting from the main checkout, so an agent branching
-off a worktree does not need to re-enable it — but the setting must exist on the
-main repository for the inheritance to apply.
+Enable both hooks once per checkout by entering
+`nix develop .#dotfiles-maintenance` (directly or via direnv): its shell hook
+runs `git config core.hooksPath .githooks`. Git worktrees inherit that setting
+from the main checkout, so an agent branching off a worktree does not need to
+re-enter the shell there — but the setting must exist on the main repository for
+the inheritance to apply.
 
-The set of formatters and the excluded paths live in `treefmt.nix`; change that
-file when a new language or a new generated tree enters the repository.
-`nix flake check` runs the same treefmt config across every tracked file as its
-`formatting` check, so a CI or pre-push sweep can catch drift the per-commit
-hook missed.
+The set of formatters and linters and the excluded paths live in `treefmt.nix`;
+change that file when a new language or a new generated tree enters the
+repository. `nix flake check` runs the same treefmt config across every tracked
+file as its `formatting` check, so CI or the pre-push hook can catch drift the
+per-commit hook missed.
 
 ## Agent skills
 

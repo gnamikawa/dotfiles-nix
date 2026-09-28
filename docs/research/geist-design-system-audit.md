@@ -272,7 +272,7 @@ Also `--ds-focus-ring-outline: 2px solid var(--ds-focus-color)` and
 
 ### Motion — small and specific
 
-```
+```text
 --ds-motion-timing-swift:     cubic-bezier(.175, .885, .32, 1.1)
 --ds-motion-overlay-timing:   var(--ds-motion-timing-swift)
 --ds-motion-overlay-duration: .3s
