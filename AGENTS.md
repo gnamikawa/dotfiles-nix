@@ -1,3 +1,5 @@
+# Agent instructions
+
 ## Working style
 
 For length, plain language, jargon, and standalone-sentence rules, see

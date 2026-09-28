@@ -1,3 +1,5 @@
+# Claude instructions
+
 ## Collaboration
 
 Never tamper with the user's home files. The only home files an agent may edit

@@ -138,6 +138,6 @@ environments.
 ## Further reference
 
 - [`CONTEXT.md`](CONTEXT.md) defines the project's canonical terms.
-- [`docs/adr/`](docs/adr/) records architectural decisions and their trade-offs.
+- `docs/adr/` records architectural decisions and their trade-offs.
 - [`docs/maintenance.md`](docs/maintenance.md) documents standing maintenance
   and recovery procedures.
