@@ -20,20 +20,20 @@ environment is a named, activatable set of programming tools.
 - **Centralized.** Application settings, command-line tools, development
   environments, desktop behaviour, and shared visual rules live in one
   repository.
-- **Opinionated.** This configuration makes deliberate choices instead of
-  trying to be a general-purpose framework. Hyprland, the compositor that
-  arranges windows and provides the graphical session, owns the full desktop.
-  Geist, Vercel's design system—a shared set of visual rules—governs its visual
+- **Opinionated.** This configuration makes deliberate choices instead of trying
+  to be a general-purpose framework. Hyprland, the compositor that arranges
+  windows and provides the graphical session, owns the full desktop. Geist,
+  Vercel's design system—a shared set of visual rules—governs its visual
   language. Bash is the configured shell.
 - **Portable.** Home Manager can activate profiles on its own, without NixOS,
-  the Linux distribution configured with Nix. This lets the user environment
-  run on other Linux distributions. Applications and preferences can sit
-  beneath a distribution-owned desktop, while the full desktop profile supplies
-  its own graphical session. The terminal profile works in graphical terminals,
-  Linux text consoles (TTYs), and SSH sessions; it does not promise
-  shell-agnostic behaviour.
-- **Keyboard-first.** Every interactive surface should be reachable and
-  operable without a pointer, except work that is inherently pointer-driven.
+  the Linux distribution configured with Nix. This lets the user environment run
+  on other Linux distributions. Applications and preferences can sit beneath a
+  distribution-owned desktop, while the full desktop profile supplies its own
+  graphical session. The terminal profile works in graphical terminals, Linux
+  text consoles (TTYs), and SSH sessions; it does not promise shell-agnostic
+  behaviour.
+- **Keyboard-first.** Every interactive surface should be reachable and operable
+  without a pointer, except work that is inherently pointer-driven.
 
 ## Profiles
 
@@ -67,9 +67,9 @@ set of pinned dependencies and named outputs. This flake exposes four groups:
 ## Ownership boundary
 
 This repository owns user-level configuration. That includes applications,
-preferences, user packages, development environments, and desktop behaviour.
-It does not own operating-system configuration, hardware setup, secrets, or
-mutable user data.
+preferences, user packages, development environments, and desktop behaviour. It
+does not own operating-system configuration, hardware setup, secrets, or mutable
+user data.
 
 On NixOS, `system-nix` is the system entry point. It owns the operating system
 and consumes this repository's default NixOS module. On other Linux
@@ -82,9 +82,9 @@ You need [Nix](https://nix.dev/install-nix) with the `flakes`
 [experimental feature](https://nix.dev/manual/nix/latest/development/experimental-features.html)
 enabled. The flake also uses the `pipe-operators` feature; it declares that
 itself, so you do not enable it in `nix.conf` — but Nix only trusts a flake's
-declared config for a trusted user, so either add yourself to `trusted-users`
-in `nix.conf` or pass `--accept-flake-config` on every command. Activation
-also needs the
+declared config for a trusted user, so either add yourself to `trusted-users` in
+`nix.conf` or pass `--accept-flake-config` on every command. Activation also
+needs the
 [Home Manager command](https://nix-community.github.io/home-manager/nix-flakes/standalone.html).
 These links cover the wider Nix ecosystem; this README only describes this
 repository's entry points.
@@ -93,39 +93,39 @@ Clone the repository, then inspect its outputs without changing your user
 environment:
 
 ```console
-$ git clone https://github.com/gnamikawa/dotfiles-nix.git
-$ cd dotfiles-nix
-$ nix flake show
+git clone https://github.com/gnamikawa/dotfiles-nix.git
+cd dotfiles-nix
+nix flake show
 ```
 
 Evaluate and build the repository's checks with:
 
 ```console
-$ nix flake check
+nix flake check
 ```
 
 This may fetch and build dependencies, but it does not activate a Home Manager
 profile. To build one profile without activating it:
 
 ```console
-$ home-manager build --flake .#genzo-terminal
+home-manager build --flake .#genzo-terminal
 ```
 
-Activating a profile changes the current user's packages and managed files.
-This configuration is written for the `genzo` account and hard-codes its home
+Activating a profile changes the current user's packages and managed files. This
+configuration is written for the `genzo` account and hard-codes its home
 directory, so review and adapt it before running any activation command. Once
 reviewed, a standalone profile can be activated with:
 
 ```console
-$ home-manager switch --flake .#genzo-terminal
+home-manager switch --flake .#genzo-terminal
 ```
 
 Replace `genzo-terminal` with `genzo-apps` or `genzo-desktop` only after
 reviewing the larger profile. In particular, `genzo-desktop` supplies a
 graphical session rather than fitting beneath an existing one. Home Manager's
 default lookup on the `genzo` account resolves `home-manager switch --flake .`
-(no attribute) to `genzo-desktop`, so the attributeless form activates the
-full desktop.
+(no attribute) to `genzo-desktop`, so the attributeless form activates the full
+desktop.
 
 ## Compatibility and maturity
 
@@ -138,7 +138,6 @@ environments.
 ## Further reference
 
 - [`CONTEXT.md`](CONTEXT.md) defines the project's canonical terms.
-- [`docs/adr/`](docs/adr/) records architectural decisions and their
-  trade-offs.
+- [`docs/adr/`](docs/adr/) records architectural decisions and their trade-offs.
 - [`docs/maintenance.md`](docs/maintenance.md) documents standing maintenance
   and recovery procedures.
