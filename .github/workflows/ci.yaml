@@ -1,0 +1,129 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [master]
+  push:
+    branches: [master]
+  workflow_dispatch:
+    inputs:
+      system_nix_ref:
+        description: >-
+          system-nix branch to run the VM suite against (defaults to master)
+        required: false
+        type: string
+
+# A new commit on a pull request supersedes the run already in flight for
+# that same pull request; a push to master or a manual dispatch never
+# cancels another run, so each gets its own group keyed by run id.
+concurrency:
+  group: >-
+    ${{ github.workflow }}-${{ github.event_name == 'pull_request' &&
+    format('pr-{0}', github.event.pull_request.number) || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    env:
+      NIX_CONFIG: |
+        experimental-features = nix-command flakes pipe-operators
+    steps:
+      - name: Check out dotfiles-nix
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      # The pull-request body is untrusted input: it never appears directly
+      # in a `run:` script (that would let its text execute as shell code),
+      # only ever passed through `env:`, and reaches git only as a quoted
+      # argument, never interpolated into a command line.
+      - name: Resolve system-nix ref
+        id: system-nix-ref
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+          DISPATCH_REF: ${{ github.event.inputs.system_nix_ref }}
+        run: |
+          set -euo pipefail
+
+          ref="master"
+
+          case "$EVENT_NAME" in
+            pull_request)
+              contract_lines="$(printf '%s\n' "$PR_BODY" |
+                grep -c '^System-Nix-Ref:[[:space:]]*[^[:space:]]\+[[:space:]]*$' || true)"
+              if [ "$contract_lines" -gt 1 ]; then
+                echo "::error::Pull request body sets System-Nix-Ref more than once." >&2
+                exit 1
+              elif [ "$contract_lines" -eq 1 ]; then
+                ref="$(printf '%s\n' "$PR_BODY" |
+                  grep '^System-Nix-Ref:[[:space:]]*[^[:space:]]\+[[:space:]]*$' |
+                  sed -E 's/^System-Nix-Ref:[[:space:]]*//; s/[[:space:]]*$//')"
+              fi
+              ;;
+            workflow_dispatch)
+              if [ -n "${DISPATCH_REF:-}" ]; then
+                ref="$DISPATCH_REF"
+              fi
+              ;;
+          esac
+
+          # Conservative branch-name allowlist: must start with an
+          # alphanumeric (never `-`, which git could parse as a flag), and
+          # contain only characters valid in a git ref component.
+          if ! printf '%s' "$ref" |
+            grep -Eq '^[A-Za-z0-9][A-Za-z0-9._-]*(/[A-Za-z0-9][A-Za-z0-9._-]*)*$'; then
+            echo "::error::'$ref' is not a valid branch name." >&2
+            exit 1
+          fi
+
+          if ! git ls-remote --exit-code --heads \
+            https://github.com/gnamikawa/system-nix "$ref" >/dev/null; then
+            echo "::error::gnamikawa/system-nix has no branch named '$ref'." >&2
+            exit 1
+          fi
+
+          echo "ref=$ref" >>"$GITHUB_OUTPUT"
+          {
+            echo "### system-nix ref"
+            echo "Running the VM suite against \`gnamikawa/system-nix@$ref\`."
+          } >>"$GITHUB_STEP_SUMMARY"
+
+      - name: Check out system-nix
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: gnamikawa/system-nix
+          ref: ${{ steps.system-nix-ref.outputs.ref }}
+          path: system-nix
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@13d8dd58da0234aa297dedd986986ccb8e7f3e24 # v31.11.1
+
+      - name: Restore/save the Nix store
+        uses: nix-community/cache-nix-action@7df957e333c1e5da7721f60227dbba6d06080569 # v7.0.2
+        with:
+          primary-key: nix-${{ runner.os }}-${{ hashFiles('flake.lock', 'system-nix/flake.lock') }}
+          restore-prefixes-first-match: nix-${{ runner.os }}-
+
+      # Fast gate: source formatting, linting, and flake evaluation, before
+      # anything is built. Repeats what the pre-commit/pre-push hooks already
+      # checked locally, so a skipped or bypassed hook still gets caught.
+      - name: Check formatting, linting, and flake evaluation
+        run: nix flake check --no-build
+
+      # Builds every activation package and every native check this flake
+      # declares (formatting, greeter, session-lock, the AGS checks, the
+      # standalone profiles).
+      - name: Build every dotfiles-nix check
+        run: nix flake check
+
+      # Runs system-nix's own check suite — the GEN-DPC, GEN-LPC, and
+      # session-lock VM tests — with this checkout's dotfiles-nix standing in
+      # for system-nix's pinned input, so a dotfiles-nix change is validated
+      # against the consumer before it merges.
+      - name: Run the system-nix VM suite
+        working-directory: system-nix
+        run: nix flake check --override-input dotfiles-nix "path:${GITHUB_WORKSPACE}"
