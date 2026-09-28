@@ -13,6 +13,15 @@
   # through prettier — one formatter, seven extensions.
   programs.prettier.enable = true;
 
+  # Hard-wrap Markdown prose at prettier's default 80 columns, matching the
+  # `--prose-wrap always` the Neovim conform config passes when saving.
+  programs.prettier.settings.overrides = [
+    {
+      files = [ "*.md" ];
+      options.proseWrap = "always";
+    }
+  ];
+
   # Lua config (Hyprland binds/rules, Neovim).
   programs.stylua.enable = true;
 

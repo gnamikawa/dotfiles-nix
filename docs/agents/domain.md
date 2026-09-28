@@ -16,5 +16,5 @@ before exploring or changing it. When work affects the interface consumed by
 `system-nix`, the NixOS deployment path, or a domain term shared across the
 boundary, also read the relevant context and decisions in `system-nix`.
 
-Use each repository's canonical terms. If the two repositories disagree,
-surface the conflict instead of silently choosing one definition.
+Use each repository's canonical terms. If the two repositories disagree, surface
+the conflict instead of silently choosing one definition.

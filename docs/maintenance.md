@@ -1,8 +1,8 @@
 # Maintenance rules
 
 Working conventions for maintaining this repository. Unlike `CONTEXT.md`
-(glossary) and `docs/adr/` (decisions with trade-offs), these are standing
-rules about how the code is kept.
+(glossary) and `docs/adr/` (decisions with trade-offs), these are standing rules
+about how the code is kept.
 
 ## Manual session lock
 
@@ -42,8 +42,8 @@ session lock. Recovery is deliberately manual; there is no restart watchdog.
    hyprctl keyword misc:allow_session_lock_restore false
    ```
 
-4. If the replacement fails again, terminate the graphical session instead
-   of repeating a crash loop:
+4. If the replacement fails again, terminate the graphical session instead of
+   repeating a crash loop:
 
    ```sh
    systemctl --user stop wayland-wm@hyprland.desktop.service
@@ -53,21 +53,20 @@ session lock. Recovery is deliberately manual; there is no restart watchdog.
 
 Modules are one flat file directly under `modules/`. Around 100 LOC, or when
 distinct responsibilities start to tangle inside one file, is the signal to
-refactor into a folder of smaller files with succinct identities — not
-before.
+refactor into a folder of smaller files with succinct identities — not before.
 
-A module also becomes a directory the moment it gains a Module source (a
-non-Nix file pulled in via `builtins.readFile` because the option consuming
-it demands a string, not an out-of-store path) — regardless of the module's
-own line count. `modules/firefox/{default.nix,userChrome.css}` is the first
-instance: `userChrome.css` only takes effect through a rebuild, so it gets
-none of the live-edit benefit `assets/` exists to provide, and belongs beside
-the module that reads it instead.
+A module also becomes a directory the moment it gains a Module source (a non-Nix
+file pulled in via `builtins.readFile` because the option consuming it demands a
+string, not an out-of-store path) — regardless of the module's own line count.
+`modules/firefox/{default.nix,userChrome.css}` is the first instance:
+`userChrome.css` only takes effect through a rebuild, so it gets none of the
+live-edit benefit `assets/` exists to provide, and belongs beside the module
+that reads it instead.
 
 ## Generated slices
 
-Computed slices (ADR-0005) are emitted to `~/.config/generated/<app>/…`
-(e.g. `generated/hypr/`, `generated/waybar/`), never into the asset tree.
-Nested structure inside `generated/<app>/` mirrors the config it joins, so
-file relationships stay legible. Raw assets reference slices by that path
-through the application's own include mechanism.
+Computed slices (ADR-0005) are emitted to `~/.config/generated/<app>/…` (e.g.
+`generated/hypr/`, `generated/waybar/`), never into the asset tree. Nested
+structure inside `generated/<app>/` mirrors the config it joins, so file
+relationships stay legible. Raw assets reference slices by that path through the
+application's own include mechanism.
