@@ -7,8 +7,10 @@ let
   inherit (pkgs) lib;
   testFiles = lib.fileset.unions [
     ../assets/home/.config/ags/common/event-coordinator.ts
+    ../assets/home/.config/ags/common/pw-dump.ts
     ../tests/ags/event-coordinator.test.ts
     ../tests/ags/window-context-wiring.test.ts
+    ../tests/ags/pw-dump.test.ts
     ../tests/ags/package.json
     ../tests/ags/package-lock.json
     ../tests/ags/vitest.config.ts

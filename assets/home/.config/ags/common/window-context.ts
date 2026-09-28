@@ -29,6 +29,7 @@ import {
   createEventCoordinator,
   subscribeWindowEvents,
 } from "./event-coordinator";
+import { spawnPwDump } from "./pw-dump";
 
 const TITLE_SETTLE_MS = 150;
 
@@ -423,16 +424,13 @@ export const audioStreamIndex = createExternal(
       return new Promise((resolve) => {
         let proc: Gio.Subprocess;
         try {
-          const launcher = new Gio.SubprocessLauncher({
-            flags:
-              Gio.SubprocessFlags.STDOUT_PIPE |
-              Gio.SubprocessFlags.STDERR_SILENCE,
-          });
-          // libpipewire logs straight to journald, bypassing stderr, so
-          // STDERR_SILENCE alone lets pw-dump's benign races (streams
-          // vanishing mid-snapshot) spam ags.service's journal.
-          launcher.setenv("PIPEWIRE_LOG_SYSTEMD", "false", true);
-          proc = launcher.spawnv(["pw-dump", "-N"]);
+          proc = spawnPwDump(
+            new Gio.SubprocessLauncher({
+              flags:
+                Gio.SubprocessFlags.STDOUT_PIPE |
+                Gio.SubprocessFlags.STDERR_SILENCE,
+            }),
+          );
         } catch {
           resolve();
           return;
