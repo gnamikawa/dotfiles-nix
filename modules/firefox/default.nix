@@ -116,6 +116,7 @@ in
         "findbar.highlightAll" = true;
         "general.smoothScroll" = false;
         "layout.css.prefers-color-scheme.content-override" = 0;
+        "middlemouse.paste" = false;
         "network.dns.disablePrefetch" = true;
         "network.http.speculative-parallel-limit" = 0;
         "network.prefetch-next" = false;
