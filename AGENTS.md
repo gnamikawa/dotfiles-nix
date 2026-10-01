@@ -6,12 +6,6 @@ For length, plain language, jargon, and standalone-sentence rules, see
 `CONTEXT.md` `## Working style`. Those rules govern both conversation and any
 prose written into the repository (ADRs, research notes, commit messages).
 
-## Never push
-
-Agents must never push. Do not run `git push` or publish a branch, tag, or
-commit to any remote by any other means. Agent commits stay local; the human
-decides what leaves the machine.
-
 ## Formatting
 
 Every commit is gated by treefmt via `.githooks/pre-commit`. The hook runs
