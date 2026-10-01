@@ -7,7 +7,7 @@
 // The layer-shell surface that hosts this lives in desktop/Desktop.tsx, so
 // Bar takes no props and knows nothing about which monitor it is on.
 
-import { createBinding, createComputed, Accessor } from "ags";
+import { createBinding, createComputed, createExternal, Accessor } from "ags";
 import { createPoll } from "ags/time";
 import { Gtk } from "ags/gtk4";
 import Gio from "gi://Gio";
@@ -15,6 +15,11 @@ import GLib from "gi://GLib";
 import NM from "gi://NM";
 import AstalBluetooth from "gi://AstalBluetooth";
 import AstalBattery from "gi://AstalBattery";
+import {
+  findWifiDevice,
+  followWifiDevice,
+  type WifiDeviceSource,
+} from "../../common/wifi-device";
 
 const bluetooth = AstalBluetooth.get_default();
 
@@ -84,41 +89,49 @@ function bindLucideIcon(image: Gtk.Image, name: Accessor<string>): () => void {
 // of the caching bugs, and no crashes on association.
 const nmClient = NM.Client.new(null);
 
-/**
- * Find the first NetworkManager Wi-Fi device, or `null` when the machine
- * has none.
- *
- * @returns The Wi-Fi device wrapper, or `null` on a hard-wired-only box.
- */
-function getWifiDevice(): NM.DeviceWifi | null {
-  for (const d of nmClient.get_devices()) {
-    if (d.get_device_type() === NM.DeviceType.WIFI) {
-      return d as NM.DeviceWifi;
-    }
-  }
-  return null;
-}
+const wifiDeviceSource: WifiDeviceSource<NM.Device, NM.DeviceWifi> = {
+  /** Every device NetworkManager currently exposes. */
+  getDevices: () => nmClient.get_devices(),
+  /** Whether a device is a Wi-Fi adapter. */
+  isWifi: (device): device is NM.DeviceWifi =>
+    device.get_device_type() === NM.DeviceType.WIFI,
+  /** Call back whenever NetworkManager's device list changes. */
+  subscribeDevices: (callback) => {
+    const id = nmClient.connect("notify::devices", callback);
+    return () => nmClient.disconnect(id);
+  },
+};
 
-// Looked up once, not re-scanned per tick — same "fixed for the life of the
-// shell" tradeoff as `bluetooth` above. A Wi-Fi adapter hot-plugged after AGS
-// starts won't be picked up without a restart; this machine's adapter is
-// built in, so that gap doesn't bite in practice.
-const wifiDevice = getWifiDevice();
+// Followed, not looked up once. A device object dies with the NetworkManager
+// process that exposed it: a restart (any `nixos-rebuild switch` that touches
+// its config) drops the object with its last state frozen and exposes a new
+// one. Holding the first object left the bar reading "Connecting…" with the
+// machine online until AGS itself was restarted.
+const wifiDevice = createExternal(findWifiDevice(wifiDeviceSource), (set) =>
+  followWifiDevice(wifiDeviceSource, set),
+);
 
 const wirelessEnabled = createBinding(nmClient, "wirelessEnabled");
 const connectivity = createBinding(nmClient, "connectivity");
+// Each of these re-binds whenever `wifiDevice` changes, the same way
 // `createBinding`'s multi-property form re-subscribes to the *new* access
 // point's `strength` whenever `activeAccessPoint` itself changes (each hop
-// re-evaluates via a nested `createComputed`), so reassociating to a
-// different AP keeps the signal-strength binding live without any manual
-// resubscription.
-const wifiState = wifiDevice ? createBinding(wifiDevice, "state") : null;
-const wifiStrength = wifiDevice
-  ? createBinding(wifiDevice, "activeAccessPoint", "strength")
-  : null;
-const wifiConnectionName = wifiDevice
-  ? createBinding(wifiDevice, "activeConnection", "id")
-  : null;
+// re-evaluates via a nested `createComputed`), so neither a new device nor
+// reassociating to a different AP needs any manual resubscription.
+const wifiState = createComputed(() => {
+  const device = wifiDevice();
+  return device ? createBinding(device, "state")() : null;
+});
+const wifiStrength = createComputed(() => {
+  const device = wifiDevice();
+  return device
+    ? createBinding(device, "activeAccessPoint", "strength")()
+    : null;
+});
+const wifiConnectionName = createComputed(() => {
+  const device = wifiDevice();
+  return device ? createBinding(device, "activeConnection", "id")() : null;
+});
 
 /**
  * Derive the Lucide glyph that best represents the current Wi-Fi state.
@@ -129,13 +142,13 @@ const wifiConnectionName = wifiDevice
  * @returns Lucide icon basename for {@link lucideIcon}.
  */
 function computeWifiIcon(): string {
-  if (!wifiDevice || !wirelessEnabled()) return "wifi-off";
+  if (!wifiDevice() || !wirelessEnabled()) return "wifi-off";
 
-  const state = wifiState!();
+  const state = wifiState();
   if (state !== NM.DeviceState.ACTIVATED) return "wifi-off";
   if (connectivity() !== NM.ConnectivityState.FULL) return "wifi-zero";
 
-  const strength = wifiStrength!() ?? 0;
+  const strength = wifiStrength() ?? 0;
   if (strength >= 75) return "wifi";
   if (strength >= 50) return "wifi-high";
   if (strength >= 25) return "wifi-low";
@@ -150,21 +163,21 @@ function computeWifiIcon(): string {
  * @returns Tooltip text for the bar's Wi-Fi glyph.
  */
 function computeWifiTooltip(): string {
-  if (!wifiDevice) return "No Wi-Fi adapter";
+  if (!wifiDevice()) return "No Wi-Fi adapter";
   if (!wirelessEnabled()) return "Wi-Fi off";
 
-  const state = wifiState!();
+  const state = wifiState();
   const DS = NM.DeviceState;
   if (state === DS.UNAVAILABLE) return "Wi-Fi unavailable";
   if (state === DS.DISCONNECTED) return "Not connected";
   if (state === DS.FAILED) return "Connection failed";
   if (state !== DS.ACTIVATED) return "Connecting…";
 
-  const name = wifiConnectionName!() ?? "Wi-Fi";
+  const name = wifiConnectionName() ?? "Wi-Fi";
   if (connectivity() !== NM.ConnectivityState.FULL) {
     return `${name} — no internet`;
   }
-  const strength = wifiStrength!() ?? 0;
+  const strength = wifiStrength() ?? 0;
   return `${name} · ${strength}%`;
 }
 
