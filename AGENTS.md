@@ -6,6 +6,17 @@ For length, plain language, jargon, and standalone-sentence rules, see
 `CONTEXT.md` `## Working style`. Those rules govern both conversation and any
 prose written into the repository (ADRs, research notes, commit messages).
 
+## Git
+
+- Never push to `master` (or `main`).
+- When working on a feature with the user, changes go to whatever branch is
+  active at that moment. Do not create or switch branches unless the user names
+  one.
+- A job is finished only when its changes are committed. Before reporting work
+  as done, commit it on the active branch and check `git status`, so no staged
+  or unstaged change is left behind to be forgotten. If something must stay
+  uncommitted, say exactly what and why.
+
 ## Formatting
 
 Every commit is gated by treefmt via `.githooks/pre-commit`. The hook runs
