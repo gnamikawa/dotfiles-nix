@@ -18,6 +18,7 @@
     ./fcitx5.nix
     ./theme.nix
     ./obsidian.nix
+    ./discord.nix
     # ./flatpak.nix
     ./packages/nvidia.nix
     ./packages/user-applications.nix
