@@ -45,12 +45,15 @@ hl.window_rule({
 -- shadow appears/disappears the moment `float` flips.
 hl.window_rule({ match = { float = false }, no_shadow = true })
 
--- Discord Flatpak briefly opens a "Discord Updater" splash window before
--- the main app materializes; hide it on a silent special workspace so it
--- never flashes on screen. The main window (title starts with "Discord")
--- is unaffected.
+-- Discord Flatpak briefly opens a splash window before the main app
+-- materializes; hide it on a silent special workspace so it never flashes
+-- on screen or takes focus. Measured against Discord 0.0.133: the splash
+-- maps with the bare title "Discord" (it tiled across the whole workspace
+-- for about three seconds), while the main window always maps with a page
+-- name in front ("Friends - Discord"), so the anchored match leaves it
+-- alone. "Discord Updater" is the title older builds gave the same splash.
 hl.window_rule({
-	match = { class = "^com\\.discordapp\\.Discord$", title = "^Discord Updater$" },
+	match = { class = "^com\\.discordapp\\.Discord$", title = "^Discord( Updater)?$" },
 	workspace = "special:_hidden silent",
 })
 
