@@ -11,8 +11,18 @@
 # There is no tray to click, so the window is summoned by launching Discord
 # again: the second launch hands over to the running one, which opens its
 # main window. Closing that window leaves Discord running.
+#
+# That handover is also why the unit has to kill Discord itself. Flatpak moves
+# the app into its own `app-flatpak-…` scope, outside this unit, so systemd's
+# own stop reaches nothing: Discord lives on, and the next start hands over to
+# it — the window opens and the unit exits. `flatpak kill` before every start
+# and on every stop makes sure a start is always a fresh, hidden Discord.
 
 { pkgs, ... }:
+let
+  # `-`: nothing to kill is the normal case at login, not a failure.
+  killDiscord = "-${pkgs.flatpak}/bin/flatpak kill com.discordapp.Discord";
+in
 {
   systemd.user.services.discord = {
     Unit = {
@@ -24,7 +34,10 @@
     };
     Service = {
       Type = "simple";
+      # Also covers a Discord left running outside the unit (launched by hand).
+      ExecStartPre = killDiscord;
       ExecStart = "${pkgs.flatpak}/bin/flatpak run com.discordapp.Discord --start-minimized";
+      ExecStop = killDiscord;
       # No Restart: quitting Discord on purpose should leave it quit.
     };
     Install.WantedBy = [ "graphical-session.target" ];
