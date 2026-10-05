@@ -11,6 +11,7 @@ hl.bind(mod .. " + F4", hl.dsp.window.close())
 hl.bind(mod .. " + F3", hl.dsp.exec_cmd("ags request runner-open >/dev/null"))
 hl.bind(win .. " + F", hl.dsp.window.float({ action = "toggle" }))
 hl.bind(win .. " + T", hl.dsp.exec_cmd("kitty -e bash -lc yazi"))
+hl.bind(win .. " + E", hl.dsp.exec_cmd("thunar"))
 hl.bind(win .. " + B", hl.dsp.exec_cmd(os.getenv("BROWSER") or "xdg-open about:blank"))
 hl.bind(win .. " + SPACE", hl.dsp.exec_cmd("fcitx5-remote -t"))
 
