@@ -12,6 +12,13 @@
     shellIntegration.enableBashIntegration = true;
     settings = {
       "confirm_os_window_close" = 0;
+      # Kitty saves its window state to ~/.cache/kitty/main.json on exit and
+      # asks for it back on the next launch. Under Hyprland a tiled kitty
+      # saves itself as "maximized", so every new window then opened
+      # maximized over its neighbours until focus moved away. Measured on
+      # kitty 0.49.0 / Hyprland 0.56.2: with this off, a launch against the
+      # same cache file maps tiled.
+      "remember_window_size" = "no";
     };
 
     font = {
