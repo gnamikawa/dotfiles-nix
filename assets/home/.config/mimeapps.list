@@ -9,6 +9,7 @@ image/*=feh.desktop
 x-scheme-handler/claude-cli=claude-code-url-handler.desktop
 application/x-zerosize=code.desktop
 x-scheme-handler/claude=claude-desktop.desktop
+text/markdown=userapp-kitty --hold nvim %F-KCHUW3.desktop
 
 [Removed Associations]
 
