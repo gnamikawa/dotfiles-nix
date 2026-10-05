@@ -31,4 +31,15 @@
       };
     };
   };
+
+  # The fcitx5 package ships an XDG autostart entry, which races the
+  # fcitx5-daemon.service this module already installs: both start, and the
+  # loser exits with "Is there another fcitx already running?". Hide the
+  # entry so the service is the only launcher.
+  xdg.configFile."autostart/org.fcitx.Fcitx5.desktop".text = ''
+    [Desktop Entry]
+    Type=Application
+    Name=Fcitx 5
+    Hidden=true
+  '';
 }
