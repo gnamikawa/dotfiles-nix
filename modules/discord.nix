@@ -31,6 +31,9 @@ in
       PartOf = [ "graphical-session.target" ];
       # A host without the Flatpak skips the unit instead of failing it.
       ConditionPathExists = "%h/.local/share/flatpak/app/com.discordapp.Discord";
+      # Give up after five failed starts in a minute instead of retrying forever.
+      StartLimitIntervalSec = 60;
+      StartLimitBurst = 5;
     };
     Service = {
       Type = "simple";
@@ -38,7 +41,20 @@ in
       ExecStartPre = killDiscord;
       ExecStart = "${pkgs.flatpak}/bin/flatpak run com.discordapp.Discord --start-minimized";
       ExecStop = killDiscord;
-      # No Restart: quitting Discord on purpose should leave it quit.
+      # Retry a failed launch, but leave Discord quit when it was quit on
+      # purpose. Flatpak 1.18.1 sometimes refuses to start an app while the
+      # login rush is still mounting things ("Extension
+      # org.freedesktop.Platform.GL.default has invalid merge-dirs", exit 1);
+      # the same launch works a moment later. Measured exit codes of the unit
+      # on 2026-10-11:
+      #
+      #   - that failed launch: 1, so it is retried.
+      #   - Ctrl+Q inside Discord: 0, a clean exit, so no retry.
+      #   - `flatpak kill` by hand: 137, excluded below, so no retry.
+      #   - `systemctl --user stop`: systemd never retries its own stops.
+      Restart = "on-failure";
+      RestartSec = 2;
+      RestartPreventExitStatus = 137;
     };
     Install.WantedBy = [ "graphical-session.target" ];
   };
