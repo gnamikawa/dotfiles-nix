@@ -91,7 +91,8 @@ in
       })
     '';
     plugins = {
-      git = "${yaziPluginRepoDir}/git.yazi";
+      # Track nixpkgs so the plugin's API matches the yazi it ships with.
+      git = pkgs.yaziPlugins.git;
       full-border = "${yaziPluginRepoDir}/full-border.yazi";
       mount = "${yaziPluginRepoDir}/mount.yazi";
       clipboard = clipboardRepoDir;
