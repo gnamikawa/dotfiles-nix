@@ -1,35 +1,15 @@
 { constants, pkgs, ... }:
 let
-  yaziPluginRepoDir = pkgs.fetchFromGitHub {
-    owner = "yazi-rs";
-    repo = "plugins";
-    rev = "196281844b8cbcac658a59013e4805300c2d6126";
-    sha256 = "sha256-pAkBlodci4Yf+CTjhGuNtgLOTMNquty7xP0/HSeoLzE=";
-  };
-  bookmarksRepoDir = pkgs.fetchFromGitHub {
-    owner = "dedukun";
-    repo = "bookmarks.yazi";
-    rev = "9ef1254d8afe88aba21cd56a186f4485dd532ab8";
-    sha256 = "sha256-GQFBRB2aQqmmuKZ0BpcCAC4r0JFKqIANZNhUC98SlwY=";
-  };
-  restoreRepoDir = pkgs.fetchFromGitHub {
-    owner = "boydaihungst";
-    repo = "restore.yazi";
-    rev = "0e0870460b9b74c5ae98b7f96c7c26a9a274ce6d";
-    sha256 = "sha256-rDsyMF5IEBHx+fJ0oYTCCQAlTSquUcOkFLC4Lmbuz6k=";
-  };
-  clipboardRepoDir = pkgs.fetchFromGitHub {
-    owner = "XYenon";
-    repo = "clipboard.yazi";
-    rev = "3b9681091b783d6bc5d07172afd6159060a7db63";
-    sha256 = "sha256-8p2RC8F8JH1K36HebJM58stHX+lFLD+KYQxfdJm06y0=";
-  };
-  compressRepoDir = pkgs.fetchFromGitHub {
-    owner = "KKV9";
-    repo = "compress.yazi";
-    rev = "46a6b9f02ff2f8aced466a1f01a3fe241f1cd45f";
-    sha256 = "sha256-Mby185FCJY6nqHcHDQu+D5SLk+wGcyeUHK8yAvrd4TM=";
-  };
+  # Plugins come from nixpkgs so they move in lockstep with the yazi binary;
+  # hand-pinned copies drifted behind yazi's plugin API and broke at runtime.
+  # Upstream bookmarks.yazi still calls `ya.mgr_emit`, which yazi renamed to
+  # `ya.emit`. --replace-fail turns this into a build error once upstream
+  # fixes it, which is the cue to delete the override.
+  bookmarks = pkgs.yaziPlugins.bookmarks.overrideAttrs (old: {
+    postPatch = (old.postPatch or "") + ''
+      substituteInPlace main.lua --replace-fail "ya.mgr_emit(" "ya.emit("
+    '';
+  });
 in
 {
   programs.yazi = {
@@ -91,14 +71,15 @@ in
       })
     '';
     plugins = {
-      # Track nixpkgs so the plugin's API matches the yazi it ships with.
-      git = pkgs.yaziPlugins.git;
-      full-border = "${yaziPluginRepoDir}/full-border.yazi";
-      mount = "${yaziPluginRepoDir}/mount.yazi";
-      clipboard = clipboardRepoDir;
-      restore = restoreRepoDir;
-      bookmarks = bookmarksRepoDir;
-      compress = compressRepoDir;
+      inherit (pkgs.yaziPlugins)
+        git
+        full-border
+        mount
+        clipboard
+        restore
+        compress
+        ;
+      inherit bookmarks;
     };
 
     keymap = {
