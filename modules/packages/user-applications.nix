@@ -38,7 +38,12 @@
       chromium
 
       # ── Compatibility ─────────────────────────────────────────────────────
-      wineWow64Packages.stable # 32+64-bit Wine
+      # Staging Full, not stable: the same Wine the clip-studio launcher runs,
+      # so the Clip Studio prefix is never opened by two different versions.
+      # Full also carries the Gecko and Mono installers, so a new prefix gets
+      # them without a download or a prompt.
+      wineWow64Packages.stagingFull # 32+64-bit Wine
+      winetricks
 
       # ── Tray ──────────────────────────────────────────────────────────────
       pa_applet

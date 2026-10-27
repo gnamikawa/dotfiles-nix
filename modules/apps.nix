@@ -19,6 +19,7 @@
     ./theme.nix
     ./obsidian.nix
     ./discord.nix
+    ./clip-studio
     # ./flatpak.nix
     ./packages/nvidia.nix
     ./packages/user-applications.nix
