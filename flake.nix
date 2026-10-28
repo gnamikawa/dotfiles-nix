@@ -226,6 +226,11 @@
               catalog.cpp
             ];
           };
+
+          # Repository maintenance (formatters, linters, git hooks) — named
+          # by its full purpose rather than through the language catalog
+          # above, since it is not a project environment to stack.
+          dotfiles-maintenance = pkgs.mkShell ({ name = "dotfiles-maintenance"; } // shellArgs "maintenance");
         };
 
       # Keep the standalone profiles from rotting: `nix flake check` builds all
